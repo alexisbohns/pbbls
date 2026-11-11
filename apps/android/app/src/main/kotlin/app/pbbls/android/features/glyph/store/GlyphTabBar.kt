@@ -21,19 +21,19 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.GlyphShelf
 
 /** The three store tabs — ports iOS `GlyphTab` (rawValues mine/owned/commu) and its icons. */
 enum class GlyphTab(
     val labelRes: Int,
-    val icon: PbblsIcon,
+    val icon: PbblsGlyph,
 ) {
-    MINE(R.string.glyph_tab_mine, PbblsIcon.PERSON),
-    OWNED(R.string.glyph_tab_owned, PbblsIcon.CHECK_CIRCLE_DOT),
-    COMMU(R.string.glyph_tab_commu, PbblsIcon.PEOPLE),
+    MINE(R.string.glyph_tab_mine, PbblsGlyph.PERSON),
+    OWNED(R.string.glyph_tab_owned, PbblsGlyph.CHECK_CIRCLE_DOT),
+    COMMU(R.string.glyph_tab_commu, PbblsGlyph.PEOPLE),
 }
 
 /** The tab a navigation key's shelf opens on (#1383 D17). The key names the `core/model` shelf, never this enum. */
@@ -115,8 +115,8 @@ private fun GlyphTabToggle(
         onCheckedChange = { onSelect(tab) },
         modifier = Modifier.semantics { role = Role.RadioButton },
     ) {
-        PbblsIconImage(
-            icon = tab.icon,
+        PbblsGlyphImage(
+            glyph = tab.icon,
             contentDescription = if (showLabel) null else label,
             size = ToggleButtonDefaults.IconSize,
         )

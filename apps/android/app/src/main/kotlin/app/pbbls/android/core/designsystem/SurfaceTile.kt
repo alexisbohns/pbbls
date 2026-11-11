@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun SurfaceTile(
-    icon: PbblsIcon,
+    icon: PbblsGlyph,
     label: String,
     modifier: Modifier = Modifier,
     muted: Boolean = false,
@@ -44,8 +44,8 @@ fun SurfaceTile(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(spacing.xs),
         ) {
-            PbblsIconImage(
-                icon = icon,
+            PbblsGlyphImage(
+                glyph = icon,
                 size = PbblsIconSize.TILE,
                 contentDescription = null,
                 tint = resolvedIconTint,

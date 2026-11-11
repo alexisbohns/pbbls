@@ -46,7 +46,7 @@ import app.pbbls.android.core.data.HomeShortcutsLayout
 import app.pbbls.android.core.data.TapHaptic
 import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.designsystem.PageShapes
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.stone.SplitStone
@@ -222,7 +222,7 @@ private fun RowCell(
         modifier.padding(start = if (first) 16.dp else 20.dp, top = 15.dp, end = 12.dp, bottom = 14.dp),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        PbblsIconImage(shortcut.icon, PbblsIconSize.TILE, contentDescription = null, tint = ink)
+        PbblsGlyphImage(shortcut.icon, PbblsIconSize.TILE, contentDescription = null, tint = ink)
         Spacer(Modifier.height(6.dp))
         Label(shortcut, ink, TextAlign.Start)
     }
@@ -239,7 +239,7 @@ private fun StackedCell(
         modifier.padding(start = 16.dp, top = 14.dp, end = 12.dp, bottom = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        PbblsIconImage(shortcut.icon, PbblsIconSize.TILE, contentDescription = null, tint = ink)
+        PbblsGlyphImage(shortcut.icon, PbblsIconSize.TILE, contentDescription = null, tint = ink)
         Spacer(Modifier.width(12.dp))
         Label(shortcut, ink, TextAlign.Start)
     }
@@ -336,7 +336,7 @@ private fun LeadCell(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        PbblsIconImage(shortcut.icon, contentDescription = null, size = LEAD_ICON, tint = ink)
+        PbblsGlyphImage(shortcut.icon, contentDescription = null, size = LEAD_ICON, tint = ink)
         Spacer(Modifier.height(9.dp))
         Label(shortcut, ink, TextAlign.Center)
     }
@@ -353,7 +353,7 @@ private fun PairCell(
         modifier.padding(start = 18.dp, top = 10.dp, end = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        PbblsIconImage(shortcut.icon, PbblsIconSize.TILE, contentDescription = null, tint = ink)
+        PbblsGlyphImage(shortcut.icon, PbblsIconSize.TILE, contentDescription = null, tint = ink)
         Spacer(Modifier.width(10.dp))
         Label(shortcut, ink, TextAlign.Start)
     }

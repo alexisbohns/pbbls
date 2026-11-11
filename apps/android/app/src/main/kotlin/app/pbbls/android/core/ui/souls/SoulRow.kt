@@ -31,8 +31,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.SoulWithGlyph
@@ -52,8 +52,8 @@ private fun SoulCount(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xs),
     ) {
-        PbblsIconImage(
-            icon = PbblsIcon.PEBBLE_ROUND,
+        PbblsGlyphImage(
+            glyph = PbblsGlyph.PEBBLE_ROUND,
             contentDescription = null,
             size = PbblsIconSize.INLINE,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -127,8 +127,8 @@ fun SoulRow(
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.md)) {
                     SoulCount(count = soul.pebblesCount)
                     if (showsSelection) {
-                        PbblsIconImage(
-                            icon = if (chosen) PbblsIcon.CHECK_CIRCLE else PbblsIcon.PLUS_CIRCLE,
+                        PbblsGlyphImage(
+                            glyph = if (chosen) PbblsGlyph.CHECK_CIRCLE else PbblsGlyph.PLUS_CIRCLE,
                             contentDescription = null,
                             size = PbblsIconSize.TOOLBAR,
                             tint = if (chosen) colors.primary else colors.onSurface,
@@ -171,7 +171,12 @@ fun SoulAddRow(
                 )
             },
             trailingContent = {
-                PbblsIconImage(icon = PbblsIcon.PLUS_CIRCLE, contentDescription = null, size = PbblsIconSize.TOOLBAR, tint = colors.primary)
+                PbblsGlyphImage(
+                    glyph = PbblsGlyph.PLUS_CIRCLE,
+                    contentDescription = null,
+                    size = PbblsIconSize.TOOLBAR,
+                    tint = colors.primary,
+                )
             },
         )
         HorizontalDivider(modifier = Modifier.padding(horizontal = PebblesTheme.spacing.lg), color = colors.outlineVariant)

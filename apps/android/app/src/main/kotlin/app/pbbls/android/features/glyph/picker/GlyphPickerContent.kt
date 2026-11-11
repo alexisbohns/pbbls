@@ -28,8 +28,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
@@ -297,8 +297,8 @@ private fun PickerGlyphTile(
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                PbblsIconImage(
-                    icon = PbblsIcon.KARMA_DOT,
+                PbblsGlyphImage(
+                    glyph = PbblsGlyph.KARMA_DOT,
                     size = PbblsIconSize.INLINE,
                     contentDescription = null,
                     tint = colors.onSurfaceVariant,

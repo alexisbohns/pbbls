@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 
@@ -38,8 +38,8 @@ fun FeaturedCommunityCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PbblsIconImage(
-                icon = PbblsIcon.PEOPLE,
+            PbblsGlyphImage(
+                glyph = PbblsGlyph.PEOPLE,
                 size = PbblsIconSize.TILE,
                 contentDescription = null,
                 tint = colors.primary,

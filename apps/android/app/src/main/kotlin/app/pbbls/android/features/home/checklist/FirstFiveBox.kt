@@ -31,12 +31,14 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PageShapes
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
+import app.pbbls.android.core.designsystem.PbblsGlyphState
 import app.pbbls.android.core.designsystem.PebblesActionHeight
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SectionHead
 import app.pbbls.android.core.designsystem.figureOf
+import app.pbbls.android.core.designsystem.glyph.form
 import app.pbbls.android.core.designsystem.stone.SplitStone
 import app.pbbls.android.core.designsystem.stone.StoneOptions
 import app.pbbls.android.features.home.ClaimStatus
@@ -187,7 +189,12 @@ private fun ClaimButton(
         if (claiming) {
             LoadingIndicator(color = LocalContentColor.current, modifier = Modifier.size(SPINNER))
         } else {
-            PbblsIconImage(PbblsIcon.PEBBLE_ROUND_LIT_1, contentDescription = null, size = ButtonDefaults.IconSize)
+            PbblsGlyphImage(
+                PbblsGlyph.PEBBLE_ROUND,
+                contentDescription = null,
+                form = PbblsGlyph.PEBBLE_ROUND.form(PbblsGlyphState.SELECTED),
+                size = ButtonDefaults.IconSize,
+            )
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text(text = stringResource(R.string.home_first_five_claim), style = ButtonDefaults.textStyleFor(PebblesActionHeight))
         }

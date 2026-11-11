@@ -27,8 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.SoulWithGlyph
 
@@ -135,7 +135,7 @@ private fun MoreTile(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xs, Alignment.CenterVertically),
     ) {
-        PbblsIconImage(icon = PbblsIcon.PLUS_CIRCLE, contentDescription = null, size = PLUS_SIDE, tint = colors.onSurfaceVariant)
+        PbblsGlyphImage(glyph = PbblsGlyph.PLUS_CIRCLE, contentDescription = null, size = PLUS_SIDE, tint = colors.onSurfaceVariant)
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,

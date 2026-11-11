@@ -32,8 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.TapHaptic
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.SoulWithGlyph
 
@@ -125,7 +125,7 @@ fun SoulChooserBody(
             containerColor = if (lit) colors.primary else colors.primaryContainer,
             contentColor = if (lit) colors.onPrimary else colors.onPrimaryContainer,
         ) {
-            PbblsIconImage(icon = PbblsIcon.PLUS_CIRCLE, contentDescription = stringResource(R.string.souls_add_a11y))
+            PbblsGlyphImage(glyph = PbblsGlyph.PLUS_CIRCLE, contentDescription = stringResource(R.string.souls_add_a11y))
         }
     }
 }

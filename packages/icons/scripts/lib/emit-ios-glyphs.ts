@@ -4,7 +4,7 @@
  * `PbblsIcon` stay with `iosEmitter` until part 7 removes them.
  */
 import { GENERATED_NOTICE, type Emitter } from "./emit"
-import { loadGlyphsOnce } from "./emit-glyphs"
+import { loadGlyphsOnce, nativeGlyphData } from "./emit-glyphs"
 import { docLines, swiftCase } from "./emit-ios"
 import type { GlyphData } from "./forms"
 import { loadStates, type StateTable } from "./states"
@@ -12,12 +12,6 @@ import { loadStates, type StateTable } from "./states"
 export const IOS_GLYPH_DATA = "apps/ios/Pebbles/Resources/pbbls-glyphs.json"
 export const IOS_GLYPH_SWIFT = "apps/ios/Pebbles/Theme/PbblsGlyph.swift"
 export const IOS_STATE_SWIFT = "apps/ios/Pebbles/Theme/PbblsGlyphState.swift"
-
-function nativeData(glyphs: readonly GlyphData[], states: StateTable): string {
-  const byName: Record<string, Omit<GlyphData, "name" | "meaning" | "family" | "tags">> = {}
-  for (const { name, meaning: _m, family: _f, tags: _t, ...forms } of glyphs) byName[name] = forms
-  return JSON.stringify({ notice: GENERATED_NOTICE, version: 1, states, glyphs: byName }) + "\n"
-}
 
 function glyphSwift(glyphs: readonly GlyphData[]): string {
   const cases = glyphs.map((g) => [...docLines(g.meaning), `    case ${swiftCase(g.name)} = "${g.name}"`].join("\n"))
@@ -48,7 +42,7 @@ ${Object.keys(states).map((s) => `    case ${s}`).join("\n")}
 /** The three iOS files for these glyphs and states. */
 export function iosGlyphFiles(glyphs: readonly GlyphData[], states: StateTable): Map<string, string> {
   return new Map([
-    [IOS_GLYPH_DATA, nativeData(glyphs, states)],
+    [IOS_GLYPH_DATA, nativeGlyphData(glyphs, states)],
     [IOS_GLYPH_SWIFT, glyphSwift(glyphs)],
     [IOS_STATE_SWIFT, stateSwift(states)],
   ])

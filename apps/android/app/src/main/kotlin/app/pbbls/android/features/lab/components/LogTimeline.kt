@@ -18,8 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
+import app.pbbls.android.core.designsystem.PbblsGlyphState
+import app.pbbls.android.core.designsystem.glyph.GlyphForm
+import app.pbbls.android.core.designsystem.glyph.form
 import app.pbbls.android.core.model.Log
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -75,10 +78,12 @@ private fun TimelineRow(
     // Shipped is done, in progress a lit pebble, the backlog a plain one (spec D4).
     val icon =
         when (mode) {
-            LogTimelineMode.CHANGELOG -> PbblsIcon.CHECK_CIRCLE
-            LogTimelineMode.IN_PROGRESS -> PbblsIcon.PEBBLE_ROUND_LIT_1
-            LogTimelineMode.BACKLOG -> PbblsIcon.PEBBLE_ROUND
+            LogTimelineMode.CHANGELOG -> PbblsGlyph.CHECK_CIRCLE
+            LogTimelineMode.IN_PROGRESS, LogTimelineMode.BACKLOG -> PbblsGlyph.PEBBLE_ROUND
         }
+    // The in-progress row lights its pebble with the `selected` form (iOS `iconForm`).
+    val iconForm =
+        if (mode == LogTimelineMode.IN_PROGRESS) PbblsGlyph.PEBBLE_ROUND.form(PbblsGlyphState.SELECTED) else GlyphForm.REGULAR
     val iconTint = if (mode == LogTimelineMode.CHANGELOG) colors.primary else colors.onSurfaceVariant
 
     Row(
@@ -98,7 +103,7 @@ private fun TimelineRow(
             )
             // A fixed slot (spec D6): the node column is 16dp wide whatever the
             // font scale, so the node fills it at a fixed 16dp rather than INLINE.
-            PbblsIconImage(icon = icon, contentDescription = null, size = 16.dp, tint = iconTint)
+            PbblsGlyphImage(glyph = icon, contentDescription = null, form = iconForm, size = 16.dp, tint = iconTint)
             if (!isLast) {
                 Box(
                     modifier =

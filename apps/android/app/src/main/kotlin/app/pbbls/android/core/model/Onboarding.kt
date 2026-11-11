@@ -2,7 +2,7 @@ package app.pbbls.android.core.model
 
 import androidx.annotation.StringRes
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsGlyph
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
@@ -33,14 +33,14 @@ data class PromiseLetter(
 enum class OnboardingReason(
     val slug: String,
     @StringRes val labelRes: Int,
-    val icon: PbblsIcon,
+    val icon: PbblsGlyph,
 ) {
-    NOTICE_FEELINGS("notice-feelings", R.string.onboarding_reason_notice_feelings, PbblsIcon.HEART),
-    KEEP_PEOPLE("keep-people", R.string.onboarding_reason_keep_people, PbblsIcon.PEOPLE),
-    HARD_SEASON("hard-season", R.string.onboarding_reason_hard_season, PbblsIcon.ABSTRACT_DRIZZLE),
-    GOOD_DAYS("good-days", R.string.onboarding_reason_good_days, PbblsIcon.SUNSHINE),
-    OWN_PATTERNS("own-patterns", R.string.onboarding_reason_own_patterns, PbblsIcon.PATH),
-    KEEP_RECORD("keep-record", R.string.onboarding_reason_keep_record, PbblsIcon.CASE),
+    NOTICE_FEELINGS("notice-feelings", R.string.onboarding_reason_notice_feelings, PbblsGlyph.HEART),
+    KEEP_PEOPLE("keep-people", R.string.onboarding_reason_keep_people, PbblsGlyph.PEOPLE),
+    HARD_SEASON("hard-season", R.string.onboarding_reason_hard_season, PbblsGlyph.ABSTRACT_DRIZZLE),
+    GOOD_DAYS("good-days", R.string.onboarding_reason_good_days, PbblsGlyph.SUNSHINE),
+    OWN_PATTERNS("own-patterns", R.string.onboarding_reason_own_patterns, PbblsGlyph.PATH),
+    KEEP_RECORD("keep-record", R.string.onboarding_reason_keep_record, PbblsGlyph.CASE),
 }
 
 /** Step 6's four paces (D11), in group order. [slug] is the wire value in `profiles.pace`. */
@@ -48,17 +48,17 @@ enum class OnboardingPace(
     val slug: String,
     @StringRes val labelRes: Int,
     @StringRes val detailRes: Int,
-    val icon: PbblsIcon,
+    val icon: PbblsGlyph,
 ) {
-    DAILY("daily", R.string.onboarding_pace_daily, R.string.onboarding_pace_daily_detail, PbblsIcon.SUNSHINE),
-    FEW_A_WEEK("few-a-week", R.string.onboarding_pace_few_a_week, R.string.onboarding_pace_few_a_week_detail, PbblsIcon.PATH),
+    DAILY("daily", R.string.onboarding_pace_daily, R.string.onboarding_pace_daily_detail, PbblsGlyph.SUNSHINE),
+    FEW_A_WEEK("few-a-week", R.string.onboarding_pace_few_a_week, R.string.onboarding_pace_few_a_week_detail, PbblsGlyph.PATH),
     WHEN_IT_MATTERS(
         "when-it-matters",
         R.string.onboarding_pace_when_it_matters,
         R.string.onboarding_pace_when_it_matters_detail,
-        PbblsIcon.PEBBLE_ROUND,
+        PbblsGlyph.PEBBLE_ROUND,
     ),
-    WEEKLY_WRAP("weekly-wrap", R.string.onboarding_pace_weekly_wrap, R.string.onboarding_pace_weekly_wrap_detail, PbblsIcon.CALENDAR_DAY),
+    WEEKLY_WRAP("weekly-wrap", R.string.onboarding_pace_weekly_wrap, R.string.onboarding_pace_weekly_wrap_detail, PbblsGlyph.CALENDAR_DAY),
 }
 
 /** One first person (step 5): a name as typed and the glyph on their piece. Always a glyph: `souls.glyph_id` is not null. */

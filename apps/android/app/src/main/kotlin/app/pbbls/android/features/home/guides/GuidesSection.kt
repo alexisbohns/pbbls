@@ -45,6 +45,7 @@ internal fun GuidesSection(
             val words = guide.localized(locale)
             ChipRow(
                 icon = guide.illustration.chipIcon(),
+                form = guide.illustration.chipForm(),
                 title = words.title,
                 line = words.summary,
                 seed = "chip-$index",

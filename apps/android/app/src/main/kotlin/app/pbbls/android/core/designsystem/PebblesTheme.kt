@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
+import app.pbbls.android.core.designsystem.glyph.GlyphCatalog
 
 val LocalSpacing = staticCompositionLocalOf { Spacing }
 
@@ -65,6 +66,8 @@ fun PebblesTheme(
     val dark = isSystemInDarkTheme()
     val contrast = rememberContrastLevel()
     val context = LocalContext.current
+    // Before any child asks a glyph for a form, so a screen or preview never sees an empty catalog.
+    GlyphCatalog.install(context)
     val brand = pebblesColorScheme(dark, contrast)
     val scheme =
         when {

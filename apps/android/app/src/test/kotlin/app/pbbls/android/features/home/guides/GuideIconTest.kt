@@ -1,6 +1,7 @@
 package app.pbbls.android.features.home.guides
 
-import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.glyph.GlyphForm
 import app.pbbls.android.core.model.home.GuideIllustration
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -11,15 +12,15 @@ class GuideIconTest {
     fun `each illustration has its chip icon`() {
         val expected =
             mapOf(
-                GuideIllustration.PEBBLES to PbblsIcon.PEBBLE_ROUND,
-                GuideIllustration.STONES to PbblsIcon.STONES_ALIGNED_BOTTOM,
-                GuideIllustration.EMOTIONS to PbblsIcon.STONES_TRACK,
-                GuideIllustration.VALENCE to PbblsIcon.SCALE,
-                GuideIllustration.DOMAINS to PbblsIcon.ABSTRACT_LANDSCAPE,
-                GuideIllustration.COLLECTIONS to PbblsIcon.COLLECTION,
-                GuideIllustration.SOULS to PbblsIcon.PEOPLE,
-                GuideIllustration.GLYPHS to PbblsIcon.PEBBLE_GLYPH_DOTTED,
-                GuideIllustration.KARMA to PbblsIcon.KARMA_DOT,
+                GuideIllustration.PEBBLES to PbblsGlyph.PEBBLE_ROUND,
+                GuideIllustration.STONES to PbblsGlyph.STONES_ALIGNED_BOTTOM,
+                GuideIllustration.EMOTIONS to PbblsGlyph.STONES_TRACK,
+                GuideIllustration.VALENCE to PbblsGlyph.SCALE,
+                GuideIllustration.DOMAINS to PbblsGlyph.ABSTRACT_LANDSCAPE,
+                GuideIllustration.COLLECTIONS to PbblsGlyph.COLLECTION,
+                GuideIllustration.SOULS to PbblsGlyph.PEOPLE,
+                GuideIllustration.GLYPHS to PbblsGlyph.PEBBLE_GLYPH,
+                GuideIllustration.KARMA to PbblsGlyph.KARMA_DOT,
             )
 
         assertEquals(GuideIllustration.entries.toSet(), expected.keys)
@@ -30,6 +31,16 @@ class GuideIconTest {
     fun `a guide without an illustration wears the round pebble`() {
         val none: GuideIllustration? = null
 
-        assertEquals(PbblsIcon.PEBBLE_ROUND, none.chipIcon())
+        assertEquals(PbblsGlyph.PEBBLE_ROUND, none.chipIcon())
+    }
+
+    @Test
+    fun `only the glyphs guide draws its chip dotted`() {
+        GuideIllustration.entries.forEach { illustration ->
+            val expected = if (illustration == GuideIllustration.GLYPHS) GlyphForm.DOTTED else GlyphForm.REGULAR
+            assertEquals("$illustration", expected, illustration.chipForm())
+        }
+        val none: GuideIllustration? = null
+        assertEquals(GlyphForm.REGULAR, none.chipForm())
     }
 }

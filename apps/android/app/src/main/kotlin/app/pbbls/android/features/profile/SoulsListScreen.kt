@@ -33,8 +33,8 @@ import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -176,8 +176,8 @@ fun SoulsListContent(
                     trailing = {
                         SoulChooserSearchButton(state = chooser)
                         IconButton(onClick = onOpenCircle) {
-                            PbblsIconImage(
-                                icon = PbblsIcon.PEOPLE,
+                            PbblsGlyphImage(
+                                glyph = PbblsGlyph.PEOPLE,
                                 size = PbblsIconSize.TOOLBAR,
                                 contentDescription = stringResource(R.string.people_circle_a11y),
                                 tint = colors.onSurfaceVariant,
@@ -267,8 +267,8 @@ private fun DeleteMenu(
                 )
             },
             leadingIcon = {
-                PbblsIconImage(
-                    icon = PbblsIcon.TRASH,
+                PbblsGlyphImage(
+                    glyph = PbblsGlyph.TRASH,
                     size = PbblsIconSize.ROW,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.error,

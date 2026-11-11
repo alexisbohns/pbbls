@@ -49,8 +49,8 @@ import app.pbbls.android.core.data.SnapAspectCache
 import app.pbbls.android.core.data.TapHaptic
 import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.designsystem.CalendarLabels
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.rememberReduceMotion
@@ -357,8 +357,8 @@ internal fun SpinePebble(
                         )
                     },
                     leadingIcon = {
-                        PbblsIconImage(
-                            icon = PbblsIcon.TRASH,
+                        PbblsGlyphImage(
+                            glyph = PbblsGlyph.TRASH,
                             size = PbblsIconSize.ROW,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.error,

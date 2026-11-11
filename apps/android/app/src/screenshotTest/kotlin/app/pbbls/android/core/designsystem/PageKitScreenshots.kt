@@ -139,14 +139,14 @@ private fun Rows() {
         Column {
             SectionHead("About Pebbles")
             ChipRow(
-                icon = PbblsIcon.PEBBLE_FLAT,
+                icon = PbblsGlyph.PEBBLE_FLAT,
                 title = "What is a pebble",
                 line = "A moment you kept, and how it felt",
                 seed = "about-pebble",
                 onClick = {},
             )
             ChipRow(
-                icon = PbblsIcon.GLYPH_UNDERLINED,
+                icon = PbblsGlyph.GLYPH_UNDERLINED,
                 title = "Glyphs",
                 line = "The marks you carve for your moments",
                 seed = "about-glyphs",

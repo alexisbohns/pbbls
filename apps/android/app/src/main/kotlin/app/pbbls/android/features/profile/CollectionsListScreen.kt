@@ -42,8 +42,8 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
@@ -151,8 +151,8 @@ fun CollectionsListContent(
                 },
                 trailing = {
                     IconButton(onClick = onCreateCollection) {
-                        PbblsIconImage(
-                            icon = PbblsIcon.PLUS_CIRCLE,
+                        PbblsGlyphImage(
+                            glyph = PbblsGlyph.PLUS_CIRCLE,
                             size = PbblsIconSize.TOOLBAR,
                             contentDescription = stringResource(R.string.collections_add_a11y),
                             tint = colors.onSurfaceVariant,
@@ -287,8 +287,8 @@ private fun CollectionRow(
                     )
                 },
                 leadingIcon = {
-                    PbblsIconImage(
-                        icon = PbblsIcon.TRASH,
+                    PbblsGlyphImage(
+                        glyph = PbblsGlyph.TRASH,
                         size = PbblsIconSize.ROW,
                         contentDescription = null,
                         tint = colors.error,

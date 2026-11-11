@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.ChipRow
-import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.SectionHead
 import app.pbbls.android.core.model.GlyphShelf
 
@@ -43,7 +43,7 @@ internal fun YouGlyphsSection(
         )
         Spacer(Modifier.height(HEAD_GAP))
         ChipRow(
-            icon = PbblsIcon.DRAW_DOTTED,
+            icon = PbblsGlyph.DRAW_DOTTED,
             title = stringResource(R.string.you_glyphs_mine),
             line =
                 glyphsCarved?.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.you_glyphs_mine_line, it, it) }
@@ -53,7 +53,7 @@ internal fun YouGlyphsSection(
             modifier = Modifier.padding(horizontal = textInset),
         )
         ChipRow(
-            icon = PbblsIcon.POUCH,
+            icon = PbblsGlyph.POUCH,
             title = stringResource(R.string.you_glyphs_owned),
             line =
                 glyphsOwned?.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.you_glyphs_owned_line, it, it) }
@@ -63,7 +63,7 @@ internal fun YouGlyphsSection(
             modifier = Modifier.padding(horizontal = textInset),
         )
         ChipRow(
-            icon = PbblsIcon.PETROGLYPH,
+            icon = PbblsGlyph.PETROGLYPH,
             title = stringResource(R.string.you_glyphs_community),
             line = stringResource(R.string.you_glyphs_community_line),
             seed = "chip-g2",

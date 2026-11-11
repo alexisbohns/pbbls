@@ -22,6 +22,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PebblesTheme
 
 private const val TAG = "SoulChooserSearch"
@@ -104,6 +106,6 @@ fun SoulChooserSearchButton(
     modifier: Modifier = Modifier,
 ) {
     IconButton(onClick = state::openSearch, modifier = modifier) {
-        Icon(painter = painterResource(R.drawable.ic_search), contentDescription = stringResource(R.string.souls_search))
+        PbblsGlyphImage(glyph = PbblsGlyph.MAGNIFYING_MD, contentDescription = stringResource(R.string.souls_search))
     }
 }
