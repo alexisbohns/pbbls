@@ -604,15 +604,6 @@
       "replaces": { "ios": [], "android": [], "web": [] }
     },
     {
-      "name": "pebble-glyph-dotted",
-      "meaning": "The marks a user scribbles on a stone: a dotted stone ring around a small scribble.",
-      "tags": { "category": ["glyphs"] },
-      "wave": "2026-10-foundation",
-      "status": "candidate",
-      "migrated": ["ios", "android", "web"],
-      "replaces": { "ios": ["scribble", "pencil.and.outline"], "android": ["ic_scribble"], "web": ["Fingerprint", "PenTool"] }
-    },
-    {
       "name": "abstract-curves",
       "meaning": "The marks a user scribbles on a stone: a dotted arc, a hooked stroke and a short tail.",
       "tags": { "category": ["glyphs"] },
@@ -633,15 +624,6 @@
     {
       "name": "abstract-mi",
       "meaning": "The marks a user scribbles on a stone: a zigzag and a bar over a dotted swell.",
-      "tags": { "category": ["glyphs"] },
-      "wave": "2026-10-foundation",
-      "status": "candidate",
-      "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
-    },
-    {
-      "name": "pebble-glyph-dotted-open",
-      "meaning": "The marks a user scribbles on a stone: a dotted stone ring around a small scribble, the ring open on one side.",
       "tags": { "category": ["glyphs"] },
       "wave": "2026-10-foundation",
       "status": "candidate",
@@ -1077,8 +1059,8 @@
       "tags": { "category": ["glyphs"] },
       "wave": "2026-10-foundation",
       "status": "candidate",
-      "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
+      "migrated": ["ios", "android", "web"],
+      "replaces": { "ios": ["scribble", "pencil.and.outline"], "android": ["ic_scribble"], "web": ["Fingerprint", "PenTool"] }
     },
     {
       "name": "pebble-glyph-open",
@@ -2593,15 +2575,6 @@
       "replaces": { "ios": [], "android": [], "web": [] }
     },
     {
-      "name": "palette-1",
-      "meaning": "Palette: the colour world the app wears.",
-      "tags": { "category": ["appearance"] },
-      "wave": "2026-11-everyday",
-      "status": "candidate",
-      "migrated": [],
-      "replaces": { "ios": [], "android": [], "web": [] }
-    },
-    {
       "name": "circles-jointure",
       "meaning": "Palette: the colour world the app wears.",
       "tags": { "category": ["appearance"] },
@@ -2638,7 +2611,7 @@
       "replaces": { "ios": [], "android": [], "web": [] }
     },
     {
-      "name": "palette-3",
+      "name": "palette",
       "meaning": "Palette: the colour world the app wears.",
       "tags": { "category": ["appearance"] },
       "wave": "2026-11-everyday",

@@ -210,9 +210,6 @@ enum class PbblsGlyph(
     /** Adjust things: a stylus crossed by three rings of cord. */
     ABSTRACT_SIGN_2("abstract-sign-2"),
 
-    /** The marks a user scribbles on a stone: a dotted stone ring around a small scribble. */
-    PEBBLE_GLYPH_DOTTED("pebble-glyph-dotted"),
-
     /** The marks a user scribbles on a stone: a dotted arc, a hooked stroke and a short tail. */
     ABSTRACT_CURVES("abstract-curves"),
 
@@ -221,9 +218,6 @@ enum class PbblsGlyph(
 
     /** The marks a user scribbles on a stone: a zigzag and a bar over a dotted swell. */
     ABSTRACT_MI("abstract-mi"),
-
-    /** The marks a user scribbles on a stone: a dotted stone ring around a small scribble, the ring open on one side. */
-    PEBBLE_GLYPH_DOTTED_OPEN("pebble-glyph-dotted-open"),
 
     /** The marks a user scribbles on a stone: a scribble over a dotted line. */
     GLYPH_UNDERLINED("glyph-underlined"),
@@ -874,9 +868,6 @@ enum class PbblsGlyph(
     SUNSET_SEAA("sunset-seaa"),
 
     /** Palette: the colour world the app wears. */
-    PALETTE_1("palette-1"),
-
-    /** Palette: the colour world the app wears. */
     CIRCLES_JOINTURE("circles-jointure"),
 
     /** Palette: the colour world the app wears. */
@@ -889,7 +880,7 @@ enum class PbblsGlyph(
     CIRCLES_JOINTURE_2("circles-jointure-2"),
 
     /** Palette: the colour world the app wears. */
-    PALETTE_3("palette-3"),
+    PALETTE("palette"),
 
     /** Palette: the colour world the app wears. */
     PRISM("prism"),
