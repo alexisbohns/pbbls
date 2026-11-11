@@ -8,4 +8,7 @@ object GlyphTestData {
 
     /** The generated resource, the same bytes the app bundles. */
     val resource: File get() = File("src/main/res/raw/pbbls_glyphs.json")
+
+    /** Points the process-wide catalog at the generated resource. */
+    fun install() = GlyphCatalog.installSource { resource.inputStream() }
 }
