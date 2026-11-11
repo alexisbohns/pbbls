@@ -27,7 +27,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesCard
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SectionHead
@@ -121,7 +121,7 @@ private fun BadgeCard(
         ) {
             PbblsGlyphImage(
                 glyph = achievementFamilyIcon(record.family),
-                size = PbblsIconSize.TILE,
+                size = PbblsGlyphSize.TILE,
                 contentDescription = null,
                 form = achievementFamilyForm(record.family),
                 tint = colors.primary,
@@ -151,7 +151,7 @@ private fun InviteCard(onOpen: () -> Unit) {
         ) {
             PbblsGlyphImage(
                 glyph = PbblsGlyph.PEBBLE_GLOW_MD,
-                size = PbblsIconSize.TILE,
+                size = PbblsGlyphSize.TILE,
                 contentDescription = null,
                 tint = colors.primary,
             )

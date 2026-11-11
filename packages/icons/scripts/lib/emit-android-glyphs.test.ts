@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { buildGlyph } from "./emit-glyphs"
-import { ANDROID_GLYPH_DATA, ANDROID_GLYPH_KOTLIN, ANDROID_STATE_KOTLIN, androidGlyphFiles } from "./emit-android-glyphs"
+import { ANDROID_GLYPH_DATA, ANDROID_GLYPH_KOTLIN, ANDROID_STATE_KOTLIN, androidGlyphFiles, kdocLines } from "./emit-android-glyphs"
 import { IOS_GLYPH_DATA, iosGlyphFiles } from "./emit-ios-glyphs"
 import type { IconRow } from "./manifest"
 
@@ -33,5 +33,18 @@ describe("androidGlyphFiles", () => {
   it("writes the states in the table's order", () => {
     const kotlin = files.get(ANDROID_STATE_KOTLIN) ?? ""
     expect(kotlin).toContain('enum class PbblsGlyphState(\n    val key: String,\n) {\n    REST("rest"),\n    SELECTED("selected"),\n}')
+  })
+})
+
+describe("kdocLines", () => {
+  it("wraps a long KDoc under 140 columns", () => {
+    const long = Array.from({ length: 40 }, (_, i) => `word${i}`).join(" ")
+    const lines = kdocLines(long)
+    expect(lines.length).toBeGreaterThan(3)
+    expect(lines[0]).toBe("    /**")
+    expect(lines[lines.length - 1]).toBe("     */")
+    for (const line of lines) expect(line.length).toBeLessThanOrEqual(140)
+    expect(lines.slice(1, -1).map((l) => l.slice(7)).join(" ")).toBe(long)
+    expect(kdocLines("short")).toEqual(["    /** short */"])
   })
 })

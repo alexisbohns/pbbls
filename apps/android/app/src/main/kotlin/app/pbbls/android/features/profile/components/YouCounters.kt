@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.stone.SplitStone
 import java.text.NumberFormat
@@ -124,7 +124,7 @@ internal fun YouCounters(
                 horizontalArrangement = Arrangement.spacedBy(LABEL_GAP),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                PbblsGlyphImage(counter.icon, PbblsIconSize.INLINE, contentDescription = null, tint = colors.primary)
+                PbblsGlyphImage(counter.icon, PbblsGlyphSize.INLINE, contentDescription = null, tint = colors.primary)
                 Text(text = label, style = PebblesTheme.page.counterLabel, color = colors.onSurfaceVariant)
             }
         }

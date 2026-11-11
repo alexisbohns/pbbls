@@ -44,7 +44,7 @@ import app.pbbls.android.core.data.glyphMarketErrorMessage
 import app.pbbls.android.core.data.toDataError
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SurfaceTile
 import app.pbbls.android.core.model.BuyGlyphResult
@@ -267,7 +267,7 @@ internal fun GlyphDetailDrawerContent(
                 ) {
                     PbblsGlyphImage(
                         glyph = PbblsGlyph.KARMA_DOT,
-                        size = PbblsIconSize.INLINE,
+                        size = PbblsGlyphSize.INLINE,
                         contentDescription = null,
                         tint = colors.primary,
                     )
@@ -374,14 +374,14 @@ private fun DottedRuleWithBadge(
             if (isOwned) {
                 PbblsGlyphImage(
                     glyph = PbblsGlyph.CHECK_CIRCLE_DOT,
-                    size = PbblsIconSize.ROW,
+                    size = PbblsGlyphSize.ROW,
                     contentDescription = null,
                     tint = colors.primary,
                 )
             } else {
                 PbblsGlyphImage(
                     glyph = PbblsGlyph.KARMA_DOT,
-                    size = PbblsIconSize.INLINE,
+                    size = PbblsGlyphSize.INLINE,
                     contentDescription = null,
                     tint = colors.primary,
                 )

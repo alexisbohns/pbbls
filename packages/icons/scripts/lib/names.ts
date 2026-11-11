@@ -26,11 +26,6 @@ export function constantName(name: string): string {
   return words(name).map((w) => w.toUpperCase()).join("_")
 }
 
-/** `check-circle` → `ic_pbbls_check_circle` (the Android drawable). */
-export function drawableName(name: string): string {
-  return "ic_pbbls_" + words(name).join("_")
-}
-
 /** `home.active` → `home.active.svg`; `home` → `home.svg` (the source file). */
 export function sourceFile(name: string): string {
   return `${name}.svg`

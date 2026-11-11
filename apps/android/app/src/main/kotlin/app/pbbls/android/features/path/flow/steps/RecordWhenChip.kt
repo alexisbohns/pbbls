@@ -52,7 +52,7 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.features.path.capture.WhenSource
@@ -115,7 +115,7 @@ fun RecordWhenChip(
         leadingIcon = {
             PbblsGlyphImage(
                 glyph = if (source == WhenSource.PHOTO) PbblsGlyph.SPARKLE else PbblsGlyph.CALENDAR_DAY,
-                size = PbblsIconSize.INLINE,
+                size = PbblsGlyphSize.INLINE,
                 contentDescription = null,
                 tint = colors.onSecondaryContainer,
             )
@@ -277,7 +277,7 @@ private fun RecordWhenSheet(
                 ) {
                     PbblsGlyphImage(
                         glyph = PbblsGlyph.CALENDAR_DAY,
-                        size = PbblsIconSize.INLINE,
+                        size = PbblsGlyphSize.INLINE,
                         contentDescription = null,
                         tint = colors.primary,
                     )

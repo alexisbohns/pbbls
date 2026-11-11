@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.AttachedSnap
 import app.pbbls.android.core.model.FormSnap
@@ -120,7 +120,7 @@ private fun LibraryInvitation(
         ) {
             PbblsGlyphImage(
                 glyph = PbblsGlyph.CAMERA_FOCUS,
-                size = PbblsIconSize.HERO,
+                size = PbblsGlyphSize.HERO,
                 contentDescription = null,
                 tint = colors.onPrimaryContainer,
             )

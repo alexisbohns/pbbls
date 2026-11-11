@@ -42,7 +42,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.ProfileEmptyState
@@ -162,7 +162,7 @@ internal fun GlyphsListContent(
                     IconButton(onClick = onCarve) {
                         PbblsGlyphImage(
                             glyph = PbblsGlyph.PLUS_CIRCLE,
-                            size = PbblsIconSize.TOOLBAR,
+                            size = PbblsGlyphSize.TOOLBAR,
                             contentDescription = stringResource(R.string.glyphs_carve_a11y),
                             tint = colors.onSurfaceVariant,
                         )
@@ -311,7 +311,7 @@ private fun GlyphStoreCell(
             ) {
                 PbblsGlyphImage(
                     glyph = PbblsGlyph.KARMA_DOT,
-                    size = PbblsIconSize.INLINE,
+                    size = PbblsGlyphSize.INLINE,
                     contentDescription = null,
                     tint = colors.onSurfaceVariant,
                 )

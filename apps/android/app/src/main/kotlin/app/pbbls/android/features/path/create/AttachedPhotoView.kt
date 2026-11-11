@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.rememberPbblsGlyphPainter
 import app.pbbls.android.core.designsystem.toDp
 import app.pbbls.android.core.model.AttachedSnap
@@ -168,7 +168,7 @@ internal fun MediaStateLabel(
             painter = icon,
             contentDescription = null,
             tint = color,
-            modifier = Modifier.size(PbblsIconSize.INLINE.toDp(LocalDensity.current)),
+            modifier = Modifier.size(PbblsGlyphSize.INLINE.toDp(LocalDensity.current)),
         )
         Text(
             text = text,
@@ -184,7 +184,7 @@ internal fun RemovePhotoButton(onRemove: () -> Unit) {
     IconButton(onClick = onRemove) {
         PbblsGlyphImage(
             glyph = PbblsGlyph.REMOVE,
-            size = PbblsIconSize.TOOLBAR,
+            size = PbblsGlyphSize.TOOLBAR,
             contentDescription = stringResource(R.string.photo_remove_a11y),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 
 /**
@@ -40,7 +40,7 @@ fun FeaturedCommunityCard(
         ) {
             PbblsGlyphImage(
                 glyph = PbblsGlyph.PEOPLE,
-                size = PbblsIconSize.TILE,
+                size = PbblsGlyphSize.TILE,
                 contentDescription = null,
                 tint = colors.primary,
             )
