@@ -25,6 +25,7 @@
 - **The nav shows the selected form.** `lib/config/navigation.ts` said the nav marks the current tab "never by an `active` twin (spec D11)"; the icon forms spec (§3) supersedes that for forms: the current tab draws its `selected` form (People its solid with the mark, as iOS after the device pass and Android), on the bar, the rail and the desktop sidebar. The colour and `aria-current` stay.
 - **Twins stay emitted, unused**, until part 7 deletes them with the other surfaces' twins. After this part no web or admin file outside `packages/icons` imports a twin (`*Active`, `*Lit<N>`) or a `pebble-glyph-dotted*` row.
 - **The design page draws from `glyphs.json` through `GlyphSvg`**, so it stops shipping its own engine and stops pulling every component through `import * as PbblsIcons`.
+- **The app-facing helpers live on the `@pbbls/icons/runtime` subpath** (`GlyphSvg`, `glyphForm`, `formsOf`, `drawForm` and the form constants; added in Task 6), so a call site imports them without reaching into the package's directories.
 
 ## File map
 
