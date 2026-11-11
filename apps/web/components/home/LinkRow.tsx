@@ -1,13 +1,16 @@
 import type { ComponentType } from "react"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
+import type { Form } from "@pbbls/icons"
 import { IconChip } from "./IconChip"
 
 type LinkRowProps = {
   href: string
   /** The chip's stone seed, so each row's stone has its own outline. */
   seed: string
-  icon: ComponentType<{ className?: string }> | null
+  icon: ComponentType<{ className?: string; form?: Form }> | null
+  /** The form the icon draws, when it is a glyph and not its regular one. */
+  iconForm?: Form
   title: string
   line: string
 }
@@ -17,13 +20,13 @@ type LinkRowProps = {
  * the title over its line, a chevron. The whole row is the link; the chip and
  * the chevron are decoration. Home's About and You's Glyphs share it.
  */
-export function LinkRow({ href, seed, icon, title, line }: LinkRowProps) {
+export function LinkRow({ href, seed, icon, iconForm, title, line }: LinkRowProps) {
   return (
     <Link
       href={href}
       className="flex items-center gap-3.5 rounded-xl px-1 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <IconChip seed={seed} icon={icon} />
+      <IconChip seed={seed} icon={icon} iconForm={iconForm} />
       <span className="min-w-0 flex-1">
         <span className="pb-type-row-title block text-m3-on-surface">{title}</span>
         <span className="pb-type-row-line mt-0.5 block text-m3-on-surface-variant">{line}</span>

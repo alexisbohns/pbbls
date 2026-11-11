@@ -1,7 +1,7 @@
 "use client"
 
-import { CheckCircle, PebbleRound, PebbleRoundLit1 } from "@pbbls/icons"
-import { PBBLS_ICON_SIZE, type PbblsIconComponent } from "@/lib/icons/pbbls-icon"
+import { CheckCircle, PebbleRound, glyphForm, type Form } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE, type PbblsGlyphComponent } from "@/lib/icons/pbbls-icon"
 import type { ReactNode } from "react"
 import type { Log } from "@/lib/types"
 import { logSummary, logTitle } from "@/lib/utils/log-localized"
@@ -11,10 +11,14 @@ import { cn } from "@/lib/utils"
 export type TimelineMode = "changelog" | "in_progress" | "backlog"
 
 // In progress is the lit stone, the backlog a plain one (iOS `LogTimeline`).
-const MODE_ICON: Record<TimelineMode, PbblsIconComponent> = {
+const MODE_ICON: Record<TimelineMode, PbblsGlyphComponent> = {
   changelog: CheckCircle,
-  in_progress: PebbleRoundLit1,
+  in_progress: PebbleRound,
   backlog: PebbleRound,
+}
+
+const MODE_FORM: Partial<Record<TimelineMode, Form>> = {
+  in_progress: glyphForm(PebbleRound, "selected"),
 }
 
 type LogTimelineProps = {
@@ -51,6 +55,7 @@ export function LogTimeline({ mode, logs, locale, renderTrailing }: LogTimelineP
           <li key={log.id} className="flex gap-3">
             <div className="flex flex-col items-center pt-0.5">
               <Icon
+                form={MODE_FORM[mode]}
                 className={cn(
                   PBBLS_ICON_SIZE.inline,
                   "shrink-0",

@@ -62,7 +62,7 @@ export function DesignMobileBar({ themeKey, ...state }: DesignToolsState & { the
               </div>
               <nav aria-label="Design system" className="mt-8">
                 <ul className="flex flex-col gap-1">
-                  {DIRECTORY_PAGES.map(({ path, label, summary, icon: Icon }) => (
+                  {DIRECTORY_PAGES.map(({ path, label, summary, icon: Icon, iconForm }) => (
                     <li key={path}>
                       <Link
                         href={directoryHref(path, themeKey)}
@@ -75,7 +75,7 @@ export function DesignMobileBar({ themeKey, ...state }: DesignToolsState & { the
                             : "text-m3-on-surface hover:bg-m3-on-surface/5",
                         )}
                       >
-                        <Icon className={cn(PBBLS_ICON_SIZE.toolbar, "mt-0.5 shrink-0")} />
+                        <Icon className={cn(PBBLS_ICON_SIZE.toolbar, "mt-0.5 shrink-0")} form={iconForm} />
                         <span className="flex min-w-0 flex-col gap-0.5">
                           <span className="text-base font-medium">{label}</span>
                           <span className="text-sm text-m3-on-surface-variant">{summary}</span>

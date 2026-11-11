@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl"
-import { PebbleGlyphDotted } from "@pbbls/icons"
+import { DOTTED, PebbleGlyph } from "@pbbls/icons"
 import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
 import { Pentagon } from "@/components/stones/Pentagon"
 import { formatDate } from "@/lib/i18n/format"
@@ -36,7 +36,7 @@ export function YouHeader({ name, memberSince, glyph, rippleLevel, activeToday, 
           {glyph && glyph.strokes.length > 0 ? (
             <GlyphPreview mark={glyph} className="size-[3.625rem]" strokeClassName="text-m3-on-primary-container" />
           ) : (
-            <PebbleGlyphDotted className="size-[3.625rem] text-m3-on-primary-container" />
+            <PebbleGlyph form={DOTTED} className="size-[3.625rem] text-m3-on-primary-container" />
           )}
         </Pentagon>
         <h1 className="pb-type-hand mt-3.5 max-w-full text-m3-on-surface [overflow-wrap:anywhere]">{name}</h1>

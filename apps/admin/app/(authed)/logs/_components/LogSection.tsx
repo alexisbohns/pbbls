@@ -1,5 +1,4 @@
 import Link from "next/link"
-import type { ComponentType } from "react"
 import {
   Apple,
   Bot,
@@ -9,7 +8,7 @@ import {
   Telescope,
   type LucideIcon,
 } from "lucide-react"
-import { CheckCircle, HourglassEnd, PebbleRound, PebbleRoundLit1, type PbblsIconProps } from "@pbbls/icons"
+import { CheckCircle, HourglassEnd, PebbleRound, glyphForm, type Form, type PbblsGlyphComponent } from "@pbbls/icons"
 import {
   Table,
   TableBody,
@@ -30,7 +29,9 @@ export type LogSectionVariant =
 type DateField = "updated_at" | "released_at" | "published_at"
 
 type VariantConfig = {
-  icon: ComponentType<PbblsIconProps> | null
+  icon: PbblsGlyphComponent | null
+  /** The form the icon draws; regular when absent. */
+  iconForm?: Form
   iconClass: string
   dateField: DateField
   dateLabel: string
@@ -38,7 +39,8 @@ type VariantConfig = {
 
 const VARIANTS: Record<LogSectionVariant, VariantConfig> = {
   in_progress: {
-    icon: PebbleRoundLit1,
+    icon: PebbleRound,
+    iconForm: glyphForm(PebbleRound, "selected"),
     iconClass: "text-blue-500",
     dateField: "updated_at",
     dateLabel: "Updated",
@@ -137,7 +139,7 @@ export function LogSection({
   return (
     <section className="space-y-3">
       <h2 className="flex items-center gap-2 text-base font-semibold">
-        {Icon && <Icon className={cn("size-5", config.iconClass)} aria-hidden />}
+        {Icon && <Icon className={cn("size-5", config.iconClass)} form={config.iconForm} aria-hidden />}
         <span>{title}</span>
         <span className="text-muted-foreground font-normal">· {logs.length}</span>
       </h2>

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { PebbleGlyphDotted } from "@pbbls/icons"
+import { DOTTED, PebbleGlyph } from "@pbbls/icons"
 import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { cn } from "@/lib/utils"
 import type { Mark } from "@/lib/types"
@@ -53,7 +53,7 @@ export function GlyphHeader({ glyph, glyphs, selectedGlyphId, onSelect }: GlyphH
           {glyph && glyph.strokes.length > 0 ? (
             <GlyphPreview mark={glyph} className="size-16" />
           ) : (
-            <PebbleGlyphDotted className={cn(PBBLS_ICON_SIZE.hero, "text-muted-foreground")} />
+            <PebbleGlyph form={DOTTED} className={cn(PBBLS_ICON_SIZE.hero, "text-muted-foreground")} />
           )}
         </DialogTrigger>
         <DialogContent>

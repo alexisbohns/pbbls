@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl"
 import { Lock } from "lucide-react"
-import { Collection, Heart, PebbleGlyphDotted, PebbleGlowMd, People, Stack } from "@pbbls/icons"
-import { PBBLS_ICON_SIZE, type PbblsIconComponent } from "@/lib/icons/pbbls-icon"
+import { Collection, DOTTED, Heart, PebbleGlyph, PebbleGlowMd, People, Stack, type Form } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE, type PbblsGlyphComponent } from "@/lib/icons/pbbls-icon"
 import { cn } from "@/lib/utils"
 import { useFormatDate } from "@/lib/i18n"
 import type { Achievement, AchievementFamily } from "@/lib/types"
@@ -14,15 +14,21 @@ import type { AchievementCopy } from "@/lib/i18n"
 // the rewarding-moment satellite — deliberately not built here.
 // `domain_first` and `glyph_sales` take the family default until the chrome
 // wave draws life domain and market (iOS `familySymbol`).
-export const FAMILY_ICONS: Record<AchievementFamily, PbblsIconComponent> = {
+export const FAMILY_ICONS: Record<AchievementFamily, PbblsGlyphComponent> = {
   pebble_count: Stack,
   emotion_first: Heart,
   domain_first: PebbleGlowMd,
   first_collection: Collection,
-  first_glyph: PebbleGlyphDotted,
+  first_glyph: PebbleGlyph,
   first_soul: People,
-  glyph_count: PebbleGlyphDotted,
+  glyph_count: PebbleGlyph,
   glyph_sales: PebbleGlowMd,
+}
+
+/** The form a family's icon draws, where it is not the regular one. */
+export const FAMILY_FORMS: Partial<Record<AchievementFamily, Form>> = {
+  first_glyph: DOTTED,
+  glyph_count: DOTTED,
 }
 
 type AchievementBadgeProps = {
@@ -56,7 +62,7 @@ export function AchievementBadge({ achievement, copy, unlockedAt }: AchievementB
           locked ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary",
         )}
       >
-        <Icon className={PBBLS_ICON_SIZE.tile} />
+        <Icon className={PBBLS_ICON_SIZE.tile} form={FAMILY_FORMS[achievement.family]} />
       </div>
       <span className="text-sm font-semibold text-foreground">{copy.title}</span>
       <span className="text-xs text-muted-foreground">{copy.description}</span>

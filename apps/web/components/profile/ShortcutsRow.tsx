@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import { UserRoundPlus } from "lucide-react"
-import { PebbleGlyphDotted, People } from "@pbbls/icons"
+import { DOTTED, PebbleGlyph, People } from "@pbbls/icons"
 import { ShortcutTile } from "@/components/profile/ShortcutTile"
 
 /**
@@ -15,7 +15,7 @@ export function ShortcutsRow() {
   return (
     <div className="flex gap-2.5">
       <ShortcutTile href="/souls" icon={People} label={t("souls")} />
-      <ShortcutTile href="/glyphs" icon={PebbleGlyphDotted} label={t("glyphs")} />
+      <ShortcutTile href="/glyphs" icon={PebbleGlyph} iconForm={DOTTED} label={t("glyphs")} />
       <ShortcutTile href="/connections" icon={UserRoundPlus} label={t("connections")} />
     </div>
   )

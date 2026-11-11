@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Waves } from "lucide-react"
-import { CalendarDate, PebbleGlyphDotted, PebbleRound } from "@pbbls/icons"
+import { DOTTED, CalendarDate, PebbleGlyph, PebbleRound } from "@pbbls/icons"
 import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
@@ -57,7 +57,7 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
             />
           ) : (
             <div className="flex size-24 items-center justify-center rounded-2xl border border-dashed border-border">
-              <PebbleGlyphDotted className={cn(PBBLS_ICON_SIZE.hero, "text-muted-foreground")} />
+              <PebbleGlyph form={DOTTED} className={cn(PBBLS_ICON_SIZE.hero, "text-muted-foreground")} />
             </div>
           )}
 
