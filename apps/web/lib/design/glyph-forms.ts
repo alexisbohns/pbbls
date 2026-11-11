@@ -3,14 +3,17 @@ import data from "@pbbls/icons/glyphs.json"
 import review from "@pbbls/icons/review.json"
 import round1 from "@pbbls/icons/verdicts.json"
 import round2 from "@pbbls/icons/round2.json"
+import { formsOf, parseFormKey, type Form } from "@pbbls/icons/runtime"
 import { isVerdict, needsWork } from "./useReviewVerdicts"
 
 /**
- * The forms data the design page reviews (#1607, part 3): every glyph from the
- * generator's `glyphs.json`, drawn with the same rules as `renderForm` in
- * packages/icons/scripts/lib/forms.ts. Part 4 replaces this with the web
- * components.
+ * The forms data the design page reviews (#1607): every glyph from the
+ * generator's `glyphs.json`, with the page's own review, category and search
+ * helpers. The forms and how they draw come from the package's runtime
+ * (`formsOf`, `drawForm`, `GlyphSvg`), the code the components run.
  */
+
+export type { Form }
 
 /** A hidden path (mark or step) is not drawn at rest; it appears filled when its role fills. */
 export type GlyphPath = {
@@ -53,99 +56,8 @@ function isGlyph(g: unknown): g is Glyph {
 const rawGlyphs: readonly unknown[] = data.glyphs
 export const GLYPHS: readonly Glyph[] = rawGlyphs.filter(isGlyph)
 
-export type Fill = { kind: "regular" } | { kind: "solid" } | { kind: "parts"; parts: string[] } | { kind: "progress"; k: number } | { kind: "dotted" }
-/** A form (spec D3): a fill, plus the mark when the glyph has one. */
-export type Form = { fill: Fill; marked?: boolean }
-
-const REGULAR: Form = { fill: { kind: "regular" } }
-
-export function formKey(form: Form): string {
-  const f = form.fill
-  const fill = f.kind === "parts" ? `parts-${f.parts.join("+")}` : f.kind === "progress" ? `progress-${f.k}` : f.kind
-  if (!form.marked) return fill
-  return fill === "regular" ? "marked" : `${fill}-marked`
-}
-
 export function hasMark(glyph: Glyph): boolean {
   return glyph.paths.some((p) => p.role === "mark")
-}
-
-/** Every combination of parts short of all of them, smallest first (as packages/icons/scripts/lib/roles.ts). */
-function partCombinations(names: readonly string[]): string[][] {
-  const out: string[][] = []
-  for (let bits = 1; bits < (1 << names.length) - 1; bits += 1) out.push(names.filter((_, i) => bits & (1 << i)))
-  return out.sort((a, b) => a.length - b.length)
-}
-
-/** Every form the glyph has, in the generator's order: each fill then the same fill marked, dotted after regular. */
-export function glyphForms(glyph: Glyph): Form[] {
-  const fills: Fill[] = [{ kind: "regular" }]
-  if (glyph.carved.solid) fills.push({ kind: "solid" })
-  for (const parts of partCombinations(glyph.parts)) fills.push({ kind: "parts", parts })
-  for (let k = 1; k <= glyph.steps; k += 1) fills.push({ kind: "progress", k })
-  const mark = hasMark(glyph)
-  const forms = fills.flatMap((fill): Form[] => (mark ? [{ fill }, { fill, marked: true }] : [{ fill }]))
-  if (glyph.dotted) forms.splice(mark ? 2 : 1, 0, { fill: { kind: "dotted" } })
-  return forms
-}
-
-/** progress(0) is regular. */
-function normalize(form: Form): Form {
-  return form.fill.kind === "progress" && form.fill.k <= 0 ? { fill: { kind: "regular" }, marked: form.marked } : form
-}
-
-export function hasForm(glyph: Glyph, form: Form): boolean {
-  const key = formKey(normalize(form))
-  return glyphForms(glyph).some((f) => formKey(f) === key)
-}
-
-/** The form actually drawn: the form itself when the glyph has it, else regular. */
-export function drawnForm(glyph: Glyph, form: Form): Form {
-  const f = normalize(form)
-  return hasForm(glyph, f) ? f : REGULAR
-}
-
-export function isCarved(form: Form): boolean {
-  return form.fill.kind === "solid" || form.fill.kind === "parts"
-}
-
-/** Whether a stroke-level form (regular, marked, progress) fills this path; a hidden path is drawn only then. */
-export function isLit(p: GlyphPath, form: Form): boolean {
-  const k = form.fill.kind === "progress" ? form.fill.k : 0
-  return (form.marked === true && p.role === "mark") || (p.role === "step" && (p.step ?? 0) <= k)
-}
-
-/** The paths a lit, carved path is cut through: they are not drawn. */
-export function cutIndices(glyph: Glyph, form: Form): Set<number> {
-  return new Set(glyph.paths.flatMap((p) => (isLit(p, form) && p.fill !== undefined ? (p.cuts ?? []) : [])))
-}
-
-const stroked = (d: string): RenderedPath => ({ d, fill: false, evenOdd: false, stroke: true })
-const filledPath = (d: string): RenderedPath => ({ d, fill: true, evenOdd: false, stroke: true })
-const carvedPath = (d: string): RenderedPath => ({ d, fill: true, evenOdd: true, stroke: false })
-const litPath = (p: GlyphPath): RenderedPath => (p.fill !== undefined ? carvedPath(p.fill) : filledPath(p.d))
-
-/** The paths a form draws, as `renderForm` does; a form the glyph lacks draws regular. */
-export function formPaths(glyph: Glyph, form: Form): RenderedPath[] {
-  const drawn = drawnForm(glyph, form)
-  const key = formKey(drawn)
-  const override = glyph.overrides[key]
-  if (override) return override
-  if (drawn.fill.kind === "dotted") return glyph.dotted ?? []
-  const carved = isCarved(drawn) ? glyph.carved[key] : undefined
-  if (carved) {
-    const pick = (i: number, draw: (p: GlyphPath) => RenderedPath) => {
-      const p = glyph.paths[i]
-      return p ? [draw(p)] : []
-    }
-    return [carvedPath(carved.d), ...carved.keep.flatMap((i) => pick(i, (p) => stroked(p.d))), ...carved.lit.flatMap((i) => pick(i, litPath))]
-  }
-  const cut = cutIndices(glyph, drawn)
-  return glyph.paths.flatMap((p, i) => {
-    const on = isLit(p, drawn)
-    if ((p.hidden && !on) || cut.has(i)) return []
-    return [on ? litPath(p) : stroked(p.d)]
-  })
 }
 
 /** A form in words, for the review dialog: `solid · marked`, `left + middle`, `progress 2`. */
@@ -158,9 +70,9 @@ export function formLabel(form: Form): string {
 
 /** Every form the glyph has, as the review dialog lays them out. */
 export function formChoices(glyph: Glyph): { key: string; label: string; form: Form; override: boolean }[] {
-  return glyphForms(glyph).map((form) => {
-    const key = formKey(form)
-    return { key, label: formLabel(form), form, override: key in glyph.overrides }
+  return formsOf(glyph).flatMap((key) => {
+    const form = parseFormKey(key)
+    return form ? [{ key, label: formLabel(form), form, override: key in glyph.overrides }] : []
   })
 }
 

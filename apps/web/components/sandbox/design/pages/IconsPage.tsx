@@ -2,6 +2,7 @@
 
 import { Fragment, useMemo, useState } from "react"
 import { Android, Apple, Globe } from "@pbbls/icons"
+import { GlyphSvg } from "@pbbls/icons/runtime"
 import type { FindingGroup } from "@/lib/design/audit"
 import { GLYPHS, describeSigns, glyphInCategory, glyphMatchesQuery, inRound2, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Form, type Glyph, type GlyphView } from "@/lib/design/glyph-forms"
 import { ICON_ROWS, replacementsFor, type IconSurface } from "@/lib/design/icon-catalog"
@@ -71,7 +72,7 @@ function GlyphTile({ glyph, size, form, view, verdict, noted, onVerdict, onOpen 
       <button
         type="button"
         onClick={onOpen}
-        aria-label={`Open ${glyph.name} (${describeSigns(signs)}): every form, its twins and its roles`}
+        aria-label={`Open ${glyph.name} (${describeSigns(signs)}): every form and its roles`}
         className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
       {(needsReview(glyph.name) || inRound2(glyph.name)) && (
@@ -116,7 +117,7 @@ function GlyphTile({ glyph, size, form, view, verdict, noted, onVerdict, onOpen 
 
 /**
  * The hand-drawn set at its real sizes (rem, so 1:1 with the app): one tile per
- * glyph, base and twin alike, drawn in the chosen form, searched, counted and sized from the side area. Hovering a
+ * glyph, drawn in the chosen form, searched, counted and sized from the side area. Hovering a
  * tile shows where its row has migrated. Then what web still draws with Lucide.
  */
 export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
@@ -147,7 +148,7 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
         {glyphShow !== "all" && (
           <div className="mb-4 flex items-center justify-between gap-4 text-sm text-muted-foreground">
             <span>
-              {reviewed} of {glyphs.length} judged · {work} need work · {noted} fixes noted · open a tile to see its forms and twins, judge it with one key and say what a fix needs
+              {reviewed} of {glyphs.length} judged · {work} need work · {noted} fixes noted · open a tile to see its forms, judge it with one key and say what a fix needs
             </span>
             <Button size="sm" variant="secondary" onClick={() => void copy()}>
               Copy verdicts
@@ -204,7 +205,7 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
                 {replacements.length === 0 ? (
                   <span className="text-[11px] text-muted-foreground">no drawing</span>
                 ) : (
-                  replacements.slice(0, 2).map((r) => (r.Icon ? <r.Icon key={r.name} className={PBBLS_ICON_SIZE.inline} /> : null))
+                  replacements.slice(0, 2).map((r) => (r.glyph ? <GlyphSvg key={r.name} glyph={r.glyph} className={PBBLS_ICON_SIZE.inline} /> : null))
                 )}
               </span>
             )
@@ -219,7 +220,7 @@ export function IconsPage({ lucide }: { lucide: readonly FindingGroup[] }) {
             <ul className="flex flex-wrap gap-2">
               {webPending.map((row) => (
                 <li key={row.name} className="flex items-center gap-2 rounded-lg border border-border px-2 py-1 text-xs">
-                  {row.Icon && <row.Icon className={PBBLS_ICON_SIZE.inline} />}
+                  {row.glyph && <GlyphSvg glyph={row.glyph} className={PBBLS_ICON_SIZE.inline} />}
                   <code>{row.name}</code>
                   <span className="text-muted-foreground">← {row.replacesWeb.join(", ")}</span>
                 </li>

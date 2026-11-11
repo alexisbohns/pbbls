@@ -8,6 +8,7 @@
   "types": "./react/index.ts",
   "exports": {
     ".": "./react/index.ts",
+    "./runtime": "./runtime/public.ts",
     "./icons.json": "./icons.json",
     "./categories.json": "./categories.json",
     "./glyphs.json": "./glyphs/glyphs.json",
