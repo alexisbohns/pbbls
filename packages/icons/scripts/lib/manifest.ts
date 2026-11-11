@@ -5,9 +5,6 @@ import { parseFormKey } from "./forms"
 export type Status = "exploring" | "candidate" | "shipped"
 export const STATUSES: readonly Status[] = ["exploring", "candidate", "shipped"]
 
-export type Variant = "active" | "lit-1" | "lit-2" | "lit-3"
-export const VARIANTS: readonly Variant[] = ["active", "lit-1", "lit-2", "lit-3"]
-
 /** `src/<name>.dotted.svg`: the drawn dotted form (spec D3, D4), not an override. */
 export const DOTTED_FORM = "dotted"
 
@@ -30,7 +27,6 @@ export type IconRow = {
   /** Groups versions of one idea (`knot` for `knot-sm` and `knot-lg`); null when alone. */
   family: string | null
   tags: Tags
-  variants: string[]
   wave: string
   status: string
   /** The surfaces whose code no longer names this row's `replaces` (the migration lint reads it). */
@@ -40,13 +36,9 @@ export type IconRow = {
 
 export type Manifest = { icons: IconRow[] }
 
-/** One emitted icon: a base row, or one of its twins. */
+/** One emitted icon: a row that is not `exploring`. */
 export type EmittedRow = {
-  /** `home` or `home.active`. */
   name: string
-  /** The base row's name (`home` for both). */
-  base: string
-  variant: Variant | null
   meaning: string
   row: IconRow
 }
@@ -62,10 +54,9 @@ const isSurface = (v: string): v is Surface => (SURFACES as readonly string[]).i
 function rowFrom(value: unknown, index: number): IconRow {
   const where = `${MANIFEST_FILE}: icons[${index}]`
   if (!isRecord(value)) throw new Error(`${where} is not an object`)
-  const { name, meaning, variants, wave, status, migrated, replaces, family, tags } = value
+  const { name, meaning, wave, status, migrated, replaces, family, tags } = value
   if (typeof name !== "string") throw new Error(`${where}.name is not a string`)
   if (typeof meaning !== "string") throw new Error(`${where} (${name}).meaning is not a string`)
-  if (!isStringArray(variants)) throw new Error(`${where} (${name}).variants is not a string array`)
   if (typeof wave !== "string") throw new Error(`${where} (${name}).wave is not a string`)
   if (typeof status !== "string") throw new Error(`${where} (${name}).status is not a string`)
   if (!isStringArray(migrated)) throw new Error(`${where} (${name}).migrated is not a string array`)
@@ -96,7 +87,7 @@ function rowFrom(value: unknown, index: number): IconRow {
       tagRecord[key] = list
     }
   }
-  return { name, meaning, family: typeof family === "string" ? family : null, tags: tagRecord, variants, wave, status, migrated: migratedSurfaces, replaces: lists }
+  return { name, meaning, family: typeof family === "string" ? family : null, tags: tagRecord, wave, status, migrated: migratedSurfaces, replaces: lists }
 }
 
 /** Shape-checks a parsed `icons.json`; every failure names the row. */
@@ -111,22 +102,7 @@ export function loadManifest(root: string): Manifest {
   return parseManifest(JSON.parse(readFileSync(file, "utf8")))
 }
 
-const isVariant = (v: string): v is Variant => (VARIANTS as readonly string[]).includes(v)
-
-/**
- * The rows the generator emits, in manifest order: every row that is not
- * `exploring`, each followed by its twins in `variants` order. Unknown variants
- * are skipped here; the lint reports them.
- */
+/** The rows the generator emits, in manifest order: every row that is not `exploring`. */
 export function emitted(manifest: Manifest): EmittedRow[] {
-  const out: EmittedRow[] = []
-  for (const row of manifest.icons) {
-    if (row.status === "exploring") continue
-    out.push({ name: row.name, base: row.name, variant: null, meaning: row.meaning, row })
-    for (const variant of row.variants) {
-      if (!isVariant(variant)) continue
-      out.push({ name: `${row.name}.${variant}`, base: row.name, variant, meaning: row.meaning, row })
-    }
-  }
-  return out
+  return manifest.icons.filter((row) => row.status !== "exploring").map((row) => ({ name: row.name, meaning: row.meaning, row }))
 }

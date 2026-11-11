@@ -8,7 +8,6 @@ import { coverage, lintReplaces, lucideName, type Hit } from "./replaces"
 const row = (name: string, extra: Record<string, unknown> = {}) => ({
   name,
   meaning: `${name}.`,
-  variants: [],
   wave: "2026-10-foundation",
   status: "candidate",
   migrated: [],

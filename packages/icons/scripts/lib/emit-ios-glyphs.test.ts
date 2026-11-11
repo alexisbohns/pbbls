@@ -3,7 +3,7 @@ import { buildGlyph } from "./emit-glyphs"
 import { IOS_GLYPH_DATA, IOS_GLYPH_SWIFT, IOS_STATE_SWIFT, docLines, iosGlyphFiles, swiftCase } from "./emit-ios-glyphs"
 import type { IconRow } from "./manifest"
 
-const row = (name: string, meaning: string): IconRow => ({ name, meaning, family: null, tags: { category: ["stones"] }, variants: [], wave: "w", status: "candidate", migrated: [], replaces: { ios: [], android: [], web: [] } })
+const row = (name: string, meaning: string): IconRow => ({ name, meaning, family: null, tags: { category: ["stones"] }, wave: "w", status: "candidate", migrated: [], replaces: { ios: [], android: [], web: [] } })
 const SVG = (inner: string) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`
 const glyphs = [
   buildGlyph(row("pebble-round", "A recorded moment."), SVG('<path d="M4 12 C4 6 20 6 20 12 C20 18 4 18 4 12" data-role="body"/>'), {}),
