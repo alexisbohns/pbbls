@@ -6,6 +6,7 @@ import { Person } from "@pbbls/icons"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { useNavItems } from "@/lib/hooks/useNavItems"
+import { selectedForm } from "@/lib/config/navigation"
 import { useAuth } from "@/lib/data/auth-context"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { HapticsToggle } from "@/components/layout/HapticsToggle"
@@ -27,7 +28,8 @@ export function Sidebar() {
 
       <nav aria-label={aria("mainNavigation")} className="flex-1 px-2 py-2">
         <ul className="flex flex-col gap-1">
-          {navItems.map(({ href, label, icon: Icon }) => {
+          {navItems.map((item) => {
+            const { href, label, icon: Icon } = item
             const isActive = pathname.startsWith(href)
             return (
               <li key={href}>
@@ -41,7 +43,7 @@ export function Sidebar() {
                   )}
                   aria-current={isActive ? "page" : undefined}
                 >
-                  <Icon className="size-4" />
+                  <Icon className="size-4" form={isActive ? selectedForm(item) : undefined} />
                   {label}
                 </Link>
               </li>
