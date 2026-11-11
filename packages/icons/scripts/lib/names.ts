@@ -26,11 +26,6 @@ export function constantName(name: string): string {
   return words(name).map((w) => w.toUpperCase()).join("_")
 }
 
-/** `check-circle` → `pbbls-check-circle` (the iOS asset). */
-export function assetName(name: string): string {
-  return "pbbls-" + words(name).join("-")
-}
-
 /** `home.active` → `home.active.svg`; `home` → `home.svg` (the source file). */
 export function sourceFile(name: string): string {
   return `${name}.svg`

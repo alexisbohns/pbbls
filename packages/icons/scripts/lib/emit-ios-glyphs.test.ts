@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { buildGlyph } from "./emit-glyphs"
-import { IOS_GLYPH_DATA, IOS_GLYPH_SWIFT, IOS_STATE_SWIFT, iosGlyphFiles } from "./emit-ios-glyphs"
+import { IOS_GLYPH_DATA, IOS_GLYPH_SWIFT, IOS_STATE_SWIFT, docLines, iosGlyphFiles, swiftCase } from "./emit-ios-glyphs"
 import type { IconRow } from "./manifest"
 
 const row = (name: string, meaning: string): IconRow => ({ name, meaning, family: null, tags: { category: ["stones"] }, variants: [], wave: "w", status: "candidate", migrated: [], replaces: { ios: [], android: [], web: [] } })
@@ -32,5 +32,27 @@ describe("iosGlyphFiles", () => {
   it("writes the states in the table's order", () => {
     const swift = files.get(IOS_STATE_SWIFT) ?? ""
     expect(swift).toContain("enum PbblsGlyphState: String, CaseIterable, Sendable {\n    case rest\n    case selected\n}")
+  })
+})
+
+describe("docLines", () => {
+  it("wraps a long meaning under SwiftLint's line width", () => {
+    const long = Array.from({ length: 40 }, (_, i) => `word${i}`).join(" ")
+    const lines = docLines(long)
+    expect(lines.length).toBeGreaterThan(1)
+    for (const line of lines) {
+      expect(line.length).toBeLessThanOrEqual(120)
+      expect(line.startsWith("    /// ")).toBe(true)
+    }
+    expect(lines.map((l) => l.slice(8)).join(" ")).toBe(long)
+    expect(docLines("short")).toEqual(["    /// short"])
+  })
+})
+
+describe("swiftCase", () => {
+  it("backticks a case that is a Swift keyword", () => {
+    expect(swiftCase("check-circle")).toBe("checkCircle")
+    expect(swiftCase("case")).toBe("`case`")
+    expect(swiftCase("case.lit-1")).toBe("caseLit1")
   })
 })

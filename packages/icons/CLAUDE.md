@@ -18,7 +18,6 @@ The hand-drawn Pebbles icon set and its generator. `src/<name>.svg` (and `<name>
 The generator owns these paths outright and clears them before writing. Fix the source or the emitter, then `generate`:
 
 - `packages/icons/react/` (forms-aware components: `<Name>.tsx` per icon with the `form` and `animate` props and `Name.forms`, plus `states.ts`, `types.ts`, `index.ts`)
-- `apps/ios/Pebbles/Resources/Icons.xcassets/`, `apps/ios/Pebbles/Theme/PbblsIcon.swift`
 - `packages/icons/glyphs/glyphs.json` (the forms data: every glyph's paths with roles, its carved solid and parts fills with and without the mark, its dotted drawing and overrides, and the state tokens)
 - `packages/icons/glyphs/forms-contract.json` (what `formsOf`, `renderForm` and `resolveState` say for a sample of glyphs; every native renderer's tests read it)
 - `apps/ios/Pebbles/Resources/pbbls-glyphs.json`, `apps/ios/Pebbles/Theme/PbblsGlyph.swift`, `apps/ios/Pebbles/Theme/PbblsGlyphState.swift` (the iOS forms data, names and state tokens)
