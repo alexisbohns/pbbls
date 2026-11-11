@@ -118,15 +118,29 @@ class GlyphIndex private constructor(
             }
         }
 
+        /**
+         * Jumps from quote to quote with `indexOf`, a runtime intrinsic, because nearly
+         * every byte of the file sits inside a long path string and a per-character loop
+         * is slow under a debuggable ART. A quote is escaped when an odd number of
+         * backslashes precede it, so `"a\\"` ends at its second quote.
+         */
         private fun skipString() {
             expect('"')
-            while (pos < text.length) {
-                when (text[pos++]) {
-                    '\\' -> pos++
-                    '"' -> return
+            var from = pos
+            while (true) {
+                val quote = text.indexOf('"', from)
+                if (quote < 0) {
+                    pos = text.length
+                    fail("unterminated string")
+                }
+                var i = quote - 1
+                while (i >= pos && text[i] == '\\') i--
+                from = quote + 1
+                if ((quote - 1 - i) % 2 == 0) {
+                    pos = from
+                    return
                 }
             }
-            fail("unterminated string")
         }
 
         private fun skipContainer() {
@@ -149,12 +163,12 @@ class GlyphIndex private constructor(
         /** A number, `true`, `false` or `null`: everything up to the next delimiter. */
         private fun skipLiteral() {
             val start = pos
-            while (pos < text.length && text[pos] !in LITERAL_END) pos++
+            while (pos < text.length && !isLiteralEnd(text[pos])) pos++
             if (pos == start) fail("expected a value")
         }
 
         private fun skipWhitespace() {
-            while (pos < text.length && text[pos] in WHITESPACE) pos++
+            while (pos < text.length && isWhitespace(text[pos])) pos++
         }
 
         private fun peek(): Char = if (pos < text.length) text[pos] else fail("unexpected end of input")
@@ -168,5 +182,6 @@ class GlyphIndex private constructor(
     }
 }
 
-private const val WHITESPACE = " \t\r\n"
-private const val LITERAL_END = ",}] \t\r\n"
+private fun isWhitespace(c: Char): Boolean = c == ' ' || c == '\n' || c == '\r' || c == '\t'
+
+private fun isLiteralEnd(c: Char): Boolean = c == ',' || c == '}' || c == ']' || isWhitespace(c)

@@ -27,6 +27,8 @@ class GlyphIndexTest {
         assertNull(index.decode("no-such-glyph"))
     }
 
+    private fun GlyphIndex.firstPathOf(name: String): String? = decode(name)?.paths?.first()?.d
+
     private fun glyphJson(d: String) = """{"paths":[{"d":"$d"}]}"""
 
     @Test
@@ -62,6 +64,18 @@ class GlyphIndexTest {
                 ?.single()
                 ?.d,
         )
+    }
+
+    @Test
+    fun aStringEndingInAnEscapedBackslashClosesAtItsQuote() {
+        val snippet =
+            "{\"glyphs\":{\"k\\\"\\\\\":${glyphJson("a\\\\")},\"after\":${glyphJson("M2 2\\\\\\\"")}}," +
+                "\"states\":{\"s\\\\\":[\"x\"]}}"
+        val index = GlyphIndex.parse(snippet)
+        assertEquals(listOf("k\"\\", "after"), index.names)
+        assertEquals(mapOf("s\\" to listOf("x")), index.states)
+        assertEquals("a\\", index.firstPathOf("k\"\\"))
+        assertEquals("M2 2\\\"", index.firstPathOf("after"))
     }
 
     @Test
