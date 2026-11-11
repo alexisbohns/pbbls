@@ -1,0 +1,17 @@
+/* @pbbls/icons: a form change that fills a path fades and scales it in (spec D9), only where the caller passes `animate`. */
+@media (prefers-reduced-motion: no-preference) {
+  .pbbls-glyph-fill {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition:
+      opacity 220ms ease-out,
+      scale 220ms ease-out;
+  }
+
+  @starting-style {
+    .pbbls-glyph-fill {
+      opacity: 0;
+      scale: 0.9;
+    }
+  }
+}
