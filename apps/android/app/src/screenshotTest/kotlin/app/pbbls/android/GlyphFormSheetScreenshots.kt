@@ -96,7 +96,8 @@ private fun GlyphFormSheet(page: GlyphFormSheetPage) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         DRAWN.getValue(page.group).drop(page.index * FORM_PER_PAGE).take(FORM_PER_PAGE).forEach { (glyph, form) ->
-            PbblsGlyphImage(glyph = glyph, contentDescription = null, form = form)
+            // In `onSurface`, as a Surface would provide: outside one the content colour is black, unreadable in dark.
+            PbblsGlyphImage(glyph = glyph, contentDescription = null, form = form, tint = MaterialTheme.colorScheme.onSurface)
         }
     }
 }
