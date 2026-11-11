@@ -36,7 +36,7 @@ struct ProfileView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 PebbleToolbarButton(action: { isPresentingSettings = true }) {
-                    PbblsIconImage(.slider, .toolbar)
+                    PbblsGlyphView(.slider, .toolbar)
                 }
                 .accessibilityLabel(Text("Settings"))
             }

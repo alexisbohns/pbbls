@@ -47,7 +47,7 @@ extension References {
                         .fill(Color.pebbles.surfaceContainerHigh)
                         .frame(width: 46, height: 44)
                         .overlay {
-                            PbblsIconImage(.slider, .toolbar, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
+                            PbblsGlyphView(.slider, .toolbar, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
                         }
                 }
                 StoneShape(seed: "whatsapp", options: StoneOptions(corner: 30))
@@ -57,7 +57,7 @@ extension References {
                     .fill(Color.pebbles.primaryContainer)
                     .frame(width: 128, height: 122)
                     .overlay {
-                        PbblsIconImage(.pebbleGlyphDotted, size: 58,
+                        PbblsGlyphView(.pebbleGlyph, size: 58, form: .dotted,
                                        style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
                             .offset(y: 4)
                     }

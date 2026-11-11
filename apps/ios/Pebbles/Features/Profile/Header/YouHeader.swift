@@ -37,7 +37,7 @@ struct YouHeader: View {
                     if let glyphStrokes, !glyphStrokes.isEmpty {
                         GlyphThumbnail(strokes: glyphStrokes, side: 58, strokeColor: Color.pebbles.onPrimaryContainer)
                     } else {
-                        PbblsIconImage(.pebbleGlyphDotted, size: 58,
+                        PbblsGlyphView(.pebbleGlyph, size: 58, form: .dotted,
                                        style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
                     }
                 }

@@ -24,7 +24,7 @@ struct CollectionsListView: View {
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     PebbleToolbarButton(action: { isPresentingCreate = true }) {
-                        PbblsIconImage(.plusCircle, .toolbar)
+                        PbblsGlyphView(.plusCircle, .toolbar)
                     }
                     .accessibilityLabel("Add collection")
                 }
@@ -117,7 +117,7 @@ struct CollectionsListView: View {
                             Button {
                                 pendingDeletion = collection
                             } label: {
-                                Label { Text("Delete") } icon: { PbblsIconImage(.trash, .row) }
+                                Label { Text("Delete") } icon: { PbblsGlyphView(.trash, .row) }
                             }
                             .tint(Color.pebbles.error)
                         }

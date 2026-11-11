@@ -112,12 +112,12 @@ struct GlyphDetailDrawer: View {
 
     @ViewBuilder private var costOrSeal: some View {
         if isOwned {
-            PbblsIconImage(.checkCircleDot, .inline, style: AnyShapeStyle(Color.pebbles.primary))
+            PbblsGlyphView(.checkCircleDot, .inline, style: AnyShapeStyle(Color.pebbles.primary))
                 .padding(.horizontal, Spacing.sm)
                 .background(Color.pebbles.surface)
         } else {
             HStack(spacing: 2) {
-                PbblsIconImage(.karmaDot, .inline, relativeTo: .headline)
+                PbblsGlyphView(.karmaDot, .inline, relativeTo: .headline)
                 Text("\(item.price)")
             }
             .font(.headline)
@@ -133,7 +133,7 @@ struct GlyphDetailDrawer: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Me").font(.caption).foregroundStyle(Color.pebbles.onSurfaceVariant)
                 HStack(spacing: 2) {
-                    PbblsIconImage(.karmaDot, .inline, relativeTo: .subheadline)
+                    PbblsGlyphView(.karmaDot, .inline, relativeTo: .subheadline)
                     Text("\(currentBalance)")
                 }.font(.subheadline.weight(.medium))
             }

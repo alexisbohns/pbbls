@@ -107,7 +107,7 @@ struct GlyphCarveSheet: View {
                 Button {
                     strokes.removeAll()
                 } label: {
-                    Label { Text("Clear") } icon: { PbblsIconImage(.trash, .row) }
+                    Label { Text("Clear") } icon: { PbblsGlyphView(.trash, .row) }
                         .foregroundStyle(Color.pebbles.error)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 10)

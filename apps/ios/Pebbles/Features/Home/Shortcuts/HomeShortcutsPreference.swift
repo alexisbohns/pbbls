@@ -32,7 +32,7 @@ enum HomeShortcut: String, CaseIterable {
     case quick
     case pebble
 
-    var icon: PbblsIcon {
+    var icon: PbblsGlyph {
         switch self {
         case .camera: .camera
         case .quick: .pebbleFlat

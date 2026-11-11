@@ -110,7 +110,7 @@ struct GlyphStoneGrid: View {
     /// A dashed `outline` inset marks Draw: 1.5 pt, dash 6, radius 20, `Spacing.sm` in from the piece.
     private var drawPiece: some View {
         VStack(spacing: Spacing.xs) {
-            PbblsIconImage(.plusCircle, folded ? .row : .tile, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
+            PbblsGlyphView(.plusCircle, folded ? .row : .tile, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
             Text(folded ? shortDrawLabel : drawLabel)
                 .spineType(Self.captionRank)
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)

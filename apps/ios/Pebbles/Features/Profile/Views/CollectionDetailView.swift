@@ -99,7 +99,7 @@ struct CollectionDetailView: View {
             )
         } else if moments.isEmpty {
             ContentUnavailableView {
-                Label { Text("No pebbles yet") } icon: { PbblsIconImage(.hourglassEnd, .hero) }
+                Label { Text("No pebbles yet") } icon: { PbblsGlyphView(.hourglassEnd, .hero) }
             } description: {
                 Text("Pebbles added to this collection will appear here.")
             }

@@ -183,7 +183,7 @@ struct YouLabSection: View {
     private var community: some View {
         Button { openURL(LabConfig.whatsappInviteURL) } label: {
             HStack(spacing: 14) {
-                PbblsIconImage(.whatsapp, size: 32)
+                PbblsGlyphView(.whatsapp, size: 32)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Join the community")
                         .spineType(.communityTitle)

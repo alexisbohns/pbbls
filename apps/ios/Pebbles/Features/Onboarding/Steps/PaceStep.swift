@@ -52,7 +52,7 @@ struct PaceStep: View {
         let ink = on ? Color.pebbles.onPrimary : Color.pebbles.onSurface
         return Button { onSelect(pace) } label: {
             HStack(spacing: Spacing.lg) {
-                PbblsIconImage(pace.icon, .tile, style: AnyShapeStyle(ink))
+                PbblsGlyphView(pace.icon, .tile, style: AnyShapeStyle(ink))
                     .frame(width: disc, height: disc)
                     .background(Circle().fill(on ? Color.pebbles.onPrimary.opacity(0.18)
                                                  : Color.pebbles.surfaceContainerHighest))

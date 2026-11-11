@@ -492,7 +492,7 @@ struct SettingsSheet: View {
             Button {
                 showsCrisisResources = true
             } label: {
-                Label("Get support", systemImage: "lifepreserver")
+                Label { Text("Get support") } icon: { PbblsGlyphView(.lifeRing, .row) }
             }
             .buttonStyle(.plain)
             .pebblesListRow(position: .only)
@@ -513,7 +513,11 @@ struct SettingsSheet: View {
                             openURL(link.url)
                         }
                     } label: {
-                        Label(link.title(for: locale), systemImage: Self.icon(for: group.section))
+                        Label {
+                            Text(verbatim: link.title(for: locale))
+                        } icon: {
+                            PbblsGlyphView(Self.icon(for: group.section), .row)
+                        }
                     }
                     .buttonStyle(.plain)
                     .pebblesListRow(position: pebblesRowPosition(index: index, count: group.links.count))
@@ -532,11 +536,11 @@ struct SettingsSheet: View {
         }
     }
 
-    private static func icon(for section: SettingsLink.Section) -> String {
+    private static func icon(for section: SettingsLink.Section) -> PbblsGlyph {
         switch section {
-        case .legal: return "doc.text"
-        case .about: return "info.circle"
-        case .support: return "lifepreserver"
+        case .legal: return .scroll
+        case .about: return .circleInfo
+        case .support: return .lifeRing
         }
     }
 
@@ -554,7 +558,7 @@ struct SettingsSheet: View {
                 Label {
                     Text(verbatim: "Stone lab")
                 } icon: {
-                    PbblsIconImage(.pebbleRound, .row)
+                    PbblsGlyphView(.pebbleRound, .row)
                 }
             }
             .buttonStyle(.plain)
@@ -565,7 +569,7 @@ struct SettingsSheet: View {
                 Label {
                     Text(verbatim: "Spine lab")
                 } icon: {
-                    PbblsIconImage(.path, .row)
+                    PbblsGlyphView(.path, .row)
                 }
             }
             .buttonStyle(.plain)
@@ -576,7 +580,7 @@ struct SettingsSheet: View {
                 Label {
                     Text(verbatim: "Icon lab")
                 } icon: {
-                    PbblsIconImage(.sparkles, .row)
+                    PbblsGlyphView(.sparkles, .row)
                 }
             }
             .buttonStyle(.plain)
@@ -587,7 +591,7 @@ struct SettingsSheet: View {
                 Label {
                     Text(verbatim: "Replay onboarding")
                 } icon: {
-                    PbblsIconImage(.pebbleRound, .row)
+                    PbblsGlyphView(.pebbleRound, .row)
                 }
             }
             .buttonStyle(.plain)
@@ -618,7 +622,7 @@ struct SettingsSheet: View {
                 dismiss()
                 Task { await supabase.signOut() }
             } label: {
-                Label { Text("Log out") } icon: { PbblsIconImage(.remove, .row) }
+                Label { Text("Log out") } icon: { PbblsGlyphView(.remove, .row) }
                     .foregroundStyle(Color.pebbles.onSurface)
             }
             .buttonStyle(.plain)
@@ -628,7 +632,7 @@ struct SettingsSheet: View {
                 isPresentingDeleteConfirm = true
             } label: {
                 HStack {
-                    Label { Text("Delete account") } icon: { PbblsIconImage(.trash, .row) }
+                    Label { Text("Delete account") } icon: { PbblsGlyphView(.trash, .row) }
                         .foregroundStyle(Color.pebbles.error)
                     Spacer()
                     if isDeleting {

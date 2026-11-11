@@ -15,9 +15,9 @@ struct CollectionMark: View {
             } else {
                 // 14pt by default: the one place an icon draws under the 16 floor
                 // (iOS migration spec D6), a 1.0pt stroke accepted on the band. A
-                // bare template image, not `PbblsIconImage`: the slot is fixed, like
+                // bare template image, not `PbblsGlyphView`: the slot is fixed, like
                 // the glyph thumbnail beside it, and must not scale with Dynamic Type.
-                Image(PbblsIcon.collection.assetName)
+                Image(uiImage: GlyphCatalog.shared.image(.collection, form: .regular, side: side))
                     .renderingMode(.template)
                     .resizable()
                     .scaledToFit()

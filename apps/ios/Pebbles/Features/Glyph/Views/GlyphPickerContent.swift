@@ -113,14 +113,14 @@ struct GlyphPickerContent: View {
             EmptyView()
         case .owned:
             ContentUnavailableView {
-                Label { Text("Nothing owned yet") } icon: { PbblsIconImage(.checkCircleDot, .hero) }
+                Label { Text("Nothing owned yet") } icon: { PbblsGlyphView(.checkCircleDot, .hero) }
             } description: {
                 Text("Swap a community glyph to see it here.")
             }
             .frame(maxWidth: .infinity)
         case .commu:
             ContentUnavailableView {
-                Label { Text("No community glyphs") } icon: { PbblsIconImage(.people, .hero) }
+                Label { Text("No community glyphs") } icon: { PbblsGlyphView(.people, .hero) }
             } description: {
                 Text("Check back soon.")
             }
@@ -168,7 +168,7 @@ struct GlyphPickerContent: View {
                 }
                 if tab == .commu, item.price > 0 {
                     HStack(spacing: 2) {
-                        PbblsIconImage(.karmaDot, .inline, relativeTo: .caption2)
+                        PbblsGlyphView(.karmaDot, .inline, relativeTo: .caption2)
                         Text("\(item.price)")
                     }
                     .font(.caption2)

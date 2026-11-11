@@ -99,7 +99,7 @@ struct CompleteRicherStep: View {
                         .multilineTextAlignment(.center)
                 } else if let karma = result.karmaDelta, karma > 0 {
                     HStack(spacing: 6) {
-                        PbblsIconImage(.karmaDot, size: 18, relativeTo: .headline,
+                        PbblsGlyphView(.karmaDot, size: 18, relativeTo: .headline,
                                        style: AnyShapeStyle(Color.pebbles.primary))
                         Text("+\(karma) karma").pebblesFont(.headline).foregroundStyle(Color.pebbles.onSurface)
                     }
@@ -151,7 +151,7 @@ struct CompleteRicherStep: View {
 
     /// The icon set's tick, as a plain `Image` so a `Menu` item can carry it.
     private var tick: some View {
-        Image(PbblsIcon.checkmarkDot.assetName).renderingMode(.template)
+        Image(uiImage: GlyphCatalog.shared.image(.checkmarkDot, form: .regular, side: 24)).renderingMode(.template)
     }
 
     @ViewBuilder
@@ -205,9 +205,9 @@ struct CompleteRicherStep: View {
         .buttonStyle(.plain)
     }
 
-    private func row(icon: PbblsIcon, title: LocalizedStringResource, value: String?) -> some View {
+    private func row(icon: PbblsGlyph, title: LocalizedStringResource, value: String?) -> some View {
         HStack(spacing: Spacing.md) {
-            PbblsIconImage(icon, size: 24, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
+            PbblsGlyphView(icon, size: 24, style: AnyShapeStyle(Color.pebbles.onSurfaceVariant))
             Text(title).pebblesFont(.body).foregroundStyle(Color.pebbles.onSurface)
             Spacer(minLength: Spacing.sm)
             if let value {

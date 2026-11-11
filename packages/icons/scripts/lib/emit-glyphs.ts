@@ -2,13 +2,13 @@ import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { carveSolid } from "./carve"
 import { GENERATED_NOTICE, type Emitter } from "./emit"
-import { formKey, type CarvedFill, type Fill, type GlyphData, type GlyphPath, type RenderedPath } from "./forms"
+import { formKey, formsOf, parseFormKey, renderForm, type CarvedFill, type Fill, type GlyphData, type GlyphPath, type RenderedPath } from "./forms"
 import { SRC_DIR, splitSourceName } from "./lint"
 import { DOTTED_FORM, isOverrideForm, loadManifest, type IconRow } from "./manifest"
 import { normalizePath } from "./normalize"
 import { parseSvg } from "./parse"
 import { partCombinations, readRoles } from "./roles"
-import { loadStates } from "./states"
+import { loadStates, resolveState, type StateTable } from "./states"
 
 export const GLYPHS_FILE = "packages/icons/glyphs/glyphs.json"
 
@@ -116,14 +116,68 @@ export function loadGlyphs(packageRoot: string): GlyphData[] {
     })
 }
 
+export const CONTRACT_FILE = "packages/icons/glyphs/forms-contract.json"
+
+/**
+ * The glyphs the forms contract samples: between them a body, a hidden mark
+ * lit beside a solid (home), a carved mark (paper-plane-trail), steps
+ * (stack, path), a hidden step (people), parts (users, dolmen), a dotted
+ * drawing (pebble-glyph) and overrides (water-well, at).
+ */
+export const CONTRACT_GLYPHS = [
+  "home", "people", "person", "path", "stack", "collection", "pebble-round",
+  "users", "dolmen", "pebble-glyph", "water-well", "at", "paper-plane-trail",
+] as const
+
+export type ContractEntry = { forms: string[]; rendered: Record<string, RenderedPath[]>; states: Record<string, string> }
+
+/** What the generator says each sampled glyph draws (spec §4): every surface's renderer must say the same. */
+export function formsContract(glyphs: readonly GlyphData[], states: StateTable, names: readonly string[] = CONTRACT_GLYPHS): { notice: string; glyphs: Record<string, ContractEntry> } {
+  const out: Record<string, ContractEntry> = {}
+  for (const name of names) {
+    const glyph = glyphs.find((g) => g.name === name)
+    if (!glyph) throw new Error(`forms contract: ${name} is not an emitted glyph`)
+    const forms = formsOf(glyph)
+    const rendered: Record<string, RenderedPath[]> = {}
+    for (const key of forms) {
+      const form = parseFormKey(key)
+      if (!form) throw new Error(`forms contract: ${name}: ${key} is not a form key`)
+      rendered[key] = renderForm(glyph, form)
+    }
+    const resolved: Record<string, string> = {}
+    for (const state of Object.keys(states)) {
+      if (state === "progress") for (let k = 0; k <= glyph.steps + 1; k += 1) resolved[`progress@${k}`] = formKey(resolveState(states, forms, state, k))
+      else resolved[state] = formKey(resolveState(states, forms, state))
+    }
+    out[name] = { forms, rendered, states: resolved }
+  }
+  return { notice: GENERATED_NOTICE, glyphs: out }
+}
+
+const built = new Map<string, GlyphData[]>()
+
+/** `loadGlyphs`, computed once per package root and process: every emitter of one generate run reads the same glyphs. */
+export function loadGlyphsOnce(packageRoot: string): GlyphData[] {
+  const cached = built.get(packageRoot)
+  if (cached) return cached
+  const glyphs = loadGlyphs(packageRoot)
+  built.set(packageRoot, glyphs)
+  return glyphs
+}
+
 /** Builds the emitter for a package root: it reads the sources itself, not the old `EmittedIcon` list. */
 export function glyphsEmitter(packageRoot: string): Emitter {
   return {
     name: "glyphs",
-    owned: { dirs: [], files: [GLYPHS_FILE], patterns: [] },
+    owned: { dirs: [], files: [GLYPHS_FILE, CONTRACT_FILE], patterns: [] },
     emit() {
-      const data = { notice: GENERATED_NOTICE, version: 1, states: loadStates(packageRoot), glyphs: loadGlyphs(packageRoot) }
-      return new Map([[GLYPHS_FILE, JSON.stringify(data) + "\n"]])
+      const states = loadStates(packageRoot)
+      const glyphs = loadGlyphsOnce(packageRoot)
+      const data = { notice: GENERATED_NOTICE, version: 1, states, glyphs }
+      return new Map([
+        [GLYPHS_FILE, JSON.stringify(data) + "\n"],
+        [CONTRACT_FILE, JSON.stringify(formsContract(glyphs, states), null, 2) + "\n"],
+      ])
     },
   }
 }

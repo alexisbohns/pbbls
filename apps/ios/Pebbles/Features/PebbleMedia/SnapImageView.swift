@@ -55,7 +55,7 @@ struct SnapImageView: View {
         Rectangle()
             .fill(Color.pebbles.surfaceContainerHighest)
             .overlay(
-                PbblsIconImage(.cameraFocus, .tile, style: AnyShapeStyle(.secondary))
+                PbblsGlyphView(.cameraFocus, .tile, style: AnyShapeStyle(.secondary))
             )
     }
 }

@@ -30,11 +30,11 @@ struct SoulChooserBottomBar: View {
                 } else {
                     Spacer(minLength: 0)
                     orb(label: "Search souls", lit: false, action: { model.isSearching = true }, glyph: {
-                        Image(systemName: "magnifyingglass").font(.system(size: 22, weight: .medium))
+                        PbblsGlyphView(.magnifyingMd, size: 26)
                     })
                 }
                 orb(label: "Add a soul", lit: model.canAdd, action: { plusTapped() }, glyph: {
-                    PbblsIconImage(.plusCircle, size: 26)
+                    PbblsGlyphView(.plusCircle, size: 26)
                 })
                     .accessibilityValue(Text(verbatim: model.canAdd ? model.trimmedQuery : ""))
             }
@@ -46,7 +46,7 @@ struct SoulChooserBottomBar: View {
 
     private var field: some View {
         HStack(spacing: Spacing.sm) {
-            Image(systemName: "magnifyingglass")
+            PbblsGlyphView(.magnifyingSm, size: 20)
                 .foregroundStyle(Color.pebbles.onSurfaceVariant)
                 .accessibilityHidden(true)
             if rendersStatic {
@@ -127,7 +127,7 @@ struct SoulAddRow: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: Spacing.md) {
-                PbblsIconImage(.plusCircle, size: 32, style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
+                PbblsGlyphView(.plusCircle, size: 32, style: AnyShapeStyle(Color.pebbles.onPrimaryContainer))
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Add \(name)")
                         .pebblesFont(.bodyEmphasized)

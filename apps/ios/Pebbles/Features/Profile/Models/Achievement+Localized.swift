@@ -106,18 +106,28 @@ extension AchievementRecord {
 
     /// The family's pebbles icon (spec D7). `domain_first` and `glyph_sales`
     /// wait for the chrome wave (life domain, market) and take the family default.
-    var familySymbol: PbblsIcon {
+    var familySymbol: PbblsGlyph {
         switch family {
         case "pebble_count":     .stack
         case "emotion_first":    .heart
         case "first_collection": .collection
-        case "first_glyph":      .pebbleGlyphDotted
+        case "first_glyph":      .pebbleGlyph
         case "first_soul":       .people
         case "first_moment":     .pebbleFlat
         case "first_pebble":     .pebbleRound
-        case "first_five":       .stackLit3
-        case "glyph_count":      .pebbleGlyphDotted
+        case "first_five":       .stack
+        case "glyph_count":      .pebbleGlyph
         default:                 .pebbleGlowMd
+        }
+    }
+
+    /// The form the family's symbol is drawn in: `first_five` shows its last step,
+    /// the glyph families their dotted line, the rest the regular drawing.
+    var familyForm: GlyphForm {
+        switch family {
+        case "first_five":                 PbblsGlyph.stack.form(for: .done)
+        case "first_glyph", "glyph_count": .dotted
+        default:                           .regular
         }
     }
 

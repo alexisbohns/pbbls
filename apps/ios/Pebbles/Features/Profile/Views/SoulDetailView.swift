@@ -110,7 +110,7 @@ struct SoulDetailView: View {
                 header
                 if moments.isEmpty {
                     ContentUnavailableView {
-                        Label { Text("No pebbles yet") } icon: { PbblsIconImage(.hourglassEnd, .hero) }
+                        Label { Text("No pebbles yet") } icon: { PbblsGlyphView(.hourglassEnd, .hero) }
                     } description: {
                         Text("Pebbles you tag with this soul will appear here.")
                     }

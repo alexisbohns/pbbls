@@ -47,7 +47,7 @@ struct AttachedPhotoView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         case .uploaded:
-            Label { Text("Ready") } icon: { PbblsIconImage(.checkCircle, .inline, relativeTo: .caption) }
+            Label { Text("Ready") } icon: { PbblsGlyphView(.checkCircle, .inline, relativeTo: .caption) }
                 .labelStyle(.titleAndIcon)
                 .font(.caption)
                 .foregroundStyle(Color.pebbles.tertiary)
@@ -80,7 +80,7 @@ struct AttachedPhotoView: View {
 
     private var removeButton: some View {
         Button(action: onRemove) {
-            PbblsIconImage(.remove, .row)
+            PbblsGlyphView(.remove, .row)
                 .foregroundStyle(Color.pebbles.error)
         }
         .buttonStyle(.plain)

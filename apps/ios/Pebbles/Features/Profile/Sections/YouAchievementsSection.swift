@@ -86,7 +86,8 @@ struct YouAchievementsSection: View {
     private func badge(_ record: AchievementRecord) -> some View {
         NavigationLink(value: YouRoute.achievements) {
             VStack(spacing: 8) {
-                PbblsIconImage(record.familySymbol, size: 30, style: AnyShapeStyle(Color.pebbles.primary))
+                PbblsGlyphView(record.familySymbol, size: 30, form: record.familyForm,
+                               style: AnyShapeStyle(Color.pebbles.primary))
                 Text(verbatim: record.localizedTitle(emotionName: nil, domainName: nil))
                     .spineType(.badgeLabel)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)

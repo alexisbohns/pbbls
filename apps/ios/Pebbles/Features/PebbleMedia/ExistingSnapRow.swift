@@ -27,7 +27,7 @@ struct ExistingSnapRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Photo")
                     .font(.subheadline)
-                Label { Text("Saved") } icon: { PbblsIconImage(.checkCircle, .inline, relativeTo: .caption) }
+                Label { Text("Saved") } icon: { PbblsGlyphView(.checkCircle, .inline, relativeTo: .caption) }
                     .labelStyle(.titleAndIcon)
                     .font(.caption)
                     .foregroundStyle(Color.pebbles.tertiary)
@@ -74,7 +74,7 @@ struct ExistingSnapRow: View {
             ProgressView()
         } else {
             Button(action: onRemove) {
-                PbblsIconImage(.remove, .row)
+                PbblsGlyphView(.remove, .row)
                     .foregroundStyle(Color.pebbles.error)
             }
             .buttonStyle(.plain)

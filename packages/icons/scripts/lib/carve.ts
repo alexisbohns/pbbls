@@ -1,15 +1,17 @@
 import { ClipperLib, SCALE } from "./clipper"
-import { flattenPath, isClosed, type Pt } from "./geometry"
+import { flattenPath, isClosed, simplifyRing, type Pt } from "./geometry"
 
 /** Half the 1.75 stroke: the body grows by it, inner lines are outlined by it. */
 const HALF_STROKE = 0.875
 /** Round joins and caps are approximated within this many glyph units. */
 const ARC_TOLERANCE = 0.01
+/** Carved rings are thinned to this many glyph units before they are written (0.06 px at the 48 px hero at 3×). */
+const SIMPLIFY_TOLERANCE = 0.01
+const round2 = (n: number): string => (Math.round(n * 100) / 100).toString()
 
 type IntPath = { X: number; Y: number }[]
 
 const toInt = (points: Pt[]): IntPath => points.map(([x, y]) => ({ X: Math.round(x * SCALE), Y: Math.round(y * SCALE) }))
-const fmt = (n: number): string => (Math.round((n / SCALE) * 100) / 100).toString()
 
 function offset(paths: IntPath[], join: number, end: number, delta: number): IntPath[] {
   const co = new ClipperLib.ClipperOffset(2, ARC_TOLERANCE * SCALE)
@@ -130,7 +132,8 @@ export function carveSolid(body: readonly string[], others: readonly string[], h
   const area = result.reduce((sum, ring) => sum + ClipperLib.Clipper.Area(ring), 0) / (SCALE * SCALE)
   const d = result
     .filter((ring) => ring.length > 2)
-    .map((ring) => ring.map((pt, i) => `${i === 0 ? "M" : "L"}${fmt(pt.X)} ${fmt(pt.Y)}`).join(" ") + " Z")
+    .map((ring) => simplifyRing(ring.map((pt): Pt => [pt.X / SCALE, pt.Y / SCALE]), SIMPLIFY_TOLERANCE))
+    .map((ring) => ring.map(([x, y], i) => `${i === 0 ? "M" : "L"}${round2(x)} ${round2(y)}`).join(" ") + " Z")
     .join(" ")
   return { d, keep, outside, area: Math.abs(area) }
 }

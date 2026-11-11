@@ -61,7 +61,7 @@ struct GlyphView: View {
     private var content: some View {
         switch `case` {
         case .carve:
-            mark(.pebbleGlyphDotted, Color.pebbles.onSurfaceVariant)
+            mark(.pebbleGlyph, Color.pebbles.onSurfaceVariant, form: .dotted)
         case .create:
             mark(.plusCircle, Color.pebbles.outline)
         case .profile, .selected:
@@ -74,11 +74,11 @@ struct GlyphView: View {
     }
 
     /// The mark inside the dashed frame, 40% of the cell, 18 at least. A bare
-    /// template image, not `PbblsIconImage`: the cell is a fixed `side` and must
+    /// template image, not `PbblsGlyphView`: the cell is a fixed `side` and must
     /// not scale with Dynamic Type (the same choice as `CollectionMark`).
-    private func mark(_ icon: PbblsIcon, _ ink: Color) -> some View {
+    private func mark(_ icon: PbblsGlyph, _ ink: Color, form: GlyphForm = .regular) -> some View {
         let s = max(side * 0.4, 18)
-        return Image(icon.assetName)
+        return Image(uiImage: GlyphCatalog.shared.image(icon, form: form, side: s))
             .renderingMode(.template)
             .resizable()
             .scaledToFit()

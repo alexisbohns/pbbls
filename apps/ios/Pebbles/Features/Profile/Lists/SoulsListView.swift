@@ -39,7 +39,7 @@ struct SoulsListView: View {
                 // tile's icon and copy.
                 ToolbarItem(placement: .topBarLeading) {
                     PebbleToolbarButton(action: { nav.people.append(.connections) }) {
-                        PbblsIconImage(.people, .toolbar)
+                        PbblsGlyphView(.people, .toolbar)
                     }
                     .accessibilityLabel("Circle")
                 }
@@ -134,7 +134,7 @@ struct SoulsListView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let loadError, chooser.souls.isEmpty {
             ContentUnavailableView {
-                Label { Text("Couldn't load souls") } icon: { PbblsIconImage(.people, .hero) }
+                Label { Text("Couldn't load souls") } icon: { PbblsGlyphView(.people, .hero) }
             } description: {
                 Text(loadError)
             } actions: {
@@ -159,7 +159,7 @@ struct SoulsListView: View {
                             // failed, were dismissed, or are done): never a
                             // blank tab, never a spinner.
                             ContentUnavailableView {
-                                Label { Text("No souls yet") } icon: { PbblsIconImage(.people, .hero) }
+                                Label { Text("No souls yet") } icon: { PbblsGlyphView(.people, .hero) }
                             } description: {
                                 Text("People and beings you tag on your pebbles will appear here.")
                             }

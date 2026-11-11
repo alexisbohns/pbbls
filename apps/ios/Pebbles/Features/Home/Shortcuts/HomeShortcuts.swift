@@ -133,7 +133,7 @@ struct HomeShortcuts: View {
     /// cells sit 20 pt in on the leading side, clear of the leaning cut.
     private func rowContent(_ shortcut: HomeShortcut) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            PbblsIconImage(shortcut.icon, .tile, style: AnyShapeStyle(ink))
+            PbblsGlyphView(shortcut.icon, .tile, style: AnyShapeStyle(ink))
             Spacer(minLength: 8)
             label(shortcut, alignment: .leading)
         }
@@ -145,7 +145,7 @@ struct HomeShortcuts: View {
     /// The square's larger icon over its label.
     private func leadContent(_ shortcut: HomeShortcut) -> some View {
         VStack(spacing: 9) {
-            PbblsIconImage(shortcut.icon, size: 40, style: AnyShapeStyle(ink))
+            PbblsGlyphView(shortcut.icon, size: 40, style: AnyShapeStyle(ink))
             label(shortcut, alignment: .center)
         }
         .padding(14)
@@ -155,7 +155,7 @@ struct HomeShortcuts: View {
     /// Icon then label, on one left column.
     private func pairContent(_ shortcut: HomeShortcut) -> some View {
         HStack(spacing: 10) {
-            PbblsIconImage(shortcut.icon, .tile, style: AnyShapeStyle(ink))
+            PbblsGlyphView(shortcut.icon, .tile, style: AnyShapeStyle(ink))
             label(shortcut, alignment: .leading)
             Spacer(minLength: 0)
         }
