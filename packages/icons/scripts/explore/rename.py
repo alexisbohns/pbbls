@@ -15,7 +15,9 @@ GENERATED = (
     "packages/icons/react/",
     "apps/ios/Pebbles/Resources/Icons.xcassets/",
     "apps/ios/Pebbles/Theme/PbblsIcon.swift",
-    "apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsIcons.kt",
+    "apps/android/app/src/main/res/raw/pbbls_glyphs.json",
+    "apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsGlyph.kt",
+    "apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsGlyphState.kt",
 )
 SUFFIXES = ("", ".active", ".lit-1", ".lit-2", ".lit-3")
 

@@ -23,7 +23,7 @@ import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import java.time.OffsetDateTime
 import java.time.ZoneId
 
@@ -56,7 +56,7 @@ fun WhenRow(
         leading = {
             PbblsGlyphImage(
                 glyph = PbblsGlyph.CALENDAR_DATE,
-                size = PbblsIconSize.TILE,
+                size = PbblsGlyphSize.TILE,
                 contentDescription = null,
                 tint = colors.primary,
             )

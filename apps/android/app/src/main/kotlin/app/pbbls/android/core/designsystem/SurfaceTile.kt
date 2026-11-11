@@ -46,7 +46,7 @@ fun SurfaceTile(
         ) {
             PbblsGlyphImage(
                 glyph = icon,
-                size = PbblsIconSize.TILE,
+                size = PbblsGlyphSize.TILE,
                 contentDescription = null,
                 tint = resolvedIconTint,
             )

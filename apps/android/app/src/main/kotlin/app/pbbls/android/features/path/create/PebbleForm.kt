@@ -37,7 +37,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.DashedPlaceholder
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionWithPalette
@@ -283,7 +283,7 @@ private fun AddPhotoRow(onClick: () -> Unit) {
     ) {
         PbblsGlyphImage(
             glyph = PbblsGlyph.CAMERA,
-            size = PbblsIconSize.ROW,
+            size = PbblsGlyphSize.ROW,
             contentDescription = null,
             tint = colors.primary,
         )
@@ -409,7 +409,7 @@ private fun CollectionRow(
             leading = {
                 PbblsGlyphImage(
                     glyph = PbblsGlyph.COLLECTION,
-                    size = PbblsIconSize.TILE,
+                    size = PbblsGlyphSize.TILE,
                     contentDescription = null,
                     tint = colors.primary,
                 )

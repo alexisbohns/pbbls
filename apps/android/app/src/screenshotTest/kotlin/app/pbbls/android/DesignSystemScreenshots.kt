@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.ContrastLevel
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesMaterialTypography
 import app.pbbls.android.core.designsystem.PebblesShapes
@@ -36,7 +36,7 @@ import com.android.tools.screenshot.PreviewTest
  * Design-system pass 2 previews (#565): the shared top bar (iOS-idiom defaults
  * and the shipped create-bar overrides), the bordered list-section chrome, the
  * profile-card chrome, and six pebbles icons at each of the five
- * [PbblsIconSize]s (Android icon migration spec D6), light and dark. These are
+ * [PbblsGlyphSize]s (Android icon migration spec D6), light and dark. These are
  * the maintainer's visual review surface for the idiom kit and the icon sizes.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -107,7 +107,7 @@ private fun IconGallery() {
             PbblsGlyph.PLUS_CIRCLE,
         )
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        PbblsIconSize.entries.forEach { size ->
+        PbblsGlyphSize.entries.forEach { size ->
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,

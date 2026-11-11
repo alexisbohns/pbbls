@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.iconRes
 import app.pbbls.android.core.ui.labelRes
@@ -100,7 +100,7 @@ fun VisibilityChip(
                             {
                                 PbblsGlyphImage(
                                     glyph = PbblsGlyph.CHECKMARK_DOT,
-                                    size = PbblsIconSize.INLINE,
+                                    size = PbblsGlyphSize.INLINE,
                                     contentDescription = null,
                                     tint = colors.onSurface,
                                 )

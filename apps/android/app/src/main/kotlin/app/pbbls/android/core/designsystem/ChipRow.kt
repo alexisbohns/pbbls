@@ -68,7 +68,7 @@ fun ChipRow(
                     .background(colors.surfaceContainer, chip),
             contentAlignment = Alignment.Center,
         ) {
-            PbblsGlyphImage(icon, PbblsIconSize.TILE, contentDescription = null, form = form, tint = colors.primary)
+            PbblsGlyphImage(icon, PbblsGlyphSize.TILE, contentDescription = null, form = form, tint = colors.primary)
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(LINE_GAP)) {
             Text(text = title, style = type.rowTitle, color = colors.onSurface)

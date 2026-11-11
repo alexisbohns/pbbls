@@ -49,7 +49,7 @@ import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.KarmaReason
 
@@ -147,7 +147,7 @@ fun KarmaEarnedCapsule(
         ) {
             PbblsGlyphImage(
                 glyph = PbblsGlyph.KARMA_DOT,
-                size = PbblsIconSize.INLINE,
+                size = PbblsGlyphSize.INLINE,
                 contentDescription = null,
                 tint = colors.primary,
             )

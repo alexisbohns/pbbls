@@ -53,7 +53,7 @@ import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.PageTypography
 import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsGlyphImage
-import app.pbbls.android.core.designsystem.PbblsIconSize
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.stone.SplitStone
@@ -148,7 +148,7 @@ fun PeopleStep(
                         ) {
                             PbblsGlyphImage(
                                 PbblsGlyph.PLUS_CIRCLE,
-                                PbblsIconSize.TILE,
+                                PbblsGlyphSize.TILE,
                                 contentDescription = stringResource(R.string.onboarding_people_add),
                                 tint = colors.onSurfaceVariant,
                             )
