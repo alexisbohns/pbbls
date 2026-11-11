@@ -7,7 +7,10 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
-import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphState
+import app.pbbls.android.core.designsystem.glyph.GlyphForm
+import app.pbbls.android.core.designsystem.glyph.form
 import java.util.Locale
 
 // Display copy for a badge (design D7): the admin's `title_*`/`description_*`
@@ -78,18 +81,30 @@ fun achievementDescription(record: AchievementRecord): String? {
  * migration spec D4). Families with no drawing of their own (`domain_first`,
  * `glyph_sales`) and unknown ones get the glowing pebble.
  */
-fun achievementFamilyIcon(family: String): PbblsIcon =
+fun achievementFamilyIcon(family: String): PbblsGlyph =
     when (family) {
-        "pebble_count" -> PbblsIcon.STACK
-        "emotion_first" -> PbblsIcon.HEART
-        "first_collection" -> PbblsIcon.COLLECTION
-        "first_glyph" -> PbblsIcon.PEBBLE_GLYPH_DOTTED
-        "first_soul" -> PbblsIcon.PEOPLE
-        "first_moment" -> PbblsIcon.PEBBLE_FLAT
-        "first_pebble" -> PbblsIcon.PEBBLE_ROUND
-        "first_five" -> PbblsIcon.STACK_LIT_3
-        "glyph_count" -> PbblsIcon.PEBBLE_GLYPH_DOTTED
-        else -> PbblsIcon.PEBBLE_GLOW_MD
+        "pebble_count" -> PbblsGlyph.STACK
+        "emotion_first" -> PbblsGlyph.HEART
+        "first_collection" -> PbblsGlyph.COLLECTION
+        "first_glyph" -> PbblsGlyph.PEBBLE_GLYPH
+        "first_soul" -> PbblsGlyph.PEOPLE
+        "first_moment" -> PbblsGlyph.PEBBLE_FLAT
+        "first_pebble" -> PbblsGlyph.PEBBLE_ROUND
+        "first_five" -> PbblsGlyph.STACK
+        "glyph_count" -> PbblsGlyph.PEBBLE_GLYPH
+        else -> PbblsGlyph.PEBBLE_GLOW_MD
+    }
+
+/**
+ * The form the family's mark is drawn in (iOS `Achievement.familyForm`):
+ * `first_five` shows its last step, the glyph families their dotted line, the
+ * rest the regular drawing.
+ */
+fun achievementFamilyForm(family: String): GlyphForm =
+    when (family) {
+        "first_five" -> PbblsGlyph.STACK.form(PbblsGlyphState.DONE)
+        "first_glyph", "glyph_count" -> GlyphForm.DOTTED
+        else -> GlyphForm.REGULAR
     }
 
 @Composable

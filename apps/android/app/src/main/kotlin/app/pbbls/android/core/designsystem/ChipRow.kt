@@ -21,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.glyph.GlyphForm
 import app.pbbls.android.core.designsystem.stone.StoneShape
 
 private val CHIP_WIDTH = 48.dp
@@ -34,17 +35,18 @@ private val MIN_TOUCH = 48.dp
 
 /**
  * A row with its icon on a pebble chip (spec 2026-10-31, the mock's `.about .row`): a 48 × 46 dp
- * `surfaceContainer` stone cut from [seed] holding [icon] in `primary`, the [title] over its
+ * `surfaceContainer` stone cut from [seed] holding [icon] (in [form]) in `primary`, the [title] over its
  * [line], and a chevron in `outline`. The whole row is one button for TalkBack, at least 48 dp.
  */
 @Composable
 fun ChipRow(
-    icon: PbblsIcon,
+    icon: PbblsGlyph,
     title: String,
     line: String,
     seed: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    form: GlyphForm = GlyphForm.REGULAR,
 ) {
     val colors = MaterialTheme.colorScheme
     val type = PebblesTheme.page
@@ -66,7 +68,7 @@ fun ChipRow(
                     .background(colors.surfaceContainer, chip),
             contentAlignment = Alignment.Center,
         ) {
-            PbblsIconImage(icon, PbblsIconSize.TILE, contentDescription = null, tint = colors.primary)
+            PbblsGlyphImage(icon, PbblsIconSize.TILE, contentDescription = null, form = form, tint = colors.primary)
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(LINE_GAP)) {
             Text(text = title, style = type.rowTitle, color = colors.onSurface)

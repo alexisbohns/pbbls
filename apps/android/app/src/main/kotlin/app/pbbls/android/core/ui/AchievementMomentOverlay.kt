@@ -42,8 +42,8 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementMoment
 import app.pbbls.android.core.data.AchievementMomentCard
 import app.pbbls.android.core.data.AchievementNotificationService
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -171,8 +171,8 @@ private fun MomentCard(
                         .clip(CircleShape)
                         .background(colors.primaryContainer),
             ) {
-                PbblsIconImage(
-                    icon = PbblsIcon.PEBBLE_GLOW_LG,
+                PbblsGlyphImage(
+                    glyph = PbblsGlyph.PEBBLE_GLOW_LG,
                     size = PbblsIconSize.HERO,
                     contentDescription = null,
                     tint = colors.onPrimaryContainer,

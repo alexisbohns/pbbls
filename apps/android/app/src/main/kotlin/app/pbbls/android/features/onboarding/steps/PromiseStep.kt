@@ -35,11 +35,13 @@ import androidx.compose.ui.unit.em
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.PageTypography
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
+import app.pbbls.android.core.designsystem.PbblsGlyphState
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.Spacing
+import app.pbbls.android.core.designsystem.glyph.form
 import app.pbbls.android.core.model.PromiseLetter
 
 private val RAIL_WIDTH = 44.dp
@@ -112,7 +114,13 @@ fun PromiseStep(
                 if (letter != null) {
                     HorizontalDivider(color = colors.outlineVariant)
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                        PbblsIconImage(PbblsIcon.PEBBLE_ROUND_LIT_1, PbblsIconSize.TILE, contentDescription = null, tint = colors.primary)
+                        PbblsGlyphImage(
+                            PbblsGlyph.PEBBLE_ROUND,
+                            PbblsIconSize.TILE,
+                            contentDescription = null,
+                            form = PbblsGlyph.PEBBLE_ROUND.form(PbblsGlyphState.SELECTED),
+                            tint = colors.primary,
+                        )
                         Text(letter.signedBy(french), style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
                     }
                 }

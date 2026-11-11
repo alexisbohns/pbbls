@@ -22,8 +22,8 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.iconRes
@@ -98,8 +98,8 @@ fun VisibilityChip(
                     trailingIcon =
                         if (grade == value) {
                             {
-                                PbblsIconImage(
-                                    icon = PbblsIcon.CHECKMARK_DOT,
+                                PbblsGlyphImage(
+                                    glyph = PbblsGlyph.CHECKMARK_DOT,
                                     size = PbblsIconSize.INLINE,
                                     contentDescription = null,
                                     tint = colors.onSurface,

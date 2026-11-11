@@ -40,8 +40,8 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTopBar
@@ -160,8 +160,8 @@ internal fun GlyphsListContent(
                 },
                 trailing = {
                     IconButton(onClick = onCarve) {
-                        PbblsIconImage(
-                            icon = PbblsIcon.PLUS_CIRCLE,
+                        PbblsGlyphImage(
+                            glyph = PbblsGlyph.PLUS_CIRCLE,
                             size = PbblsIconSize.TOOLBAR,
                             contentDescription = stringResource(R.string.glyphs_carve_a11y),
                             tint = colors.onSurfaceVariant,
@@ -309,8 +309,8 @@ private fun GlyphStoreCell(
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                PbblsIconImage(
-                    icon = PbblsIcon.KARMA_DOT,
+                PbblsGlyphImage(
+                    glyph = PbblsGlyph.KARMA_DOT,
                     size = PbblsIconSize.INLINE,
                     contentDescription = null,
                     tint = colors.onSurfaceVariant,

@@ -51,8 +51,8 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.PageTypography
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.Spacing
@@ -146,8 +146,8 @@ fun PeopleStep(
                                 .testTag(onboardingPersonAddTag(index)),
                             contentAlignment = Alignment.Center,
                         ) {
-                            PbblsIconImage(
-                                PbblsIcon.PLUS_CIRCLE,
+                            PbblsGlyphImage(
+                                PbblsGlyph.PLUS_CIRCLE,
                                 PbblsIconSize.TILE,
                                 contentDescription = stringResource(R.string.onboarding_people_add),
                                 tint = colors.onSurfaceVariant,

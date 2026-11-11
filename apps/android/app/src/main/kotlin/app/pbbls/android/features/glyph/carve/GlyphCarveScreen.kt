@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -55,11 +56,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
-import app.pbbls.android.core.designsystem.PbblsIcon
+import app.pbbls.android.core.designsystem.PbblsGlyph
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
+import app.pbbls.android.core.designsystem.rememberPbblsGlyphPainter
 import app.pbbls.android.core.designsystem.toDp
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
@@ -181,13 +183,13 @@ fun GlyphCarveScreen(
 
             Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                 CarvePillButton(
-                    iconRes = R.drawable.ic_undo,
+                    icon = painterResource(R.drawable.ic_undo),
                     label = stringResource(R.string.carve_undo),
                     enabled = uiState.strokes.isNotEmpty(),
                     onClick = { viewModel.onStrokesChange(uiState.strokes.dropLast(1)) },
                 )
                 CarvePillButton(
-                    iconRes = PbblsIcon.TRASH.drawableRes,
+                    icon = rememberPbblsGlyphPainter(PbblsGlyph.TRASH),
                     label = stringResource(R.string.carve_clear),
                     enabled = uiState.strokes.isNotEmpty(),
                     onClick = { viewModel.onStrokesChange(emptyList()) },
@@ -318,12 +320,12 @@ internal fun CarveCanvas(
 /**
  * Undo/Clear pill — `onPrimaryContainer` label + icon on a `primaryContainer`
  * capsule (iOS chrome); disabled content drops to the 38% `onSurface` ink.
- * [iconRes] is the kept undo tracing or `PbblsIcon.TRASH.drawableRes`; both
+ * [icon] is the kept undo tracing or the trash glyph's painter; both
  * draw at ROW (Android icon migration spec D6).
  */
 @Composable
 private fun CarvePillButton(
-    iconRes: Int,
+    icon: Painter,
     label: String,
     enabled: Boolean,
     onClick: () -> Unit,
@@ -341,7 +343,7 @@ private fun CarvePillButton(
                 .padding(horizontal = 16.dp, vertical = 10.dp),
     ) {
         Icon(
-            painter = painterResource(iconRes),
+            painter = icon,
             contentDescription = null,
             tint = color,
             modifier = Modifier.size(PbblsIconSize.ROW.toDp(LocalDensity.current)),

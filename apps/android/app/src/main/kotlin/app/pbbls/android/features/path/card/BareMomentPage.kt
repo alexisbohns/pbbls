@@ -52,8 +52,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SpineTypography
 import app.pbbls.android.core.model.MomentDetail
@@ -317,8 +317,8 @@ private fun BarePlace(
             contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
             modifier = Modifier.padding(top = BODY_TO_CTA),
         ) {
-            PbblsIconImage(
-                icon = PbblsIcon.PLUS_CIRCLE,
+            PbblsGlyphImage(
+                glyph = PbblsGlyph.PLUS_CIRCLE,
                 contentDescription = null,
                 size = ButtonDefaults.IconSize,
             )
@@ -329,8 +329,8 @@ private fun BarePlace(
         }
         onAddWords?.let { addWords ->
             TextButton(onClick = addWords, modifier = Modifier.padding(top = KICKER_TO_BODY / 2)) {
-                PbblsIconImage(
-                    icon = PbblsIcon.ABSTRACT_PEN,
+                PbblsGlyphImage(
+                    glyph = PbblsGlyph.ABSTRACT_PEN,
                     contentDescription = null,
                     size = ButtonDefaults.IconSize,
                 )

@@ -28,8 +28,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.SpineTypography
 
 private const val BAND_HAIRLINE_ALPHA = 0.35f
@@ -90,8 +90,8 @@ internal fun CollectionBand(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     // A fixed slot (spec D6): the band is laid out in dp and does not grow with
                     // the font scale, so the mark passes its Dp; 14dp is the one size under the 16 floor.
-                    PbblsIconImage(
-                        icon = PbblsIcon.COLLECTION,
+                    PbblsGlyphImage(
+                        glyph = PbblsGlyph.COLLECTION,
                         contentDescription = null,
                         size = BAND_MARK,
                         tint = ink,

@@ -20,8 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.ContrastLevel
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesMaterialTypography
@@ -99,12 +99,12 @@ private fun IconGallery() {
     // soul, karma, a date, a pebble and the create mark.
     val icons =
         listOf(
-            PbblsIcon.SLIDER,
-            PbblsIcon.PEOPLE,
-            PbblsIcon.KARMA_DOT,
-            PbblsIcon.CALENDAR_DATE,
-            PbblsIcon.PEBBLE_ROUND,
-            PbblsIcon.PLUS_CIRCLE,
+            PbblsGlyph.SLIDER,
+            PbblsGlyph.PEOPLE,
+            PbblsGlyph.KARMA_DOT,
+            PbblsGlyph.CALENDAR_DATE,
+            PbblsGlyph.PEBBLE_ROUND,
+            PbblsGlyph.PLUS_CIRCLE,
         )
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         PbblsIconSize.entries.forEach { size ->
@@ -113,8 +113,8 @@ private fun IconGallery() {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 icons.forEach { icon ->
-                    PbblsIconImage(
-                        icon = icon,
+                    PbblsGlyphImage(
+                        glyph = icon,
                         size = size,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,

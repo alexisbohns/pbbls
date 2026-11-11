@@ -136,8 +136,8 @@ fun ListGroupItemScope.ListGroupSwitchItem(
                 thumbContent =
                     if (checked) {
                         {
-                            PbblsIconImage(
-                                icon = PbblsIcon.CHECKMARK_DOT,
+                            PbblsGlyphImage(
+                                glyph = PbblsGlyph.CHECKMARK_DOT,
                                 contentDescription = null,
                                 modifier = Modifier.size(SwitchDefaults.IconSize),
                             )

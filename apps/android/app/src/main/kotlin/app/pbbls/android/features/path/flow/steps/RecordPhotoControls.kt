@@ -17,8 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.Spacing
 
@@ -65,8 +65,8 @@ fun RecordPhotoControls(
                     ),
                 modifier = Modifier.size(48.dp),
             ) {
-                PbblsIconImage(
-                    icon = PbblsIcon.CAMERA,
+                PbblsGlyphImage(
+                    glyph = PbblsGlyph.CAMERA,
                     size = PbblsIconSize.TOOLBAR,
                     contentDescription = stringResource(R.string.capture_take_photo_a11y),
                 )

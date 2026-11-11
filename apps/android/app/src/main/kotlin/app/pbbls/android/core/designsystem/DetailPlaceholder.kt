@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import app.pbbls.android.core.designsystem.glyph.GlyphForm
 
 /**
  * What a detail pane shows before anything is picked (#940): a muted icon and
@@ -18,9 +19,10 @@ import androidx.compose.ui.text.style.TextAlign
  */
 @Composable
 fun DetailPlaceholder(
-    icon: PbblsIcon,
+    icon: PbblsGlyph,
     text: String,
     modifier: Modifier = Modifier,
+    form: GlyphForm = GlyphForm.REGULAR,
 ) {
     Column(
         modifier =
@@ -31,10 +33,11 @@ fun DetailPlaceholder(
         verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.md, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        PbblsIconImage(
-            icon = icon,
+        PbblsGlyphImage(
+            glyph = icon,
             size = PbblsIconSize.HERO,
             contentDescription = null,
+            form = form,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(

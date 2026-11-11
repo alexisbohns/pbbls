@@ -42,8 +42,8 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.data.glyphMarketErrorMessage
 import app.pbbls.android.core.data.toDataError
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SurfaceTile
@@ -228,20 +228,20 @@ internal fun GlyphDetailDrawerContent(
 
         Row(horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {
             SurfaceTile(
-                icon = PbblsIcon.CALENDAR_DATE,
+                icon = PbblsGlyph.CALENDAR_DATE,
                 label =
                     item.createdAt?.format(DateTimeFormatter.ofPattern("MMM yyyy", locale))
                         ?: "—",
                 modifier = Modifier.weight(1f),
             )
             SurfaceTile(
-                icon = PbblsIcon.CHART_DOUBLE_GROW,
+                icon = PbblsGlyph.CHART_DOUBLE_GROW,
                 label = stringResource(R.string.glyph_drawer_soon),
                 muted = true,
                 modifier = Modifier.weight(1f),
             )
             SurfaceTile(
-                icon = PbblsIcon.PEOPLE,
+                icon = PbblsGlyph.PEOPLE,
                 label = stringResource(R.string.glyph_drawer_soon),
                 muted = true,
                 modifier = Modifier.weight(1f),
@@ -265,8 +265,8 @@ internal fun GlyphDetailDrawerContent(
                     horizontalArrangement = Arrangement.spacedBy(2.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    PbblsIconImage(
-                        icon = PbblsIcon.KARMA_DOT,
+                    PbblsGlyphImage(
+                        glyph = PbblsGlyph.KARMA_DOT,
                         size = PbblsIconSize.INLINE,
                         contentDescription = null,
                         tint = colors.primary,
@@ -372,15 +372,15 @@ private fun DottedRuleWithBadge(
                     .padding(horizontal = PebblesTheme.spacing.sm),
         ) {
             if (isOwned) {
-                PbblsIconImage(
-                    icon = PbblsIcon.CHECK_CIRCLE_DOT,
+                PbblsGlyphImage(
+                    glyph = PbblsGlyph.CHECK_CIRCLE_DOT,
                     size = PbblsIconSize.ROW,
                     contentDescription = null,
                     tint = colors.primary,
                 )
             } else {
-                PbblsIconImage(
-                    icon = PbblsIcon.KARMA_DOT,
+                PbblsGlyphImage(
+                    glyph = PbblsGlyph.KARMA_DOT,
                     size = PbblsIconSize.INLINE,
                     contentDescription = null,
                     tint = colors.primary,

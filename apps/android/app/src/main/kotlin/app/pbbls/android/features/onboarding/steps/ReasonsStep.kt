@@ -28,11 +28,14 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.PageTypography
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
+import app.pbbls.android.core.designsystem.PbblsGlyphState
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.Spacing
+import app.pbbls.android.core.designsystem.glyph.GlyphForm
+import app.pbbls.android.core.designsystem.glyph.form
 import app.pbbls.android.core.model.OnboardingReason
 
 /** The tile of [reason], for the tests. */
@@ -87,11 +90,12 @@ fun ReasonsStep(
                             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                         ) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                PbblsIconImage(reason.icon, PbblsIconSize.TILE, contentDescription = null, tint = ink)
-                                PbblsIconImage(
-                                    if (on) PbblsIcon.PEBBLE_ROUND_LIT_1 else PbblsIcon.PEBBLE_ROUND,
+                                PbblsGlyphImage(reason.icon, PbblsIconSize.TILE, contentDescription = null, tint = ink)
+                                PbblsGlyphImage(
+                                    PbblsGlyph.PEBBLE_ROUND,
                                     PbblsIconSize.ROW,
                                     contentDescription = null,
+                                    form = if (on) PbblsGlyph.PEBBLE_ROUND.form(PbblsGlyphState.SELECTED) else GlyphForm.REGULAR,
                                     tint = if (on) colors.primary else colors.outline,
                                 )
                             }

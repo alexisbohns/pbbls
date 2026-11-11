@@ -36,8 +36,8 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.UuidHash
 import app.pbbls.android.core.designsystem.ListGroup
 import app.pbbls.android.core.designsystem.ListGroupItemScope
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.Spacing
@@ -138,8 +138,8 @@ fun RecordRicherStep(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clearAndSetSemantics { contentDescription = karmaLabel },
                 ) {
-                    PbblsIconImage(
-                        icon = PbblsIcon.KARMA_DOT,
+                    PbblsGlyphImage(
+                        glyph = PbblsGlyph.KARMA_DOT,
                         size = PbblsIconSize.INLINE,
                         contentDescription = null,
                         tint = colors.primary,
@@ -235,7 +235,7 @@ private fun RicherRows(
             if (!hasWords) {
                 add {
                     RicherRow(
-                        icon = PbblsIcon.ABSTRACT_PEN,
+                        icon = PbblsGlyph.ABSTRACT_PEN,
                         title = stringResource(R.string.richer_add_words),
                         value = stringResource(R.string.richer_words_karma),
                         enabled = enabled,
@@ -257,7 +257,7 @@ private fun ListGroupItemScope.CollectionRow(
     var expanded by remember { mutableStateOf(false) }
     Box {
         RicherRow(
-            icon = PbblsIcon.COLLECTION,
+            icon = PbblsGlyph.COLLECTION,
             title = stringResource(R.string.richer_add_collection),
             value = collections.firstOrNull { it.id == collectionId }?.name,
             enabled = enabled,
@@ -292,7 +292,7 @@ private fun ListGroupItemScope.VisibilityRow(
     var expanded by remember { mutableStateOf(false) }
     Box {
         RicherRow(
-            icon = PbblsIcon.ABSTRACT_KEY,
+            icon = PbblsGlyph.ABSTRACT_KEY,
             title = stringResource(R.string.richer_who_can_see),
             value = stringResource(visibility.labelRes),
             enabled = enabled,
@@ -322,8 +322,8 @@ private fun CheckedMenuItem(
         trailingIcon =
             if (checked) {
                 {
-                    PbblsIconImage(
-                        icon = PbblsIcon.CHECKMARK_DOT,
+                    PbblsGlyphImage(
+                        glyph = PbblsGlyph.CHECKMARK_DOT,
                         size = PbblsIconSize.INLINE,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurface,
@@ -340,7 +340,7 @@ private fun CheckedMenuItem(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ListGroupItemScope.RicherRow(
-    icon: PbblsIcon,
+    icon: PbblsGlyph,
     title: String,
     value: String?,
     enabled: Boolean,
@@ -352,8 +352,8 @@ private fun ListGroupItemScope.RicherRow(
         colors = colors,
         enabled = enabled,
         leadingContent = {
-            PbblsIconImage(
-                icon = icon,
+            PbblsGlyphImage(
+                glyph = icon,
                 size = PbblsIconSize.ROW,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,

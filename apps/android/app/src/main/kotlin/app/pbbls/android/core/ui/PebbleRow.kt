@@ -25,8 +25,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.PathMoment
@@ -112,8 +112,8 @@ fun PebbleRow(
                     )
                 },
                 leadingIcon = {
-                    PbblsIconImage(
-                        icon = PbblsIcon.TRASH,
+                    PbblsGlyphImage(
+                        glyph = PbblsGlyph.TRASH,
                         size = PbblsIconSize.ROW,
                         contentDescription = null,
                         tint = colors.error,

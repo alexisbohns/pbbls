@@ -21,8 +21,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
+import app.pbbls.android.core.designsystem.PbblsGlyphState
+import app.pbbls.android.core.designsystem.glyph.GlyphFill
+import app.pbbls.android.core.designsystem.glyph.GlyphForm
+import app.pbbls.android.core.designsystem.glyph.form
 
 /**
  * Which navigation component the window gets (#855): the M3 adaptive
@@ -62,8 +66,8 @@ fun pebblesNavigationSuiteColors(): NavigationSuiteColors {
  * `primary` on a `primaryContainer` indicator, the rest `onSurfaceVariant`.
  * The icon and the `Text` read their color from `LocalContentColor`, which the
  * item sets from these colors per selection state, so neither needs its own
- * tint. The selected tab draws its icon's `active` twin, the lit stone (Android
- * icon migration spec D5); the M3 indicator stays behind it.
+ * tint. The selected tab draws its icon's `selected` form (spec D6); the M3
+ * indicator stays behind it.
  */
 @Composable
 fun PebblesNavigationItems(
@@ -80,9 +84,10 @@ fun PebblesNavigationItems(
             onClick = { if (selected) onReselect(tab) else onSelect(tab) },
             icon = {
                 // The navigation icon slot is M3's 24dp (spec D6): the generated default.
-                PbblsIconImage(
-                    icon = if (selected) tab.icon().activeTwin ?: tab.icon() else tab.icon(),
+                PbblsGlyphImage(
+                    glyph = tab.icon(),
                     contentDescription = null,
+                    form = if (selected) tab.selectedForm() else GlyphForm.REGULAR,
                 )
             },
             label = { NavigationLabel(tab) },
@@ -145,15 +150,27 @@ private fun pebblesNavigationItemColors(type: NavigationSuiteType): NavigationIt
     }
 }
 
-/** The tab's drawing; the bar lights its `active` twin when selected (spec D5, iOS `AppTab.icon`). */
-internal fun PebblesKey.icon(): PbblsIcon =
+/** The tab's drawing; the bar draws its `selected` form when selected (spec D6, iOS `AppTab.icon`). */
+internal fun PebblesKey.icon(): PbblsGlyph =
     when (this) {
-        PebblesKey.Home -> PbblsIcon.HOME
-        PebblesKey.Path -> PbblsIcon.PATH
-        PebblesKey.People -> PbblsIcon.PEOPLE
-        PebblesKey.Collections -> PbblsIcon.COLLECTION
-        PebblesKey.You -> PbblsIcon.PERSON
+        PebblesKey.Home -> PbblsGlyph.HOME
+        PebblesKey.Path -> PbblsGlyph.PATH
+        PebblesKey.People -> PbblsGlyph.PEOPLE
+        PebblesKey.Collections -> PbblsGlyph.COLLECTION
+        PebblesKey.You -> PbblsGlyph.PERSON
         else -> error("$this is not a tab")
+    }
+
+/**
+ * The form the bar draws when the tab is selected (iOS `AppTab.selectedForm`):
+ * the `selected` token's form, except People, which keeps its mark lit on the
+ * solid. Home and Collections take their solid, Path its last step, You its mark.
+ */
+internal fun PebblesKey.selectedForm(): GlyphForm =
+    if (this == PebblesKey.People) {
+        GlyphForm(GlyphFill.Solid, marked = true)
+    } else {
+        icon().form(PbblsGlyphState.SELECTED)
     }
 
 @StringRes

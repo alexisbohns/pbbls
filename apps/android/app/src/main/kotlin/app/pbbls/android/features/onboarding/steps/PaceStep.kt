@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.PageTypography
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
 import app.pbbls.android.core.designsystem.PbblsIconSize
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.Spacing
@@ -135,7 +135,7 @@ fun PaceStep(
                             .background(if (isSelected) colors.onPrimary.copy(alpha = DISC_ALPHA) else colors.surfaceContainerHighest),
                         contentAlignment = Alignment.Center,
                     ) {
-                        PbblsIconImage(
+                        PbblsGlyphImage(
                             pace.icon,
                             PbblsIconSize.TILE,
                             contentDescription = null,

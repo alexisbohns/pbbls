@@ -16,8 +16,9 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.core.designsystem.PbblsIcon
-import app.pbbls.android.core.designsystem.PbblsIconImage
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
+import app.pbbls.android.core.designsystem.glyph.GlyphForm
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.ui.render.GlyphImage
 
@@ -41,7 +42,7 @@ enum class GlyphViewCase {
  * Canonical glyph chrome component — ports iOS
  * `Features/Glyph/Views/GlyphView.swift`. Renders either the glyph [strokes]
  * (through the existing [GlyphImage] pipeline) or a placeholder icon overlay
- * (`pebble-dotted-glyph` for [GlyphViewCase.CARVE], `plus-circle` for [GlyphViewCase.CREATE]).
+ * (`pebble-glyph` dotted for [GlyphViewCase.CARVE], `plus-circle` for [GlyphViewCase.CREATE]).
  * Named `GlyphView` for iOS symmetry; the model type owns `Glyph`.
  */
 @Composable
@@ -89,9 +90,9 @@ fun GlyphView(
     ) {
         when (case) {
             GlyphViewCase.CARVE ->
-                PlaceholderIcon(PbblsIcon.PEBBLE_GLYPH_DOTTED, side, tint = colors.onSurfaceVariant)
+                PlaceholderIcon(PbblsGlyph.PEBBLE_GLYPH, side, tint = colors.onSurfaceVariant, form = GlyphForm.DOTTED)
             GlyphViewCase.CREATE ->
-                PlaceholderIcon(PbblsIcon.PLUS_CIRCLE, side, tint = colors.outline)
+                PlaceholderIcon(PbblsGlyph.PLUS_CIRCLE, side, tint = colors.outline)
             GlyphViewCase.PROFILE, GlyphViewCase.SELECTED ->
                 GlyphStrokes(strokes, viewBox, colors.primary)
             GlyphViewCase.UNSELECTED ->
@@ -104,14 +105,15 @@ fun GlyphView(
 
 @Composable
 private fun PlaceholderIcon(
-    icon: PbblsIcon,
+    icon: PbblsGlyph,
     side: Dp,
     tint: Color,
+    form: GlyphForm = GlyphForm.REGULAR,
 ) {
     // A fixed slot (spec D6): the cell is a dp square that does not follow the
     // font scale, so the mark takes iOS's max(side * 0.4, 18) as a Dp.
     val iconSide = if (side * 0.4f > 18.dp) side * 0.4f else 18.dp
-    PbblsIconImage(icon = icon, contentDescription = null, size = iconSide, tint = tint)
+    PbblsGlyphImage(glyph = icon, contentDescription = null, form = form, size = iconSide, tint = tint)
 }
 
 @Composable
