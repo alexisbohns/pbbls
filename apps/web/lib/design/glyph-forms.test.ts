@@ -1,5 +1,6 @@
+import { drawForm, formsOf } from "@pbbls/icons/runtime"
 import { describe, expect, it } from "vitest"
-import { CATEGORIES, DEFAULT_VIEW, GLYPHS, describeSigns, firstReview, formChoices, formKey, formPaths, glyphForms, glyphInCategory, glyphMatchesQuery, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Glyph } from "./glyph-forms"
+import { CATEGORIES, DEFAULT_VIEW, GLYPHS, describeSigns, firstReview, formChoices, glyphInCategory, glyphMatchesQuery, needsReview, showsGlyph, signsOf, viewForm, viewMatches, type Glyph } from "./glyph-forms"
 
 const find = (test: (g: Glyph) => boolean, what: string): Glyph => {
   const g = GLYPHS.find(test)
@@ -15,13 +16,13 @@ describe("glyph forms", () => {
 
   it("lists a plain glyph's single form and draws a missing form as regular", () => {
     const plain = find((g) => g.steps === 0 && g.carved.solid === undefined && g.dotted === null && !g.paths.some((p) => p.role === "mark"), "plain glyph")
-    expect(glyphForms(plain).map(formKey)).toEqual(["regular"])
-    expect(formPaths(plain, { fill: { kind: "solid" } }).every((p) => !p.fill)).toBe(true)
+    expect(formsOf(plain)).toEqual(["regular"])
+    expect(drawForm(plain, { fill: { kind: "solid" } }).every((p) => !p.fill)).toBe(true)
   })
 
   it("lists each fill then the same fill marked", () => {
     const marked = find((g) => g.carved.solid !== undefined && g.paths.some((p) => p.role === "mark"), "glyph with a body and a mark")
-    expect(glyphForms(marked).map(formKey).slice(0, 4)).toEqual(["regular", "marked", "solid", "solid-marked"])
+    expect(formsOf(marked).slice(0, 4)).toEqual(["regular", "marked", "solid", "solid-marked"])
     expect(formChoices(marked)[3]?.label).toBe("solid · marked")
   })
 
@@ -29,7 +30,7 @@ describe("glyph forms", () => {
     const stepped = find((g) => g.steps > 1 && g.paths.some((p) => p.hidden && p.role === "step"), "glyph with a hidden step")
     const hidden = stepped.paths.find((p) => p.hidden && p.role === "step")
     if (!hidden) throw new Error("no hidden step")
-    const at = (k: number) => formPaths(stepped, { fill: { kind: "progress", k } })
+    const at = (k: number) => drawForm(stepped, { fill: { kind: "progress", k } })
     expect(at(0).some((p) => p.d === hidden.d)).toBe(false)
     expect(at(hidden.step ?? 1).find((p) => p.d === hidden.d)?.fill).toBe(true)
   })
@@ -37,14 +38,14 @@ describe("glyph forms", () => {
   it("carves a lit mark through the lines inside it", () => {
     const glyph = find((g) => g.paths.some((p) => p.role === "mark" && p.fill !== undefined && (p.cuts?.length ?? 0) > 0), "glyph with a carved mark")
     const carved = glyph.paths.filter((p) => p.role === "mark" && p.fill !== undefined && p.cuts)
-    const drawn = formPaths(glyph, { fill: { kind: "regular" }, marked: true })
+    const drawn = drawForm(glyph, { fill: { kind: "regular" }, marked: true })
     expect(drawn.some((p) => p.fill && p.evenOdd && !p.stroke)).toBe(true)
     for (const c of carved) for (const i of c.cuts ?? []) expect(drawn.some((p) => p.d === glyph.paths[i]?.d)).toBe(false)
   })
 
   it("draws a solid from its carved fill", () => {
     const solid = find((g) => g.carved.solid !== undefined, "glyph with a body")
-    expect(formPaths(solid, { fill: { kind: "solid" } })[0]).toEqual({ d: solid.carved.solid?.d, fill: true, evenOdd: true, stroke: false })
+    expect(drawForm(solid, { fill: { kind: "solid" } })[0]).toEqual({ d: solid.carved.solid?.d, fill: true, evenOdd: true, stroke: false })
   })
 
   it("flags glyphs the review lists", () => {

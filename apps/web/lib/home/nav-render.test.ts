@@ -57,10 +57,23 @@ describe("the app navigation (#1384 D2)", () => {
     expect(html("/guides/stones")).toContain('<a href="/home" aria-current="page"')
   })
 
-  it("is the same component on every tab: one markup up to the current mark, always on the M3 roles", () => {
-    const strip = (m: string) => m.replace(/ aria-current="page"/g, "")
+  it("is the same component on every tab: one markup up to the current mark and the icons' forms, always on the M3 roles", () => {
+    const strip = (m: string) => m.replace(/ aria-current="page"/g, "").replace(/<svg.*?<\/svg>/g, "<svg/>")
     expect(strip(html("/path"))).toBe(strip(html("/home")))
     expect(html("/souls")).toMatch(/^<nav aria-label="Main navigation" class="m3 /)
+  })
+
+  it("draws the current tab's selected form, and every other tab its regular one (#1607 spec §3)", () => {
+    const icons = (m: string) => [...m.matchAll(/<svg.*?<\/svg>/g)].map((x) => x[0])
+    const regular = icons(html("/no-tab")) // no tab is current: all five regular
+    expect(regular).toHaveLength(5)
+    for (const [i, at] of ["/home", "/path", "/souls", "/collections", "/profile"].entries()) {
+      const drawn = icons(html(at))
+      drawn.forEach((svg, j) => {
+        if (j === i) expect(svg, at).not.toBe(regular[j])
+        else expect(svg, `${at}, tab ${j}`).toBe(regular[j])
+      })
+    }
   })
 
   it("is a bar below the rail breakpoint and a rail from it, by CSS alone", () => {

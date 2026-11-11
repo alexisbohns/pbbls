@@ -17,13 +17,15 @@ The hand-drawn Pebbles icon set and its generator. `src/<name>.svg` (and `<name>
 
 The generator owns these paths outright and clears them before writing. Fix the source or the emitter, then `generate`:
 
-- `packages/icons/react/` (`<Name>.tsx` per icon, `types.ts`, `index.ts`)
+- `packages/icons/react/` (forms-aware components: `<Name>.tsx` per icon with the `form` and `animate` props and `Name.forms`, plus `states.ts`, `types.ts`, `index.ts`)
 - `apps/ios/Pebbles/Resources/Icons.xcassets/`, `apps/ios/Pebbles/Theme/PbblsIcon.swift`
 - `apps/android/app/src/main/res/drawable/ic_pbbls_*.xml`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsIcons.kt`
 - `packages/icons/glyphs/glyphs.json` (the forms data: every glyph's paths with roles, its carved solid and parts fills with and without the mark, its dotted drawing and overrides, and the state tokens)
 - `packages/icons/glyphs/forms-contract.json` (what `formsOf`, `renderForm` and `resolveState` say for a sample of glyphs; every native renderer's tests read it)
 - `apps/ios/Pebbles/Resources/pbbls-glyphs.json`, `apps/ios/Pebbles/Theme/PbblsGlyph.swift`, `apps/ios/Pebbles/Theme/PbblsGlyphState.swift` (the iOS forms data, names and state tokens)
 - `apps/android/app/src/main/res/raw/pbbls_glyphs.json`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/PbblsGlyph.kt`, `PbblsGlyphState.kt` (the Android forms data, byte-identical to iOS's, names and state tokens)
+
+`packages/icons/runtime/` is hand-written (`GlyphSvg`, `glyphForm`, the opt-in fade in `glyph.css`): each app imports `@pbbls/icons/glyph.css` once, and takes the app-facing helpers from `@pbbls/icons/runtime`.
 
 `fixtures/path-contract.json` is hand-written: the segments every surface's path parser must read. Add a case when a parser bug is found; never edit an expectation to make a parser pass.
 
@@ -45,4 +47,4 @@ A wave (`waves/<yyyy-mm-slug>/`) records how a set was chosen: briefs, seed, eac
 
 ## When `Icons` is red
 
-`.github/workflows/icons.yml` runs lint, typecheck, Vitest, `check` and `lint:replaces` on every PR. A red `fresh` step means a committed output no longer matches its source: run `npm run generate --workspace=@pbbls/icons` and commit the result. Never edit the workflow or a generated file by hand to make it pass. A red `replaces` step names a file and line that still draws a replaced symbol: migrate the call site to `PbblsIcon`, or rename the string if it is not a symbol at all; never widen the pattern. On web the line is an import specifier: import the Pebbles component from `@pbbls/icons` instead and size it with `PBBLS_ICON_SIZE` (`apps/web/lib/icons/pbbls-icon.ts`); never edit the import scan to let it through.
+`.github/workflows/icons.yml` runs lint, typecheck, Vitest, `check` and `lint:replaces` on every PR. A red `fresh` step means a committed output no longer matches its source: run `npm run generate --workspace=@pbbls/icons` and commit the result. Never edit the workflow or a generated file by hand to make it pass. A red `replaces` step names a file and line that still draws a replaced symbol: on iOS migrate the call site to `PbblsIcon`, or rename the string if it is not a symbol at all; never widen the pattern. On web the line is an import specifier: import the Pebbles component from `@pbbls/icons` instead and size it with `PBBLS_ICON_SIZE` (`apps/web/lib/icons/pbbls-icon.ts`); never edit the import scan to let it through.

@@ -24,7 +24,7 @@ import type { PbblsIconProps } from "@pbbls/icons"
  *   the Record photo hero.
  *
  * 16 is the floor. Colour only through `text-*`; never `fill-*`, `stroke-*` or
- * `strokeWidth` (the 1.75 stroke is the DNA, a filled state is a twin):
+ * `strokeWidth` (the 1.75 stroke is the DNA; a state shows a form, `form={glyphForm(Glyph, state)}`, never a twin):
  * `<PebbleRound className={cn(PBBLS_ICON_SIZE.inline, "text-primary")} />`.
  */
 export const PBBLS_ICON_SIZE = {
@@ -39,3 +39,6 @@ export type PbblsIconSize = keyof typeof PBBLS_ICON_SIZE
 
 /** A generated Pebbles icon, for maps and props whose every value is one (spec D10). */
 export type PbblsIconComponent = ComponentType<PbblsIconProps>
+
+/** A glyph component, for props whose every value draws forms: `<Glyph form={glyphForm(Glyph, "selected")} />`. */
+export type { PbblsGlyphComponent } from "@pbbls/icons"

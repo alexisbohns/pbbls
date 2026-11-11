@@ -1,12 +1,14 @@
-import { Game, PebbleGlyphDotted, Radar, Stack, Sunshine } from "@pbbls/icons"
-import type { PbblsIconComponent } from "@/lib/icons/pbbls-icon"
+import { DOTTED, Game, PebbleGlyph, Radar, Stack, Sunshine, type Form } from "@pbbls/icons"
+import type { PbblsGlyphComponent } from "@/lib/icons/pbbls-icon"
 
 export type DirectoryPage = {
   path: string
   label: string
   /** One line under the page's title in the side area (from 1024 px). */
   summary: string
-  icon: PbblsIconComponent
+  icon: PbblsGlyphComponent
+  /** The form the icon draws; regular when absent. */
+  iconForm?: Form
   /** Canvas pages draw screens and get the Screens and Zoom controls. */
   canvas: boolean
 }
@@ -15,7 +17,7 @@ export type DirectoryPage = {
 export const DIRECTORY_PAGES: readonly DirectoryPage[] = [
   { path: "", label: "Overview", summary: "Every part of the Pebbles web design system in one place, and what the source does outside it.", icon: Radar, canvas: false },
   { path: "/colors", label: "Colors & type", summary: "Live colors, type and shapes, read from the page under the theme you pick.", icon: Sunshine, canvas: false },
-  { path: "/icons", label: "Icons", summary: "Every glyph of @pbbls/icons at real size, in the form you pick. Hover a tile for where it has migrated: web, iOS, Android.", icon: PebbleGlyphDotted, canvas: false },
+  { path: "/icons", label: "Icons", summary: "Every glyph of @pbbls/icons at real size, in the form you pick. Hover a tile for where it has migrated: web, iOS, Android.", icon: PebbleGlyph, iconForm: DOTTED, canvas: false },
   { path: "/components", label: "Components", summary: "The components, drawn on real-size mobile and desktop screens scaled to the page.", icon: Stack, canvas: true },
   { path: "/views", label: "Views", summary: "Whole views, drawn on real-size mobile and desktop screens scaled to the page.", icon: Game, canvas: true },
 ]

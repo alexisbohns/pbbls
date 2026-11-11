@@ -95,7 +95,6 @@ export function OverviewPage({ audit }: { audit: DesignAudit }) {
   const parts = ENTRIES.filter((s) => s.section !== "views")
   const bridged = parts.filter((s) => s.m3 === "bridged")
   const bridgedViews = views.filter((s) => s.m3 === "bridged")
-  const twins = ICON_ROWS.reduce((n, row) => n + row.twins.length, 0)
   const webMigrated = ICON_ROWS.filter((row) => row.migrated.includes("web")).length
   const literals = [...audit.hex, ...audit.colorFunctions]
   const byFamily = (f: ArbitraryFamily) => audit.arbitrary.filter((g) => g.family === f)
@@ -121,7 +120,7 @@ export function OverviewPage({ audit }: { audit: DesignAudit }) {
             href={href("/icons")}
             title="Icons"
             figure={String(ICON_ROWS.length)}
-            lines={[`hand-drawn, plus ${twins} twins`, `${webMigrated} migrated on web`, `${audit.lucide.length} Lucide icons still on web`]}
+            lines={["hand-drawn, each with its forms", `${webMigrated} migrated on web`, `${audit.lucide.length} Lucide icons still on web`]}
           />
           <CategoryCard
             href={href("/components")}

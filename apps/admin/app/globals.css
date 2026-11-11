@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@pbbls/icons/glyph.css";
 
 /* Gate every `dark:` utility on a `.dark` ancestor. Without this, Tailwind 4
    falls back to prefers-color-scheme and dark-tuned utilities fire over the

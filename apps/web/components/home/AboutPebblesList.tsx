@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl"
-import { GUIDE_ICONS } from "@/lib/config/guides"
+import { GUIDE_ICONS, GUIDE_ICON_FORMS } from "@/lib/config/guides"
 import type { Guide } from "@/lib/types"
 import { LinkRow } from "./LinkRow"
 
@@ -23,6 +23,7 @@ export function AboutPebblesList({ guides }: { guides: readonly Guide[] }) {
                 href={`/guides/${guide.slug}`}
                 seed={`chip-${i}`}
                 icon={guide.illustration ? GUIDE_ICONS[guide.illustration] : null}
+                iconForm={guide.illustration ? GUIDE_ICON_FORMS[guide.illustration] : undefined}
                 title={guide.title}
                 line={guide.summary}
               />

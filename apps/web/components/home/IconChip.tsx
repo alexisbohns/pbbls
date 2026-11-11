@@ -1,4 +1,5 @@
 import type { ComponentType } from "react"
+import type { Form } from "@pbbls/icons"
 import { Stone } from "@/components/stones/Stone"
 import { SURFACE_CONTAINER_FILL } from "./home-fills"
 
@@ -7,11 +8,11 @@ import { SURFACE_CONTAINER_FILL } from "./home-fills"
  * container, the icon in primary. No icon keeps the chip, so titles align.
  * Decorative.
  */
-export function IconChip({ seed, icon: Icon }: { seed: string; icon: ComponentType<{ className?: string }> | null }) {
+export function IconChip({ seed, icon: Icon, iconForm }: { seed: string; icon: ComponentType<{ className?: string; form?: Form }> | null; iconForm?: Form }) {
   return (
     <span aria-hidden="true" className="shrink-0">
       <Stone seed={seed} corner={16} fill={SURFACE_CONTAINER_FILL} className="grid h-[46px] w-12 place-items-center">
-        {Icon && <Icon className="size-[26px] text-m3-primary" />}
+        {Icon && <Icon className="size-[26px] text-m3-primary" form={iconForm} />}
       </Stone>
     </span>
   )

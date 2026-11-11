@@ -45,6 +45,9 @@ export type GlyphData = {
   overrides: Record<string, RenderedPath[]>
 }
 
+/** What the form engine reads of a glyph: `GlyphData` without its manifest prose, as the components inline it. */
+export type GlyphForms = Pick<GlyphData, "name" | "paths" | "parts" | "steps" | "carved" | "dotted" | "overrides">
+
 export type Fill =
   | { kind: "regular" }
   | { kind: "solid" }
@@ -105,7 +108,7 @@ export function formKeysOf(shape: FormShape): string[] {
   return keys
 }
 
-export function shapeOf(glyph: GlyphData): FormShape {
+export function shapeOf(glyph: GlyphForms): FormShape {
   return {
     mark: glyph.paths.some((p) => p.role === "mark"),
     body: glyph.paths.some((p) => p.role === "body"),
@@ -116,7 +119,7 @@ export function shapeOf(glyph: GlyphData): FormShape {
 }
 
 /** The forms a glyph has, as keys (spec D3). */
-export function formsOf(glyph: GlyphData): string[] {
+export function formsOf(glyph: GlyphForms): string[] {
   return formKeysOf(shapeOf(glyph))
 }
 
@@ -127,7 +130,7 @@ const carvedPath = (d: string): RenderedPath => ({ d, fill: true, evenOdd: true,
 const lit = (p: GlyphPath): RenderedPath => (p.fill !== undefined ? carvedPath(p.fill) : filled(p.d))
 
 /** The paths a form draws, overrides first (spec D3, D4). `progress(0)` is regular. */
-export function renderForm(glyph: GlyphData, form: Form): RenderedPath[] {
+export function renderForm(glyph: GlyphForms, form: Form): RenderedPath[] {
   if (form.fill.kind === "progress" && form.fill.k === 0) return renderForm(glyph, { fill: { kind: "regular" }, marked: form.marked })
   const key = formKey(form)
   if (!formsOf(glyph).includes(key)) throw new Error(`${glyph.name} has no ${key} form`)

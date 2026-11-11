@@ -2,7 +2,7 @@ import Link from "next/link"
 import { useTranslations } from "next-intl"
 import { PebbleGlowMd } from "@pbbls/icons"
 import { Card } from "@/components/ui/card"
-import { FAMILY_ICONS } from "@/components/achievements/AchievementBadge"
+import { FAMILY_FORMS, FAMILY_ICONS } from "@/components/achievements/AchievementBadge"
 import type { AchievementFamily } from "@/lib/types"
 
 export type YouBadge = { slug: string; family: AchievementFamily; title: string }
@@ -37,7 +37,7 @@ export function YouAchievementsList({ badges, count }: { badges: readonly YouBad
               <li key={badge.slug}>
                 <Link href="/achievements" className={`block h-full ${FOCUS}`}>
                   <Card className="pb-card h-full items-center gap-2 px-1 pt-4 pb-3">
-                    <Icon className="size-[1.875rem] shrink-0 text-m3-primary" />
+                    <Icon className="size-[1.875rem] shrink-0 text-m3-primary" form={FAMILY_FORMS[badge.family]} />
                     <span className="pb-type-caption line-clamp-2 text-center break-words text-m3-on-surface-variant">{badge.title}</span>
                   </Card>
                 </Link>

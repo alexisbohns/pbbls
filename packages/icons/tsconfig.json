@@ -13,5 +13,5 @@
     "resolveJsonModule": true,
     "types": ["node"]
   },
-  "include": ["scripts/**/*.ts", "react/**/*.ts", "react/**/*.tsx", "vitest.config.ts"]
+  "include": ["scripts/**/*.ts", "react/**/*.ts", "react/**/*.tsx", "runtime/**/*.ts", "runtime/**/*.tsx", "vitest.config.ts"]
 }

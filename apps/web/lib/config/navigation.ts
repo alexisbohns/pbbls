@@ -1,13 +1,18 @@
-import { Collection, Home, Path, People, Person } from "@pbbls/icons"
-import type { PbblsIconComponent } from "@/lib/icons/pbbls-icon"
+import { Collection, Home, Path, People, Person, glyphForm, type Form } from "@pbbls/icons"
+import type { PbblsGlyphComponent } from "@/lib/icons/pbbls-icon"
 
 export type NavItemKey = "home" | "path" | "people" | "collections" | "you"
 
 export type NavItem = {
   key: NavItemKey
   href: string
-  /** Drawn plain: the nav marks the current entry by colour and `aria-current`, never by an `active` twin (spec D11). */
-  icon: PbblsIconComponent
+  /** Drawn regular; the current tab draws its `selected` form (icon forms spec §3), on top of the colour and `aria-current`. */
+  icon: PbblsGlyphComponent
+}
+
+/** The form the current tab draws: the `selected` token's, except People, which keeps its mark lit on the solid (iOS `AppTab.selectedForm`). */
+export function selectedForm(item: NavItem): Form {
+  return item.key === "people" ? { fill: { kind: "solid" }, marked: true } : glyphForm(item.icon, "selected")
 }
 
 /**

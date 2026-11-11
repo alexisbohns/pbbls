@@ -1,21 +1,26 @@
 "use client"
 
-import { Collection, Heart, PebbleGlyphDotted, PebbleGlowMd, People, Stack } from "@pbbls/icons"
-import { PBBLS_ICON_SIZE, type PbblsIconComponent } from "@/lib/icons/pbbls-icon"
+import { Collection, DOTTED, Heart, PebbleGlyph, PebbleGlowMd, People, Stack, type Form } from "@pbbls/icons"
+import { PBBLS_ICON_SIZE, type PbblsGlyphComponent } from "@/lib/icons/pbbls-icon"
 import { useAchievementCopy } from "@/lib/i18n"
 import type { AchievementDisplay, AchievementFamily } from "@/lib/types"
 
 // Same family mapping as the grid's badge; unknown families degrade to the
 // glow so a server ahead of this build can't break the shelf.
-const FAMILY_ICONS: Record<AchievementFamily, PbblsIconComponent> = {
+const FAMILY_ICONS: Record<AchievementFamily, PbblsGlyphComponent> = {
   pebble_count: Stack,
   emotion_first: Heart,
   domain_first: PebbleGlowMd,
   first_collection: Collection,
-  first_glyph: PebbleGlyphDotted,
+  first_glyph: PebbleGlyph,
   first_soul: People,
-  glyph_count: PebbleGlyphDotted,
+  glyph_count: PebbleGlyph,
   glyph_sales: PebbleGlowMd,
+}
+
+const FAMILY_FORMS: Partial<Record<AchievementFamily, Form>> = {
+  first_glyph: DOTTED,
+  glyph_count: DOTTED,
 }
 
 /**
@@ -33,7 +38,7 @@ export function AchievementShelfBadge({ achievement }: { achievement: Achievemen
       title={title}
       className="grid size-9 place-items-center rounded-full bg-primary/10 text-primary"
     >
-      <Icon className={PBBLS_ICON_SIZE.inline} />
+      <Icon className={PBBLS_ICON_SIZE.inline} form={FAMILY_FORMS[achievement.family]} />
       <span className="sr-only">{title}</span>
     </li>
   )

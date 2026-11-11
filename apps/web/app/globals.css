@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@pbbls/icons/glyph.css";
 @import "shadcn/tailwind.css";
 @import "./m3-theme.css";
 

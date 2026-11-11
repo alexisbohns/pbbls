@@ -8,9 +8,11 @@
   "types": "./react/index.ts",
   "exports": {
     ".": "./react/index.ts",
+    "./runtime": "./runtime/public.ts",
     "./icons.json": "./icons.json",
     "./categories.json": "./categories.json",
     "./glyphs.json": "./glyphs/glyphs.json",
+    "./glyph.css": "./runtime/glyph.css",
     "./review.json": "./waves/2026-11-forms/review.json",
     "./verdicts.json": "./waves/2026-11-forms/verdicts.json",
     "./round2.json": "./waves/2026-11-forms/round2.json"

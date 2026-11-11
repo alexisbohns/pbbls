@@ -7,6 +7,6 @@ export default defineConfig({
     // cannot. Nothing here touches the DOM, `process.chdir` or a native addon.
     pool: "threads",
     environment: "node",
-    include: ["scripts/**/*.test.ts"],
+    include: ["scripts/**/*.test.ts", "runtime/**/*.test.{ts,tsx}"],
   },
 })

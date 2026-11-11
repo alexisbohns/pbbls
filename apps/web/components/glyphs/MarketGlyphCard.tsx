@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { Heart, HeartActive } from "@pbbls/icons"
+import { Heart, glyphForm } from "@pbbls/icons"
 import { PBBLS_ICON_SIZE } from "@/lib/icons/pbbls-icon"
 import { cn } from "@/lib/utils"
 import type { MarketGlyph } from "@/lib/types"
@@ -37,11 +37,11 @@ export function MarketGlyphCard({ glyph, onBuy, onFavourite }: MarketGlyphCardPr
         aria-pressed={glyph.favourited}
         className="rounded-full p-2 text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        {glyph.favourited ? (
-          <HeartActive className={cn(PBBLS_ICON_SIZE.inline, "text-rose-500")} />
-        ) : (
-          <Heart className={PBBLS_ICON_SIZE.inline} />
-        )}
+        <Heart
+          className={cn(PBBLS_ICON_SIZE.inline, glyph.favourited && "text-rose-500")}
+          form={glyph.favourited ? glyphForm(Heart, "selected") : undefined}
+          animate
+        />
       </button>
 
       {glyph.owned ? (

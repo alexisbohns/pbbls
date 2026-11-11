@@ -4,12 +4,9 @@ import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { describeFlag, flaggedPaths, firstReview, formChoices, reviewFlags, type Glyph, type GlyphPath } from "@/lib/design/glyph-forms"
-import { ICON_ROWS, type IconRow } from "@/lib/design/icon-catalog"
 import { VERDICTS, VERDICT_KEYS, verdictLabel, type Verdict } from "@/lib/design/useReviewVerdicts"
 import { cn } from "@/lib/utils"
 import { GlyphFormView } from "./GlyphFormView"
-
-const ROWS: ReadonlyMap<string, IconRow> = new Map(ICON_ROWS.map((row) => [row.name, row]))
 
 /** The key that sets a verdict, as the footer prints it. */
 function keyCap(v: Verdict): string {
@@ -108,8 +105,8 @@ type GlyphReviewDialogProps = {
 /**
  * One glyph laid out for review: what the role pass flagged, every form the
  * generator works out (the forms grid lists every fill with and without the
- * mark, every part combination and the dotted drawing) next to the twins drawn
- * by hand today, and the roles path by path. One key judges the glyph and moves
+ * mark, every part combination and the dotted drawing), drawn as the components
+ * draw them, and the roles path by path. One key judges the glyph and moves
  * on (Space ok, P, S, M, D, I; F asks for a comment, Enter saves it and moves
  * on); ← → walk the list.
  */
@@ -143,7 +140,6 @@ export function GlyphReviewDialog({ glyph, position, verdict, onVerdict, note, o
     focusContent()
   }
 
-  const row = glyph ? ROWS.get(glyph.name) : undefined
   const flags = glyph ? reviewFlags(glyph.name) : []
   const first = glyph ? firstReview(glyph.name) : null
 
@@ -241,26 +237,6 @@ export function GlyphReviewDialog({ glyph, position, verdict, onVerdict, note, o
                   ))}
                 </div>
               </section>
-
-              {row && row.twins.length > 0 && (
-                <section className="flex flex-col gap-2">
-                  <h3 className="text-sm font-medium">Twins, drawn by hand today</h3>
-                  <div className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-2">
-                    {row.Icon && (
-                      <Cell label="base">
-                        <row.Icon className="size-16" />
-                      </Cell>
-                    )}
-                    {row.twins.map((twin) =>
-                      twin.Icon ? (
-                        <Cell key={twin.variant} label={twin.variant}>
-                          <twin.Icon className="size-16" />
-                        </Cell>
-                      ) : null,
-                    )}
-                  </div>
-                </section>
-              )}
 
               <section className="flex flex-col gap-2">
                 <h3 className="text-sm font-medium">Roles, path by path</h3>
