@@ -26,7 +26,10 @@ export interface IconRow {
   readonly replacesWeb: readonly string[]
 }
 
-const COMPONENTS: ReadonlyMap<string, PbblsIconComponent> = new Map(Object.entries(PbblsIcons))
+/** The package also exports the form constants and `glyphForm`; the components are the PascalCase functions. */
+const isComponentEntry = (entry: [string, unknown]): entry is [string, PbblsIconComponent] => /^[A-Z]/.test(entry[0]) && typeof entry[1] === "function"
+
+const COMPONENTS: ReadonlyMap<string, PbblsIconComponent> = new Map(Object.entries<unknown>(PbblsIcons).filter(isComponentEntry))
 
 /** `check-circle-dot` → `CheckCircleDot`, `path` + `lit-1` → `PathLit1`: the generator's naming. */
 export function componentName(name: string, variant?: string): string {

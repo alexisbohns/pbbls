@@ -3,6 +3,7 @@ import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 import type { GlyphData, RenderedPath } from "../scripts/lib/forms"
 import { formsOf, parseFormKey } from "../scripts/lib/forms"
+import { People, Stack, glyphForm, STATES } from "../react"
 import { DOTTED, MARKED, REGULAR, SOLID, drawForm, formKey, progress, resolveWith } from "./forms"
 
 const ROOT = join(__dirname, "..")
@@ -47,5 +48,16 @@ describe("the runtime against the forms contract", () => {
       { fill: { kind: "dotted" } },
       { fill: { kind: "progress", k: 2 } },
     ])
+  })
+})
+
+describe("glyphForm on the generated components", () => {
+  it("resolves a state against the glyph's own forms", () => {
+    expect(glyphForm(Stack, "done")).toEqual(progress(3))
+    expect(glyphForm(People, "selected")).toEqual(SOLID)
+  })
+
+  it("carries the generator's state table", () => {
+    expect(STATES).toEqual(data.states)
   })
 })

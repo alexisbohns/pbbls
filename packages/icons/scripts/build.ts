@@ -23,7 +23,7 @@ export const REPO_ROOT = fileURLToPath(new URL("../../..", import.meta.url))
 export const PACKAGE_ROOT = fileURLToPath(new URL("..", import.meta.url))
 
 /** Every surface the generator emits, in the order they are written. */
-const EMITTERS: readonly Emitter[] = [reactEmitter, iosEmitter, androidEmitter, glyphsEmitter(PACKAGE_ROOT), iosGlyphsEmitter(PACKAGE_ROOT)]
+const EMITTERS: readonly Emitter[] = [reactEmitter(PACKAGE_ROOT), iosEmitter, androidEmitter, glyphsEmitter(PACKAGE_ROOT), iosGlyphsEmitter(PACKAGE_ROOT)]
 
 const FIX = "run npm run generate --workspace=@pbbls/icons and commit the result"
 

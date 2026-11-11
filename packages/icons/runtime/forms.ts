@@ -4,7 +4,7 @@
  * does on iOS and Android. Browser-safe: nothing here reads a file.
  */
 import { formKey, renderForm, type Form, type GlyphForms, type RenderedPath } from "../scripts/lib/forms"
-import { resolveState, type StateTable } from "../scripts/lib/resolve-state"
+import { resolveState, type ReadonlyStateTable } from "../scripts/lib/resolve-state"
 
 export type { Form, GlyphForms, RenderedPath }
 
@@ -24,7 +24,7 @@ export function drawForm(glyph: GlyphForms, form: Form): RenderedPath[] {
 }
 
 /** The form `state` shows on a glyph with these form keys, against a state table; an unknown state shows regular. */
-export function resolveWith(table: StateTable, forms: readonly string[], state: string, k = 0): Form {
+export function resolveWith(table: ReadonlyStateTable, forms: readonly string[], state: string, k = 0): Form {
   return table[state] ? resolveState(table, forms, state, k) : REGULAR
 }
 
