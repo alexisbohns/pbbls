@@ -17,6 +17,8 @@ struct InviteAcceptSheet: View {
     @State private var isAccepting = false
     @State private var acceptError: String?
     @State private var accepted: AcceptInviteResult?
+    @State private var isReporting = false
+    @State private var didReport = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "connections-accept")
 
@@ -32,6 +34,15 @@ struct InviteAcceptSheet: View {
                 .pebblesScreen()
         }
         .task { await load() }
+        .sheet(isPresented: $isReporting, onDismiss: {
+            guard didReport else { return }
+            connections.pendingInviteToken = nil
+            dismiss()
+        }, content: {
+            ReportSheet(target: .invite(token: token, name: preview?.inviter?.displayName)) { _ in
+                didReport = true
+            }
+        })
     }
 
     @ViewBuilder
@@ -92,6 +103,11 @@ struct InviteAcceptSheet: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(isAccepting)
+
+                Button("Report") { isReporting = true }
+                    .font(.footnote)
+                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                    .disabled(isAccepting)
             }
         } else {
             // Expired, revoked and unknown tokens share one outward state — a

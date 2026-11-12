@@ -20,6 +20,7 @@ struct GlyphDetailDrawer: View {
     @State private var currentBalance: Int
     @State private var isBuying = false
     @State private var errorText: String?
+    @State private var isReporting = false
     @State private var feedback = GlyphSwapFeedback()
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "glyph-detail")
@@ -69,6 +70,12 @@ struct GlyphDetailDrawer: View {
                     if let errorText {
                         Text(errorText).font(.footnote).foregroundStyle(Color.pebbles.error)
                     }
+
+                    if item.price > 0 && !isOwned {
+                        Button("Report this glyph") { isReporting = true }
+                            .font(.footnote)
+                            .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                    }
                 }
                 .padding(Spacing.lg)
                 .frame(maxWidth: .infinity)
@@ -80,6 +87,9 @@ struct GlyphDetailDrawer: View {
                 }
             }
             .pebblesScreen()
+            .sheet(isPresented: $isReporting) {
+                ReportSheet(target: .glyph(item.glyph.id))
+            }
         }
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
