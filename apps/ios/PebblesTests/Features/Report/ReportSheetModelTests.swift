@@ -27,14 +27,15 @@ struct ReportSheetModelTests {
         #expect(!model.didBlock)
     }
 
-    @Test func aDuplicateIsStillASuccess() async {
+    @Test func aRetryAfterFailureLandsInSent() async {
         let model = ReportSheetModel(target: .invite(token: "t", name: nil))
         model.reason = .spam
+        await model.submit { _, _, _, _ in
+            throw NSError(domain: "t", code: 0, userInfo: [NSLocalizedDescriptionKey: "timeout"])
+        }
+        #expect(model.phase == .failed(ReportError.other("timeout").message))
         await model.submit { _, _, _, _ in receipt }
-        let again = ReportSheetModel(target: .invite(token: "t", name: nil))
-        again.reason = .spam
-        await again.submit { _, _, _, _ in receipt }   // the server returns the standing report
-        #expect(again.phase == .sent)
+        #expect(model.phase == .sent)
     }
 
     @Test func passesTrimmedDetailOrNil() async {

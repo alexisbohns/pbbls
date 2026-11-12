@@ -47,6 +47,7 @@ struct ReportSheet: View {
                 PebbleToolbarButton(action: send) {
                     if model.phase == .sending {
                         ProgressView()
+                            .accessibilityLabel(Text("Sending"))
                     } else {
                         Text("Send report")
                     }
@@ -85,6 +86,7 @@ struct ReportSheet: View {
                             Spacer(minLength: 0)
                             if model.reason == reason {
                                 Image(systemName: "checkmark")
+                                    .accessibilityHidden(true)
                                     .foregroundStyle(Color.pebbles.primary)
                             }
                         }

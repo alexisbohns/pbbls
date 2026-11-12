@@ -21,8 +21,9 @@ struct ReportModelsTests {
     @Test func receiptDecodesTheHarnessPayload() throws {
         let data = try Data(contentsOf: Self.fixtures.appendingPathComponent("report-person-receipt.json"))
         let receipt = try JSONDecoder().decode(ReportReceipt.self, from: data)
+        #expect(receipt.id == UUID(uuidString: "8ce2b8e9-1a29-456c-86a1-eb0d3b27c10a"))
         #expect(receipt.status == "open")
-        #expect(receipt.createdAt.timeIntervalSince1970 > 1_700_000_000)
+        #expect(receipt.createdAt == Date(timeIntervalSince1970: 1_794_516_883))   // 2026-11-12T20:54:43Z
     }
 
     @Test func receiptAcceptsFractionalSeconds() throws {
