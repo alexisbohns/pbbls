@@ -1987,3 +1987,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** `half` is `marked` in `states.json` and every API; the native data carries parts and steps; merged glyphs (`pebble-glyph-dotted` into `pebble-glyph`, `palette-1` and `palette-3` into `palette`) go through `replaces`.
 - **Supersedes / Superseded-by:** amends the 2026-11-08 entry above (its roles and its "dotted is never a form").
 - **Refs:** #1607, `docs/superpowers/specs/2026-11-08-icon-forms-design.md`.
+
+## 2026-11-12 — V1 ships with no crash SDK: store crash reports and a weekly triage
+
+- **Status:** taken
+- **Scope:** all
+- **Context:** No surface sends crashes or errors anywhere, which Kritik counts as a high on web, iOS and Android. The options were Sentry on all three, the platforms' own crash reports plus a written triage routine, or a first-party sink in Supabase. Sentry or a sink would change both store declarations and bump the privacy policy, which asks everyone to consent again, three weeks before launch and a week after 1.5.0.
+- **Decision:** V1 adds no crash or error SDK. iOS and Android crashes are read where the platforms already put them: Xcode Organizer (Release builds produce dSYMs, so Xcode Cloud uploads are symbolicated) and Play Console's Android vitals (the R8 mapping already reaches the Console). Server errors are read in the Vercel runtime logs and the Supabase logs. Every Monday the maintainer checks all four and files a `fix` issue for anything new; the routine lives in the launch doc's Store runbook. The first-party sink is #1622, started when the Instagram ad test begins or when a failure cannot be explained from these sources.
+- **Why:** The launch audience is relatives and the WhatsApp community, who also report problems by mail. Apple does not ask developers to disclose what Apple collects, and Play counts only what the app's own code or SDKs send off the device, so the declarations, the privacy policy and the DPIA stay as they are. A third-party SDK would add a processor receiving crash context from a health-data app.
+- **Consequences:** Crashes are seen only from users who opted in to sharing diagnostics. Errors the apps catch and show, and browser errors on web, are not seen at all until #1622. "Crash logs: not collected" stays true on Play and in the iOS manifest; any client code that sends errors off the device reverses it and needs the full data-safety change (CSV, manifest, `/docs/data-safety`, privacy policy).
+- **Supersedes / Superseded-by:** none.
+- **Refs:** #1525, #1622.
