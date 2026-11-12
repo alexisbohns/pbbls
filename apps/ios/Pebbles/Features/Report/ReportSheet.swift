@@ -85,9 +85,8 @@ struct ReportSheet: View {
                                 .foregroundStyle(Color.pebbles.onSurface)
                             Spacer(minLength: 0)
                             if model.reason == reason {
-                                Image(systemName: "checkmark")
+                                PbblsGlyphView(.checkmarkDot, .row, style: AnyShapeStyle(Color.pebbles.primary))
                                     .accessibilityHidden(true)
-                                    .foregroundStyle(Color.pebbles.primary)
                             }
                         }
                         .contentShape(Rectangle())
