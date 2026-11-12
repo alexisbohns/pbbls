@@ -50,7 +50,7 @@ screenshotValidationApi = { strictly = "0.0.1-alpha17" }
 # Entry funnel (sub-project C). supabase-kt is the auth/data client; it needs a
 # Ktor engine on the classpath — supabase-kt 3.1.4 is built against Ktor 3.1.2,
 # so the OkHttp engine is pinned to the same version to avoid Ktor version skew.
-supabase = "3.8.0"
+supabase = "3.9.0"
 ktor = "3.6.1"
 kotlinxSerializationJson = "1.12.0"
 # Custom Tabs — the in-app-browser analog of iOS SFSafariViewController, used
