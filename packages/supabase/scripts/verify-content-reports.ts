@@ -43,6 +43,8 @@
  *   - the positive admin path (queue read, takedown dispatch)
  *   - report_person's hidden-inviter gate: hiding a profile needs an admin
  *     (proven on a local Postgres when the migration was written)
+ *   - report_person's expired-invite gate: forcing expires_at into the past
+ *     needs the service role (also proven on the local Postgres)
  */
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -435,6 +437,10 @@ try {
   const { data: accepted2, error: accept2Err } = await s.rpc("accept_connection_invite", { p_token: token2 });
   const connection2 = (accepted2 as { connection_id?: string } | null)?.connection_id;
   if (accept2Err || !connection2) throw new Error(`stranger accept: ${accept2Err?.message ?? "no id"}`);
+  // Positive control: before the block, the same token files fine, so the
+  // not_found below can only come from the block gate.
+  const { error: beforeBlockErr } = await s.rpc("report_person", { p_reason: "spam", p_invite_token: token2 });
+  check("the stranger can report through the live invite before any block", !beforeBlockErr, beforeBlockErr?.message);
   const { error: removeErr } = await p.rpc("remove_connection", { p_connection_id: connection2, p_block: true });
   if (removeErr) throw new Error(`peer blocks stranger: ${removeErr.message}`);
   const { error: blockedCallerErr } = await s.rpc("report_person", { p_reason: "spam", p_invite_token: token2 });

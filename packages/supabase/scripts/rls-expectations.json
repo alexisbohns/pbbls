@@ -1683,7 +1683,7 @@
       "intact": [
         "connections"
       ],
-      "note": "Takes a connection id; a stranger passing the owner's connection is refused not_found, nothing is filed and the connection is untouched."
+      "note": "Takes a connection id; a stranger passing the owner's connection is refused not_found and the connection is untouched."
     },
     "public.resolve_content_report": {
       "kind": "admin-only",
