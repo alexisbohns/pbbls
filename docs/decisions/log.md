@@ -1998,3 +1998,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** Crashes are seen only from users who opted in to sharing diagnostics. Errors the apps catch and show, and browser errors on web, are not seen at all until #1622. "Crash logs: not collected" stays true on Play and in the iOS manifest; any client code that sends errors off the device reverses it and needs the full data-safety change (CSV, manifest, `/docs/data-safety`, privacy policy).
 - **Supersedes / Superseded-by:** none.
 - **Refs:** #1525, #1622.
+
+## 2026-11-12 — A person is reported through report_person, never by user id
+
+- **Status:** taken
+- **Scope:** all
+- **Context:** `report_content`'s `profile` branch takes the person's user id and requires a public profile. Connections and invite previews never hand a client a user id (standing rule), so a connected person or an inviter with a private profile could not be reported (#1008), and iOS needs reporting for App Store guideline 1.2 (#838).
+- **Decision:** `report_person(p_reason, p_detail, p_connection_id | p_invite_token, p_remove_and_block)` resolves the person on the server from the route the reporter met them by and files an ordinary `profile` report, with `via` in the snapshot. `report_content` is unchanged and still files glyph and moment reports. No new target kind.
+- **Why:** The admin queue, `admin_set_content_hidden('profile', …)` and the one-open-report index work as they are, and `report_content` is not re-emitted.
+- **Consequences:** Android (#839) and web (#840) report people through `report_person`. A person reported from their invite and again after connecting is one open report. Remove-and-block calls `remove_connection(id, true)` in the same transaction; it is called, never re-emitted.
+- **Supersedes / Superseded-by:** none.
+- **Refs:** #838, #1008, `docs/superpowers/specs/2026-11-12-report-person-design.md`.
