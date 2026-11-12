@@ -72,6 +72,8 @@ CI gates worth knowing about: `arkaik.yml` validates the legacy bundle + journal
 
 Status is part of the change: move an acceptance or view to `development` (`update_node`) when you pick the work up. The Arkaik GitHub App marks `development` at PR-open and `releasing` at merge; a production web deploy marks the web acceptances its PRs named `live` (`mark-live.yml`), and nothing does that for iOS or Android yet, so never set `live` yourself — leave it at `releasing`. Full rules and rationale: the `arkaik` skill, "Hosted map rules for pbbls".
 
+A new view or flow carries `metadata.product`, set to `app` or, for the back office, `admin`. Without it, the node drops out of every product-scoped view. Details: the same skill section, "Every view and flow names its product".
+
 ## Standing cross-surface rules
 
 The database is the contract between four clients. These are hardened rules promoted from `docs/decisions/log.md` — breaking one is a regression, not a style choice.
