@@ -11,6 +11,7 @@ struct ConnectionsListView: View {
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var pendingRemoval: Connection?
+    @State private var reporting: Connection?
     @State private var removeError: String?
     @State private var isPresentingInvite = false
 
@@ -31,6 +32,12 @@ struct ConnectionsListView: View {
             .task { await load() }
             .sheet(isPresented: $isPresentingInvite) {
                 InviteSheet()
+            }
+            .sheet(item: $reporting) { row in
+                ReportSheet(target: .connection(id: row.connectionId, name: row.peer.displayName)) { blocked in
+                    // The server already removed it in the same transaction.
+                    if blocked { rows.removeAll { $0.id == row.id } }
+                }
             }
             .confirmationDialog(
                 pendingRemoval.map { removalTitle(for: $0) } ?? "",
@@ -90,6 +97,9 @@ struct ConnectionsListView: View {
                     ConnectionRow(connection: row)
                         .pebblesListRow(position: pebblesRowPosition(index: index, count: rows.count))
                         .pebblesContextMenu([
+                            PebblesMenuItem(title: "Report", icon: .circleDotExclamation) {
+                                reporting = row
+                            },
                             PebblesMenuItem(title: "Remove", icon: .remove, isDestructive: true) {
                                 pendingRemoval = row
                             }
