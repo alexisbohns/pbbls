@@ -37,9 +37,12 @@ final class ReportSheetModel {
         reason != nil && phase != .sending && phase != .sent
     }
 
+    /// Caps `detail` at `detailLimit` code points, not grapheme clusters: the
+    /// server CHECK is Postgres `length(detail) <= 1000`, which counts code
+    /// points, so a family emoji (one character, five scalars) must count five.
     func clampDetail() {
-        if detail.count > Self.detailLimit {
-            detail = String(detail.prefix(Self.detailLimit))
+        if detail.unicodeScalars.count > Self.detailLimit {
+            detail = String(String.UnicodeScalarView(detail.unicodeScalars.prefix(Self.detailLimit)))
         }
     }
 

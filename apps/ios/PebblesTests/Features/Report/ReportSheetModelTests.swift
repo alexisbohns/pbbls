@@ -92,6 +92,21 @@ struct ReportSheetModelTests {
         let model = ReportSheetModel(target: .glyph(UUID()))
         model.detail = String(repeating: "x", count: 1_200)
         model.clampDetail()
-        #expect(model.detail.count == ReportSheetModel.detailLimit)
+        #expect(model.detail.unicodeScalars.count == ReportSheetModel.detailLimit)
+    }
+
+    @Test func detailIsMeasuredInCodePointsLikePostgres() {
+        // One family emoji is one grapheme but five scalars: 200 of them are exactly 1,000 scalars.
+        let family = "👨‍👩‍👧"
+        let model = ReportSheetModel(target: .glyph(UUID()))
+        model.detail = String(repeating: family, count: 200)
+        #expect(model.detail.count == 200)
+        #expect(model.detail.unicodeScalars.count == ReportSheetModel.detailLimit)
+        model.clampDetail()
+        #expect(model.detail == String(repeating: family, count: 200))
+
+        model.detail += family
+        model.clampDetail()
+        #expect(model.detail.unicodeScalars.count <= ReportSheetModel.detailLimit)
     }
 }
