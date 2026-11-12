@@ -2998,6 +2998,16 @@ export type Database = {
         }
         Returns: Json
       }
+      report_person: {
+        Args: {
+          p_connection_id?: string
+          p_detail?: string
+          p_invite_token?: string
+          p_reason: string
+          p_remove_and_block?: boolean
+        }
+        Returns: Json
+      }
       resolve_content_report: {
         Args: { p_note?: string; p_outcome: string; p_report_id: string }
         Returns: Json

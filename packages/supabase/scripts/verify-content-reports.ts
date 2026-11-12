@@ -41,6 +41,10 @@
  *     approves it, and this harness cannot mint an admin past
  *     profiles_privileged_guard (20260902090000)
  *   - the positive admin path (queue read, takedown dispatch)
+ *   - report_person's hidden-inviter gate: hiding a profile needs an admin
+ *     (proven on a local Postgres when the migration was written)
+ *   - report_person's expired-invite gate: forcing expires_at into the past
+ *     needs the service role (also proven on the local Postgres)
  */
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -113,6 +117,8 @@ async function createPebble(
 
 let owner: TestUser | null = null;
 let reporter: TestUser | null = null;
+let peer: TestUser | null = null;
+let stranger: TestUser | null = null;
 
 try {
   owner = await signUp("owner");
@@ -334,13 +340,119 @@ try {
   });
   check("a non-admin cannot resolve a report",
     !!resolveErr && resolveErr.message.includes("not_admin"), resolveErr?.message);
+
+  // ---------------------------------------------------------------------------
+  // 7. report_person (#1008): a person reached through a connection or an
+  //    invite, filed by ROUTE, never by user id. The peer's profile stays
+  //    private: that is exactly the case report_content's 'profile' branch
+  //    cannot reach. The reporter here is `reporter`, the person is `peer`.
+  // ---------------------------------------------------------------------------
+  peer = await signUp("peer");
+  stranger = await signUp("stranger");
+  const p = peer.client;
+  const s = stranger.client;
+
+  const { data: invite, error: inviteErr } = await p.rpc("create_connection_invite", { p_rotate: false });
+  const token = (invite as { token?: string } | null)?.token;
+  if (inviteErr || !token) throw new Error(`create_connection_invite: ${inviteErr?.message ?? "no token"}`);
+
+  const { data: viaInvite, error: viaInviteErr } = await r.rpc("report_person", {
+    p_reason: "spam", p_invite_token: token,
+  });
+  const viaInviteRow = viaInvite as { id?: string; status?: string; created_at?: string } | null;
+  check("an inviter is reportable through a live invite",
+    !viaInviteErr && !!viaInviteRow?.id && viaInviteRow?.status === "open", viaInviteErr?.message);
+  check("report_person emits whole-second UTC created_at",
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(viaInviteRow?.created_at ?? ""), viaInviteRow?.created_at);
+  check("report_person returns id, status and created_at only",
+    JSON.stringify(Object.keys(viaInviteRow ?? {}).sort()) === JSON.stringify(["created_at", "id", "status"]),
+    JSON.stringify(viaInviteRow));
+  // Verbatim payload for the iOS decoding test (packages/supabase/fixtures/report-person-receipt.json).
+  console.log(`report_person receipt: ${JSON.stringify(viaInvite)}`);
+
+  const { error: ownInviteErr } = await p.rpc("report_person", { p_reason: "spam", p_invite_token: token });
+  check("an inviter cannot report through their own invite",
+    !!ownInviteErr && ownInviteErr.message.includes("cannot_report_own"), ownInviteErr?.message);
+
+  const { data: accepted, error: acceptErr } = await r.rpc("accept_connection_invite", { p_token: token });
+  const connectionId = (accepted as { connection_id?: string } | null)?.connection_id;
+  if (acceptErr || !connectionId) throw new Error(`accept_connection_invite: ${acceptErr?.message ?? "no id"}`);
+
+  const { data: viaConn, error: viaConnErr } = await r.rpc("report_person", {
+    p_reason: "harassment", p_detail: "verify run", p_connection_id: connectionId,
+  });
+  check("a connected peer with a private profile is reportable",
+    !viaConnErr && !!(viaConn as { id?: string } | null)?.id, viaConnErr?.message);
+  check("the invite report and the connection report are one standing report",
+    (viaConn as { id?: string } | null)?.id === viaInviteRow?.id, JSON.stringify(viaConn));
+
+  const { error: nonPartyErr } = await s.rpc("report_person", { p_reason: "spam", p_connection_id: connectionId });
+  check("a non-party cannot report through someone else's connection",
+    !!nonPartyErr && nonPartyErr.message.includes("not_found"), nonPartyErr?.message);
+  const { error: ghostConnErr } = await r.rpc("report_person", {
+    p_reason: "spam", p_connection_id: crypto.randomUUID(),
+  });
+  check("a foreign connection and a nonexistent one fail identically",
+    !!ghostConnErr && ghostConnErr.message === nonPartyErr?.message,
+    `foreign="${nonPartyErr?.message}" ghost="${ghostConnErr?.message}"`);
+
+  const { error: bothErr } = await r.rpc("report_person", {
+    p_reason: "spam", p_connection_id: connectionId, p_invite_token: token,
+  });
+  check("two routes at once are refused", !!bothErr && bothErr.message.includes("invalid_kind"), bothErr?.message);
+  const { error: neitherErr } = await r.rpc("report_person", { p_reason: "spam" });
+  check("no route is refused", !!neitherErr && neitherErr.message.includes("invalid_kind"), neitherErr?.message);
+  const { error: badReasonErr } = await r.rpc("report_person", { p_reason: "vibes", p_connection_id: connectionId });
+  check("an unknown reason is refused by report_person",
+    !!badReasonErr && badReasonErr.message.includes("invalid_reason"), badReasonErr?.message);
+
+  // Rotating revokes the first token: it goes dark exactly like an unknown one.
+  const { data: rotated, error: rotateErr } = await p.rpc("create_connection_invite", { p_rotate: true });
+  const token2 = (rotated as { token?: string } | null)?.token;
+  if (rotateErr || !token2) throw new Error(`rotate invite: ${rotateErr?.message ?? "no token"}`);
+  const { error: revokedErr } = await s.rpc("report_person", { p_reason: "spam", p_invite_token: token });
+  check("a revoked invite is not reportable",
+    !!revokedErr && revokedErr.message.includes("not_found"), revokedErr?.message);
+  const { error: ghostTokenErr } = await s.rpc("report_person", {
+    p_reason: "spam", p_invite_token: `no-such-${runId}`,
+  });
+  check("a revoked token and an unknown one fail identically",
+    !!ghostTokenErr && ghostTokenErr.message === revokedErr?.message,
+    `revoked="${revokedErr?.message}" ghost="${ghostTokenErr?.message}"`);
+
+  // Report and block in one call: the connection goes, the reporter's block
+  // row appears (connection_blocks is readable by the blocker only).
+  const { data: blockedReport, error: blockErr } = await r.rpc("report_person", {
+    p_reason: "harassment", p_connection_id: connectionId, p_remove_and_block: true,
+  });
+  check("report with remove-and-block returns the standing report",
+    !blockErr && (blockedReport as { id?: string } | null)?.id === viaInviteRow?.id,
+    blockErr ? blockErr.message : JSON.stringify(blockedReport));
+  const { data: leftover } = await r.from("connections").select("id").eq("id", connectionId);
+  check("the connection is gone after remove-and-block", (leftover?.length ?? -1) === 0, `rows=${leftover?.length}`);
+  const { data: blocks } = await r.from("connection_blocks").select("blocked_id").eq("blocked_id", peer.id);
+  check("the reporter now blocks the peer", (blocks?.length ?? 0) === 1, `rows=${blocks?.length}`);
+
+  // An inviter who has blocked the caller: their invite is dark to that caller.
+  const { data: accepted2, error: accept2Err } = await s.rpc("accept_connection_invite", { p_token: token2 });
+  const connection2 = (accepted2 as { connection_id?: string } | null)?.connection_id;
+  if (accept2Err || !connection2) throw new Error(`stranger accept: ${accept2Err?.message ?? "no id"}`);
+  // Positive control: before the block, the same token files fine, so the
+  // not_found below can only come from the block gate.
+  const { error: beforeBlockErr } = await s.rpc("report_person", { p_reason: "spam", p_invite_token: token2 });
+  check("the stranger can report through the live invite before any block", !beforeBlockErr, beforeBlockErr?.message);
+  const { error: removeErr } = await p.rpc("remove_connection", { p_connection_id: connection2, p_block: true });
+  if (removeErr) throw new Error(`peer blocks stranger: ${removeErr.message}`);
+  const { error: blockedCallerErr } = await s.rpc("report_person", { p_reason: "spam", p_invite_token: token2 });
+  check("an inviter who blocked the caller is not reportable through their invite",
+    !!blockedCallerErr && blockedCallerErr.message.includes("not_found"), blockedCallerErr?.message);
 } catch (err) {
   failed += 1;
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);
 } finally {
   // Deleting the owner purges every report filed against them; deleting the
   // reporter detaches whatever is left. Teardown is therefore total.
-  for (const u of [reporter, owner]) {
+  for (const u of [reporter, owner, peer, stranger]) {
     if (!u) continue;
     try {
       const res = await deleteAccount(u.token);
