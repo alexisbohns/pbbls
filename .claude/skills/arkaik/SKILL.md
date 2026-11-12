@@ -489,3 +489,23 @@ Nothing does it for **iOS or Android** yet
 ([arkaik#424](https://github.com/alexisbohns/arkaik/issues/424)). Either way,
 leave acceptances at `releasing` rather than claiming a release that has not
 happened.
+
+### Every view and flow names its product
+
+The hosted project declares two products (since 2026-11-12):
+
+| id | title | platforms | what belongs |
+|---|---|---|---|
+| `app` | Pebbles | web, ios, android | everything people use to record pebbles |
+| `admin` | Admin | web | the back office: every `V-admin-*` / `F-admin-*` |
+
+A **view or flow you create must carry `metadata.product`** (`"app"` or
+`"admin"`). Without it the node is unassigned: it shows under "All products"
+only and disappears the moment someone scopes to a product. An **acceptance**
+inherits its product from the views and flows it covers, so set it only on an
+acceptance that covers nothing yet. Data models and endpoints never carry one,
+because Arkaik derives theirs.
+
+`update_node` replaces `metadata` wholesale. When you add `product` to an
+existing node, `get_node` first and send the whole object back, or you wipe
+its `platformStatuses`, screenshots and gherkin.
