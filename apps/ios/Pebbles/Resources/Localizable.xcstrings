@@ -4046,6 +4046,78 @@
         }
       }
     },
+    "consent.gate.delete.button" : {
+      "comment" : "Consent gate: deletes the account without accepting anything",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete my account"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer mon compte"
+          }
+        }
+      }
+    },
+    "consent.gate.delete.failure" : {
+      "comment" : "Consent gate: deletion failed, nothing removed",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't delete your account. Nothing was removed. Please try again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de supprimer ton compte. Rien n'a été supprimé. Réessaie."
+          }
+        }
+      }
+    },
+    "consent.gate.delete.message" : {
+      "comment" : "Consent gate: deletion confirmation message",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You don't have to accept anything above to do this. It permanently deletes your account and everything in it: pebbles, snaps, souls, collections, glyphs and karma. Glyphs other pebblers bought stay available to them, without your name attached. This cannot be undone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu n'as rien à accepter ci-dessus pour le faire. Ton compte et tout ce qu'il contient seront supprimés définitivement : galets, photos, âmes, collections, glyphes et karma. Les glyphes achetés par d'autres personnes restent disponibles pour elles, sans ton nom. Cette action est irréversible."
+          }
+        }
+      }
+    },
+    "consent.gate.delete.title" : {
+      "comment" : "Consent gate: deletion confirmation title",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete your account?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer ton compte ?"
+          }
+        }
+      }
+    },
     "day" : {
       "extractionState" : "manual",
       "localizations" : {

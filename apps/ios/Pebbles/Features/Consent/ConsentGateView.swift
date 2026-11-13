@@ -6,12 +6,15 @@ import SwiftUI
 /// An opaque layer that swallows every touch aimed at the app beneath it. It
 /// asks only for the missing kinds, and never offers to withdraw anything:
 /// `terms`, `privacy` and `age_assurance` are non-withdrawable, and
-/// `health_data` is withdrawn from Settings, never here. Declining is Log out.
+/// `health_data` is withdrawn from Settings, never here. Declining is Log out,
+/// or Delete my account (#1533, Android #1030): erasure must not require
+/// accepting anything first.
 struct ConsentGateView: View {
     let model: ConsentGateModel
     let onSignOut: () -> Void
 
     @State private var presentedLegalDoc: LegalDoc?
+    @State private var deletion = AccountDeletion()
 
     var body: some View {
         ZStack {
@@ -34,6 +37,7 @@ struct ConsentGateView: View {
                     Button { model.retry() } label: { Text("Try again") }
                         .buttonStyle(PebblesPrimaryButtonStyle(isLoading: false))
                     signOutButton
+                    deleteAccountButton
                 }
             case .required(let form):
                 column {
@@ -59,6 +63,7 @@ struct ConsentGateView: View {
                         .buttonStyle(PebblesPrimaryButtonStyle(isLoading: form.isSubmitting))
                         .disabled(!form.canContinue)
                     signOutButton
+                    deleteAccountButton
                 }
             }
         }
@@ -67,6 +72,13 @@ struct ConsentGateView: View {
             LegalDocumentSheet(url: doc.url)
                 .ignoresSafeArea()
         }
+        // A successful deletion signs out, and RootView drops the gate with the session.
+        .accountDeletion(
+            deletion,
+            title: ConsentGateStrings.deleteTitle,
+            message: ConsentGateStrings.deleteMessage,
+            failure: ConsentGateStrings.deleteFailure
+        )
     }
 
     private func column(@ViewBuilder _ content: () -> some View) -> some View {
@@ -87,6 +99,22 @@ struct ConsentGateView: View {
             .foregroundStyle(Color.pebbles.primary)
             .frame(maxWidth: .infinity)
             .frame(minHeight: 44)
+    }
+
+    private var deleteAccountButton: some View {
+        Button { deletion.begin() } label: {
+            if deletion.isBusy {
+                ProgressView()
+                    .tint(Color.pebbles.error)
+            } else {
+                Text(ConsentGateStrings.deleteButton)
+            }
+        }
+        .font(.body.weight(.medium))
+        .foregroundStyle(Color.pebbles.error)
+        .frame(maxWidth: .infinity)
+        .frame(minHeight: 44)
+        .disabled(deletion.isBusy)
     }
 
     @ViewBuilder
@@ -118,4 +146,25 @@ struct ConsentGateView: View {
             PebblesCheckbox(isChecked: binding, label: "I am 16 years old or over.")
         }
     }
+}
+
+/// The gate's deletion copy (#1533). Dotted keys because Settings asks the same
+/// English questions in French with "vous", and the gate speaks "tu" (Android
+/// `consent_gate_delete_*`, verbatim).
+enum ConsentGateStrings {
+    static let deleteButton = LocalizedStringResource(
+        "consent.gate.delete.button", defaultValue: "Delete my account",
+        comment: "Consent gate: deletes the account without accepting anything")
+    static let deleteTitle = LocalizedStringResource(
+        "consent.gate.delete.title", defaultValue: "Delete your account?",
+        comment: "Consent gate: deletion confirmation title")
+    static let deleteMessage = LocalizedStringResource(
+        "consent.gate.delete.message",
+        // swiftlint:disable:next line_length
+        defaultValue: "You don't have to accept anything above to do this. It permanently deletes your account and everything in it: pebbles, snaps, souls, collections, glyphs and karma. Glyphs other pebblers bought stay available to them, without your name attached. This cannot be undone.",
+        comment: "Consent gate: deletion confirmation message")
+    static let deleteFailure = LocalizedStringResource(
+        "consent.gate.delete.failure",
+        defaultValue: "We couldn't delete your account. Nothing was removed. Please try again.",
+        comment: "Consent gate: deletion failed, nothing removed")
 }
