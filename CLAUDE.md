@@ -64,7 +64,7 @@ Keep CLAUDE.md short. Read these when relevant — don't pre-load:
 - **Postgres / Supabase technique** → `.agents/skills/supabase-postgres-best-practices/` (RLS, indexing, locking, pooling).
 - **PR Lab Notes** → `lab-note` skill (`.claude/skills/lab-note/`); see the Lab Note section below.
 
-CI gates worth knowing about: `arkaik.yml` validates the legacy bundle + journal on any `docs/arkaik/**` change (it should now rarely run — see below), `android.yml` builds on `apps/android/**`, `web.yml` runs ESLint + the Vitest suite on **every** PR (no path filter, so it can be a required check), `supabase.yml` typechecks, replays the migration chain on a local stack and runs the contract harnesses on `packages/supabase/**` (harnesses also nightly), `lab-note-reminder.yml` advises at PR-open and `lab-note.yml` posts the note at merge.
+CI gates worth knowing about: `arkaik.yml` validates the legacy bundle + journal on any `docs/arkaik/**` change (it should now rarely run — see below), `android.yml` builds on `apps/android/**`, `web.yml` runs ESLint + the Vitest suite on **every** PR (no path filter, so it can be a required check), `supabase.yml` typechecks, replays the migration chain on a local stack and runs the contract harnesses on `packages/supabase/**` (harnesses also nightly), `lab-note-reminder.yml` advises at PR-open (at merge the Arkaik GitHub App reads the note from the PR body; no workflow posts it).
 
 ## The map is hosted — never edit `docs/arkaik/bundle.json`
 
@@ -145,7 +145,7 @@ Anything bigger than a single focused change is planned as **parts** (one part =
 ### Issues & labels
 
 - Issue titles: `[Type] Description`.
-- Apply one species label (`feat`, `fix`, `bug`, `chore`, `docs`, `test`, `quality`) plus one or more scope labels — domain (`core`, `ui`, `db`, `api`, `auth`, `facility`, `legal`) and/or surface (`web`, `ios`, `android`, `supabase`).
+- Apply one species label (`feat`, `fix`, `bug`, `chore`, `docs`, `test`, `quality`) plus one or more scope labels — domain (`core`, `ui`, `db`, `api`, `auth`, `facility`, `legal`) and/or surface (`web`, `ios`, `android`, `admin`, `supabase`).
 - A feature that lands on every surface is one backend issue plus one issue per client, each carrying its own surface label — that split is what keeps the milestone readable.
 
 ### PR checklist

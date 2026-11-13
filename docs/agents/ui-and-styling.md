@@ -9,7 +9,7 @@ Read this when building, modifying, or styling UI components.
 - UI primitives live in `<app>/components/ui/` (shadcn/ui), one set per app. Do not duplicate primitives within an app.
 - Domain components live in feature folders: `apps/web/components/path/`, `apps/web/components/pebble/`, `apps/web/components/record/`, etc.
 - Hooks encapsulate data access. Components never call the provider directly.
-- Sidebar is customizable per page via the sidebar prop: `<PageLayout sidebar={<PathProfileCard />}>...</PageLayout>`
+- Sidebar is customizable per page via the sidebar prop: `<PageLayout sidebar={<SomeCard />}>...</PageLayout>`
 
 ## shadcn-first
 
