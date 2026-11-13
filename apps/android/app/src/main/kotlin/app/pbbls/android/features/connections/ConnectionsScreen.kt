@@ -13,23 +13,35 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.Connection
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
+import app.pbbls.android.core.designsystem.PbblsGlyph
+import app.pbbls.android.core.designsystem.PbblsGlyphImage
+import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.designsystem.readableWidth
@@ -41,7 +53,10 @@ import app.pbbls.android.core.ui.GlyphViewCase
  *
  * Discovery is invite-only by design: no search, no directory (design §1).
  * Removing severs for both sides; removing with a block also stops the peer
- * re-entering through a live invite.
+ * re-entering through a live invite. Each row's overflow also offers a report
+ * (#839): [onReport] hands the row to the host, which opens the report screen.
+ * A report that also blocked has removed the connection, so the list re-reads
+ * on resume and the row goes.
  *
  * Self-applies `safeDrawingPadding()`, so the caller composes it in the OUTER
  * (unpadded) Box alongside the other full-screen covers.
@@ -50,16 +65,25 @@ import app.pbbls.android.core.ui.GlyphViewCase
 fun ConnectionsScreen(
     onDismiss: () -> Unit,
     onOpenInvite: () -> Unit,
+    onReport: (Connection) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ConnectionsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
 
+    // Returning from the report screen must re-read the list: the view model is
+    // scoped to the back stack entry, which outlives the trip to the child.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResumed()
+        onPauseOrDispose {}
+    }
+
     ConnectionsContent(
         uiState = uiState,
         onRetry = viewModel::retry,
         onRemoveRequest = viewModel::requestRemoval,
+        onReport = onReport,
         onOpenInvite = onOpenInvite,
         onDismiss = onDismiss,
         modifier = modifier,
@@ -92,9 +116,11 @@ fun ConnectionsContent(
     uiState: ConnectionsUiState,
     onRetry: () -> Unit,
     onRemoveRequest: (Connection) -> Unit,
+    onReport: (Connection) -> Unit,
     onOpenInvite: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    initialMenuFor: String? = null,
 ) {
     val colors = MaterialTheme.colorScheme
 
@@ -173,6 +199,8 @@ fun ConnectionsContent(
                                 ConnectionRow(
                                     connection = row,
                                     onRemoveRequest = { onRemoveRequest(row) },
+                                    onReport = { onReport(row) },
+                                    initialMenuOpen = row.connectionId == initialMenuFor,
                                 )
                             }
                         }
@@ -182,13 +210,17 @@ fun ConnectionsContent(
     }
 }
 
-/** One connected person: their glyph, their name, and a remove affordance. */
+/** One connected person: their glyph, their name, and an overflow menu (Report, Remove). */
 @Composable
 private fun ConnectionRow(
     connection: Connection,
     onRemoveRequest: () -> Unit,
+    onReport: () -> Unit,
+    initialMenuOpen: Boolean,
 ) {
     val colors = MaterialTheme.colorScheme
+    val name = connection.peer.displayName ?: stringResource(R.string.connections_unnamed_peer)
+    var menuOpen by remember { mutableStateOf(initialMenuOpen) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -207,19 +239,50 @@ private fun ConnectionRow(
         }
 
         Text(
-            text = connection.peer.displayName ?: stringResource(R.string.connections_unnamed_peer),
+            text = name,
             style = MaterialTheme.typography.bodyLarge,
             color = colors.onSurface,
             modifier = Modifier.weight(1f),
             maxLines = 1,
         )
 
-        TextButton(onClick = onRemoveRequest) {
-            Text(
-                text = stringResource(R.string.connections_remove_action),
-                style = MaterialTheme.typography.labelLarge,
-                color = colors.primary,
-            )
+        Box {
+            IconButton(onClick = { menuOpen = true }) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_more_vert),
+                    contentDescription = stringResource(R.string.connections_more_a11y, name),
+                )
+            }
+            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.report_action)) },
+                    leadingIcon = {
+                        PbblsGlyphImage(
+                            glyph = PbblsGlyph.CIRCLE_DOT_EXCLAMATION,
+                            size = PbblsGlyphSize.ROW,
+                            contentDescription = null,
+                        )
+                    },
+                    onClick = {
+                        menuOpen = false
+                        onReport()
+                    },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.connections_remove_action)) },
+                    leadingIcon = {
+                        PbblsGlyphImage(
+                            glyph = PbblsGlyph.REMOVE,
+                            size = PbblsGlyphSize.ROW,
+                            contentDescription = null,
+                        )
+                    },
+                    onClick = {
+                        menuOpen = false
+                        onRemoveRequest()
+                    },
+                )
+            }
         }
     }
 }

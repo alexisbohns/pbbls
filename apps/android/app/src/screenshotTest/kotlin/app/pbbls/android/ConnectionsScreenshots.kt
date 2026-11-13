@@ -64,6 +64,7 @@ private fun ConnectionsListPreview() {
             uiState = ConnectionsUiState.Content(sampleConnections),
             onRetry = {},
             onRemoveRequest = {},
+            onReport = {},
             onOpenInvite = {},
             onDismiss = {},
         )
@@ -79,6 +80,7 @@ private fun ConnectionsEmptyPreview() {
             uiState = ConnectionsUiState.Content(emptyList()),
             onRetry = {},
             onRemoveRequest = {},
+            onReport = {},
             onOpenInvite = {},
             onDismiss = {},
         )
@@ -94,8 +96,26 @@ private fun ConnectionsListDarkPreview() {
             uiState = ConnectionsUiState.Content(sampleConnections),
             onRetry = {},
             onRemoveRequest = {},
+            onReport = {},
             onOpenInvite = {},
             onDismiss = {},
+        )
+    }
+}
+
+@PreviewTest
+@Preview(name = "Connections · row menu", showBackground = true)
+@Composable
+private fun ConnectionsRowMenuPreview() {
+    PebblesTheme {
+        ConnectionsContent(
+            uiState = ConnectionsUiState.Content(sampleConnections),
+            onRetry = {},
+            onRemoveRequest = {},
+            onReport = {},
+            onOpenInvite = {},
+            onDismiss = {},
+            initialMenuFor = "c1",
         )
     }
 }
@@ -129,6 +149,27 @@ private fun AcceptValidPreview() {
             onAccept = {},
             onRetry = {},
             onDismiss = {},
+            onReport = {},
+        )
+    }
+}
+
+@PreviewTest
+@Preview(name = "Accept · valid invite, accepting", showBackground = true)
+@Composable
+private fun AcceptValidAcceptingPreview() {
+    PebblesTheme {
+        AcceptInviteContent(
+            // Both buttons are disabled while the accept is in flight.
+            uiState =
+                AcceptInviteUiState.Ready(
+                    InvitePreview(status = "valid", inviter = peer("Lea")),
+                    isAccepting = true,
+                ),
+            onAccept = {},
+            onRetry = {},
+            onDismiss = {},
+            onReport = {},
         )
     }
 }
@@ -147,6 +188,7 @@ private fun AcceptAlreadyConnectedPreview() {
             onAccept = {},
             onRetry = {},
             onDismiss = {},
+            onReport = {},
         )
     }
 }
@@ -162,6 +204,7 @@ private fun AcceptUnusablePreview() {
             onAccept = {},
             onRetry = {},
             onDismiss = {},
+            onReport = {},
         )
     }
 }

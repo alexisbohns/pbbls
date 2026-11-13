@@ -194,6 +194,9 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         ConnectionsScreen(
             onDismiss = navigator::goBack,
             onOpenInvite = { navigator.navigate(PebblesKey.Invite) },
+            onReport = { row ->
+                navigator.navigate(PebblesKey.Report(ReportTarget.Connection(row.connectionId, row.peer.displayName)))
+            },
         )
     }
 
@@ -221,7 +224,12 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         clazzContentKey = { key -> "glyph-detail:${key.item.id}" },
         metadata = NavTransitions.push + PanePairs.metadataFor<PebblesKey.GlyphDetail>(),
     ) { key ->
-        GlyphDetailScreen(item = key.item)
+        GlyphDetailScreen(
+            item = key.item,
+            // Report is a full page: BottomSheetSceneStrategy claims only an entry that asks for the sheet,
+            // so pushed on top it replaces the sheet scene, and Back brings the sheet back.
+            onReport = { navigator.navigate(PebblesKey.Report(ReportTarget.Glyph(key.item.id))) },
+        )
     }
 
     entry<PebblesKey.Lab>(metadata = NavTransitions.forKey(PebblesKey.Lab)) {
@@ -405,15 +413,21 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     }
 
     entry<PebblesKey.AcceptInvite>(metadata = NavTransitions.forKey(PebblesKey.AcceptInvite(""))) { key ->
-        AcceptInviteScreen(token = key.token, onDismiss = navigator::goBack)
+        AcceptInviteScreen(
+            token = key.token,
+            onDismiss = navigator::goBack,
+            // RootScreen already cleared the parked token when it pushed this entry.
+            onReport = { name -> navigator.navigate(PebblesKey.Report(ReportTarget.Invite(key.token, name))) },
+        )
     }
 
     entry<PebblesKey.Report>(metadata = NavTransitions.forKey(PebblesKey.Report(ReportTarget.Glyph("")))) { key ->
         ReportScreen(
             target = key.target,
-            onCancel = navigator::goBack,
-            // Part 2 pops the invite too; for now every report just closes.
-            onFinished = { navigator.goBack() },
+            // Both exits are idempotent: a double tap, or Done and Back together, must not pop what is beneath.
+            onCancel = { navigator.closeDetail(key) },
+            // A reported invite is not accepted, so its accept sheet closes with the report.
+            onFinished = { navigator.closeReport(key) },
         )
     }
 }

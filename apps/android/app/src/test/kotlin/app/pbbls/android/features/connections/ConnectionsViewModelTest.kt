@@ -88,6 +88,93 @@ class ConnectionsViewModelTest {
             assertEquals(1, service.listCount)
         }
 
+    // MARK: - Resume
+
+    /** The first resume is the screen appearing; `init` already loaded. */
+    @Test
+    fun `the first resume does not refetch`() =
+        runTest {
+            val service = FakeConnectionsService(connections = listOf(connection("a")))
+            val viewModel = viewModel(service)
+            advanceUntilIdle()
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(1, service.listCount)
+        }
+
+    /** A report with the block on severs the connection server-side; the list drops the row on return, quietly. */
+    @Test
+    fun `a later resume publishes the shorter list without passing through Loading`() =
+        runTest {
+            val service = FakeConnectionsService(connections = listOf(connection("a"), connection("b")))
+            val viewModel = viewModel(service)
+            advanceUntilIdle()
+            viewModel.onResumed()
+
+            service.connections = listOf(connection("b"))
+            viewModel.onResumed()
+            // The refresh is in flight: the old list is still up, not a spinner.
+            assertTrue(viewModel.uiState.value is ConnectionsUiState.Content)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as ConnectionsUiState.Content
+            assertEquals(listOf("b"), state.connections.map { it.connectionId })
+            assertEquals(2, service.listCount)
+        }
+
+    @Test
+    fun `a failed resume refresh keeps the list that is up`() =
+        runTest {
+            val service = FakeConnectionsService(connections = listOf(connection("a")))
+            val viewModel = viewModel(service)
+            advanceUntilIdle()
+            viewModel.onResumed()
+
+            service.failNext = IOException("offline")
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            // The refresh ran, hit the failure, and the list survived it.
+            assertEquals(2, service.listCount)
+            assertNull(service.failNext)
+            val state = viewModel.uiState.value as ConnectionsUiState.Content
+            assertEquals(listOf("a"), state.connections.map { it.connectionId })
+        }
+
+    /** The list read could land before the server severs the connection and bring the removed row back. */
+    @Test
+    fun `a resume while a removal is in flight does not reload`() =
+        runTest {
+            val service = FakeConnectionsService(connections = listOf(connection("a"), connection("b")))
+            val viewModel = viewModel(service)
+            advanceUntilIdle()
+            viewModel.onResumed()
+
+            val gate = CompletableDeferred<Unit>()
+            service.writeGate = gate
+            viewModel.requestRemoval(connection("a"))
+            viewModel.confirmRemoval(block = true)
+            advanceUntilIdle()
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(1, service.listCount)
+            assertEquals(
+                listOf("b"),
+                (viewModel.uiState.value as ConnectionsUiState.Content).connections.map { it.connectionId },
+            )
+
+            // Once the request has finished, a return refreshes again.
+            service.connections = listOf(connection("b"))
+            gate.complete(Unit)
+            advanceUntilIdle()
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(2, service.listCount)
+        }
+
     // MARK: - Removal
 
     /** The row leaves before the request — that is the point of the optimism. */

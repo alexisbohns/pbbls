@@ -784,6 +784,7 @@
     <string name="connections_load_error">Couldn\'t load your connections. Please try again.</string>
     <string name="connections_unnamed_peer">Someone</string>
     <string name="connections_remove_action">Remove</string>
+    <string name="connections_more_a11y">More options for %1$s</string>
     <string name="connections_remove_title">Remove %1$s?</string>
     <string name="connections_remove_message">You\'ll both lose the connection. Blocking also stops them joining again through your invite link.</string>
     <string name="connections_remove_confirm">Remove</string>
@@ -834,6 +835,7 @@
     <string name="report_send">Send report</string>
     <string name="report_sending">Sending</string>
     <string name="report_sent">Thanks. We\'ll look at it.</string>
+    <string name="report_action">Report</string>
 
     <!-- Achievements (M48) -->
     <string name="achievements_title">Achievements</string>

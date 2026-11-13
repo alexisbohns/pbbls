@@ -71,7 +71,10 @@ private fun StoreGallery() {
 }
 
 @Composable
-private fun DrawerGallery(isOwned: Boolean) {
+private fun DrawerGallery(
+    isOwned: Boolean,
+    onReport: (() -> Unit)? = null,
+) {
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface).width(400.dp)) {
         GlyphDetailDrawerContent(
             hapticsOn = true,
@@ -82,6 +85,7 @@ private fun DrawerGallery(isOwned: Boolean) {
             isBuying = false,
             errorRes = null,
             onConfirm = { true },
+            onReport = onReport,
         )
     }
 }
@@ -113,6 +117,22 @@ fun DrawerSwapLight() {
 @Composable
 fun DrawerOwnedDark() {
     PebblesTheme { DrawerGallery(isOwned = true) }
+}
+
+// A priced glyph you don't own: the quiet Report button sits under the slider (#839).
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun DrawerSwapReportLight() {
+    PebblesTheme { DrawerGallery(isOwned = false, onReport = {}) }
+}
+
+// Owned: no Report even when the host offers one.
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun DrawerOwnedNoReportDark() {
+    PebblesTheme { DrawerGallery(isOwned = true, onReport = {}) }
 }
 
 // The large-screen form of the store tabs (#855): icon-only toggles in a

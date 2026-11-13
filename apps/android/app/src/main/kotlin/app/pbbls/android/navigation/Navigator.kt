@@ -1,6 +1,7 @@
 package app.pbbls.android.navigation
 
 import androidx.compose.runtime.Stable
+import app.pbbls.android.core.model.ReportTarget
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
@@ -70,6 +71,26 @@ class Navigator(
     fun closeDetail(key: PebblesKey) {
         val stack = state.currentStack
         if (stack.size > 1 && stack.last() == key) {
+            stack.removeAt(stack.lastIndex)
+        }
+    }
+
+    /**
+     * Closes a finished report (#839), and the invite it was opened from.
+     *
+     * Idempotent: Done pressed twice, or Done and the back handler together, fire
+     * this again while the entry is still composing its exit. A second call finds
+     * the report no longer on top and does nothing, so it can never pop the
+     * entries beneath. A report about an inviter closes the accept sheet too: the
+     * invite was not accepted, and Done should land where the link was opened.
+     */
+    fun closeReport(key: PebblesKey.Report) {
+        val stack = state.currentStack
+        if (stack.size <= 1 || stack.last() != key) return
+        stack.removeAt(stack.lastIndex)
+        val below = stack.lastOrNull()
+        val target = key.target
+        if (target is ReportTarget.Invite && below is PebblesKey.AcceptInvite && below.token == target.token && stack.size > 1) {
             stack.removeAt(stack.lastIndex)
         }
     }
