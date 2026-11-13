@@ -1377,12 +1377,12 @@
       "note": "Buys for the caller; a private glyph is not for sale."
     },
     "public.can_use_glyph": {
-      "kind": "public-read",
+      "kind": "service-only",
       "args": {
         "p_glyph_id": "$glyph",
         "p_user": "$A"
       },
-      "note": "Glyph-usability helper behind the enforce_*_glyph_usable triggers. Callable by anon for ANY (glyph, user) pair: it discloses whether a user owns or bought a glyph."
+      "note": "Glyph-usability guard behind complete_onboarding and the enforce_*_glyph_usable triggers, all security definer. Execute revoked from anon and authenticated (#1531): it disclosed whether a user owns or bought a glyph."
     },
     "public.check_achievements": {
       "kind": "owner-only",
@@ -1575,7 +1575,7 @@
       "args": {
         "p_user_id": "$A"
       },
-      "note": "RLS helper on public-role policies (logs, guides, settings_links), so anon must execute it. It answers for ANY user id: anyone can test whether a uuid is an admin."
+      "note": "RLS helper on public-role policies (logs, guides, settings_links), so anon must execute it. Answers for the caller only (#1531): any other id, and every id when signed out, reads false."
     },
     "public.list_orphan_snap_files": {
       "kind": "service-only",
