@@ -809,6 +809,20 @@
     <string name="connections_error_own_invite">That\'s your own invite link.</string>
     <string name="connections_error_session">Please sign in again.</string>
 
+    <!-- Report (#839) -->
+    <string name="report_reason_harassment">Harassment</string>
+    <string name="report_reason_hate">Hate</string>
+    <string name="report_reason_impersonation">Impersonation</string>
+    <string name="report_reason_sexual">Sexual content</string>
+    <string name="report_reason_violence">Violence</string>
+    <string name="report_reason_self_harm">Self-harm</string>
+    <string name="report_reason_illegal">Illegal</string>
+    <string name="report_reason_spam">Spam</string>
+    <string name="report_reason_other">Other</string>
+    <string name="report_error_unavailable">This is no longer available.</string>
+    <string name="report_error_own">You can\'t report your own.</string>
+    <string name="report_error_generic">Couldn\'t send the report. Try again.</string>
+
     <!-- Achievements (M48) -->
     <string name="achievements_title">Achievements</string>
     <string name="achievements_card_subtitle">Badges along your path</string>
