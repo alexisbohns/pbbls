@@ -46,16 +46,28 @@ final class ConsentGateModel {
 
     private(set) var state: State = .idle
 
+    /// The ledger read's ceiling. Past it the gate fails closed, which offers Try again and Log out,
+    /// instead of a spinner with neither for as long as the network takes. Same bound as
+    /// `OnboardingBounds.flagRead`.
+    static let ledgerRead: Duration = .seconds(8)
+
     /// Set by `RootView` before `start`. Without it the gate fails closed.
     @ObservationIgnored var service: (any ConsentServicing)?
     @ObservationIgnored var cache = ConsentPreferences()
     /// The check or record in flight, so tests can await it.
     @ObservationIgnored private(set) var work: Task<Void, Never>?
+    /// The check's ceiling, so tests can await it.
+    @ObservationIgnored private(set) var ceiling: Task<Void, Never>?
+    @ObservationIgnored private let wait: OnboardingWait
     @ObservationIgnored private var userId: String?
     /// Bumped by every check and `recheck`: an answer lands only if its token is still current.
     @ObservationIgnored private var checkToken = 0
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "consent")
+
+    init(wait: @escaping OnboardingWait = { try await Task.sleep(for: $0) }) {
+        self.wait = wait
+    }
 
     /// Whether the app beneath may be used. Only a pass for the current user opens it.
     var isPassed: Bool {
@@ -76,7 +88,10 @@ final class ConsentGateModel {
         if userId == self.userId, state != .idle { return }
         // A check or record in flight belongs to the previous user: it must
         // never land under the next session.
-        if userId != self.userId { work?.cancel() }
+        if userId != self.userId {
+            work?.cancel()
+            ceiling?.cancel()
+        }
         self.userId = userId
         guard let userId else {
             state = .idle
@@ -101,6 +116,7 @@ final class ConsentGateModel {
     func recheck() {
         guard let userId else { return }
         work?.cancel()
+        ceiling?.cancel()
         checkToken += 1
         if cache.isSatisfied(userId: userId, fingerprint: ConsentGateLogic.fingerprint()) {
             state = .satisfied(userId: userId)
@@ -170,13 +186,27 @@ final class ConsentGateModel {
             do {
                 let active = try await service.active()
                 guard uid == userId, token == checkToken else { return }
+                ceiling?.cancel()
                 resolve(uid, ConsentGateLogic.missing(active))
             } catch {
                 // A superseded read logs nothing and changes nothing.
                 guard uid == userId, token == checkToken else { return }
+                ceiling?.cancel()
                 logger.error("consent check failed: \(error.localizedDescription, privacy: .private)")
                 state = .failed(Self.gateError(error))
             }
+        }
+        ceiling?.cancel()
+        ceiling = Task { [wait] in
+            do { try await wait(Self.ledgerRead) } catch { return }
+            // Only a check still waiting: one that answered has left `.checking`, and a newer one
+            // has its own token and its own ceiling.
+            guard uid == userId, token == checkToken, state == .checking else { return }
+            logger.error("consent check passed its ceiling; failing closed")
+            // Bumped, so the read still out can't land over the failed state.
+            checkToken += 1
+            work?.cancel()
+            state = .failed(.offline)
         }
     }
 
