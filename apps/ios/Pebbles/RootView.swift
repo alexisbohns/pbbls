@@ -293,6 +293,11 @@ struct RootView: View {
             if !wasSignedOut && isSignedOut {
                 // Re-arm the home-feed loader cover for the next sign-in.
                 firstRootLoaded = false
+                // A real sign-out only, never a cold launch that resolves signed out: an invite parked
+                // for this account must not open for the next one, while a link that launched the app
+                // signed out has to survive to the sign-in it is waiting for (#1568). Android clears its
+                // own on sign-out as well.
+                connections.pendingInviteToken = nil
             }
         }
         .onChange(of: isResolvedSignedOut) { _, signedOut in
