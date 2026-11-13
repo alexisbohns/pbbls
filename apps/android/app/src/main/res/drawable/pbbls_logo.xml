@@ -8,6 +8,8 @@
   ink box, drawn opaque so Compose can tint it with colorScheme.primary.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="VectorPath"
     android:width="98.71dp"
     android:height="120dp"
     android:viewportWidth="98.71"

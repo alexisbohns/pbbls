@@ -20,6 +20,11 @@
  * geometry, 66dp a side) put the pebble's bulges 37.8dp out, and round and
  * squircle masks cut them off (#856). The group transform carries the scale,
  * so the path data stays byte-identical to the SVG's.
+ *
+ * The mark is one ~16 000 character path, far past lint's 800 character
+ * `VectorPath` limit, so every drawable carries `tools:ignore="VectorPath"`.
+ * Each is inflated once (launcher, splash, Welcome), and reducing precision or
+ * simplifying the curves would let Android drift from the master SVG.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -173,6 +178,8 @@ function render(ink, header, geo = launcherGeometry) {
     '<?xml version="1.0" encoding="utf-8"?>',
     header,
     '<vector xmlns:android="http://schemas.android.com/apk/res/android"',
+    '    xmlns:tools="http://schemas.android.com/tools"',
+    '    tools:ignore="VectorPath"',
     `    android:width="${geo.width.toFixed(2).replace(/\.00$/, "")}dp"`,
     `    android:height="${geo.height.toFixed(2).replace(/\.00$/, "")}dp"`,
     `    android:viewportWidth="${geo.width.toFixed(2).replace(/\.00$/, "")}"`,
