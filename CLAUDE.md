@@ -34,7 +34,7 @@ There is no root `test` task. Tests: Vitest on web, Swift Testing on iOS (never 
 
 ## Task-size triage (read first)
 
-Match ceremony to task size. Heavy workflows on small tasks are the main reason agent work feels slow.
+Match ceremony to task size. Heavy workflows on small tasks are the main reason agent work feels slow. This triage decides whether a process skill (brainstorming, planning, TDD, review) or a subagent runs; a skill's or a plugin's own "always invoke me" wording does not override it.
 
 **Small (≤ ~150 LOC, single file or tightly scoped):**
 - Skip brainstorming, planning, TDD ceremony. Just make the change.
@@ -59,12 +59,11 @@ Keep CLAUDE.md short. Read these when relevant — don't pre-load:
 - **UI / styling / a11y** → `docs/agents/ui-and-styling.md` (atomic design, shadcn-first, base-nova quirks, theming, WCAG)
 - **Data layer / Supabase / async** → `docs/agents/data-and-async.md` (DataProvider, auth deadlock, withTimeout, error logging)
 - **Product architecture map** → `arkaik` skill (`.claude/skills/arkaik/`). The map is **hosted**, not a file in this repo — see below
-- **Why something is the way it is** → `docs/decisions/log.md`. Read it before making an architectural call — it is append-only and supersede-don't-edit, so the *last* entry on a topic wins.
+- **Why something is the way it is** → `docs/decisions/log.md`. Search it before making an architectural call: `grep -n '^## ' docs/decisions/log.md` lists every entry by date and title; read the entries on your topic, not the whole file. It is append-only and supersede-don't-edit, so the *last* entry on a topic wins.
 - **How a feature was designed / built** → `docs/superpowers/specs/<date>-<slug>-design.md` and `docs/superpowers/plans/<date>-<slug>.md`. Post-ship "Lessons learned" live in the plan.
 - **Postgres / Supabase technique** → `.agents/skills/supabase-postgres-best-practices/` (RLS, indexing, locking, pooling).
-- **PR Lab Notes** → `lab-note` skill (`.claude/skills/lab-note/`); see the Lab Note section below.
 
-CI gates worth knowing about: `arkaik.yml` validates the legacy bundle + journal on any `docs/arkaik/**` change (it should now rarely run — see below), `android.yml` builds on `apps/android/**`, `web.yml` runs ESLint + the Vitest suite on **every** PR (no path filter, so it can be a required check), `supabase.yml` typechecks, replays the migration chain on a local stack and runs the contract harnesses on `packages/supabase/**` (harnesses also nightly), `lab-note-reminder.yml` advises at PR-open and `lab-note.yml` posts the note at merge.
+CI gates worth knowing about: `arkaik.yml` validates the legacy bundle + journal on any `docs/arkaik/**` change (it should now rarely run — see below), `android.yml` builds on `apps/android/**`, `web.yml` runs ESLint + the Vitest suite on **every** PR (no path filter, so it can be a required check), and `supabase.yml` typechecks, replays the migration chain on a local stack and runs the contract harnesses on `packages/supabase/**` (harnesses also nightly).
 
 ## The map is hosted — never edit `docs/arkaik/bundle.json`
 
@@ -145,7 +144,7 @@ Anything bigger than a single focused change is planned as **parts** (one part =
 ### Issues & labels
 
 - Issue titles: `[Type] Description`.
-- Apply one species label (`feat`, `fix`, `bug`, `chore`, `docs`, `test`, `quality`) plus one or more scope labels — domain (`core`, `ui`, `db`, `api`, `auth`, `facility`, `legal`) and/or surface (`web`, `ios`, `android`, `supabase`).
+- Apply one species label (`feat`, `fix`, `bug`, `chore`, `docs`, `test`, `quality`) plus one or more scope labels — domain (`core`, `ui`, `db`, `api`, `auth`, `facility`, `legal`) and/or surface (`web`, `ios`, `android`, `admin`, `supabase`).
 - A feature that lands on every surface is one backend issue plus one issue per client, each carrying its own surface label — that split is what keeps the milestone readable.
 
 ### PR checklist
@@ -160,9 +159,4 @@ Anything bigger than a single focused change is planned as **parts** (one part =
 5. Run lint, **the workspace test suite**, and build at the **scope of your change** (per task-size triage above), confirm green, then open the PR.
 6. **Never write a Kritik finding id (`F-…`) in a PR body unless that PR closes it.** The Arkaik App resolves *every* id it finds in the body — it does not distinguish "closes" from "mentions", so listing follow-up work by finding id marks that work done. Reference follow-ups by GitHub issue number instead. Five launch-gating PLT-04 findings were silently closed this way by #832 ([arkaik#440](https://github.com/alexisbohns/arkaik/issues/440)); the matrix then reports a store-compliance pillar as satisfied when no client has shipped it, and a hosted session cannot re-open a finding to repair it.
 7. If this PR established or reversed a **significant** decision, append one entry to `docs/decisions/log.md` (usually a no-op). Significance bar: would a future agent or human waste real time rediscovering or wrongly reversing it? Supersede-don't-edit — status changes are new appended entries, never edits to prior ones.
-8. **Lab Note (EN/FR)** — required for user-facing PRs; see the section below.
-
-### Lab Note requirement — read before opening a PR
-
-**The gate.** The PR has the `feat` label, **or** it touches a user-visible Arkaik view node → the PR body MUST carry one `## Lab Note (EN/FR)` section. Invoke the repo-local `lab-note` skill (`.claude/skills/lab-note/`) to author it; it takes precedence over the `lab-note@ariko` plugin skill and holds the schema, the quoting rules and the tone guide. Chore, refactor, infra, or docs-only → **no note**: delete the section from the PR body and add the `no-lab-note` label if the advisory reminder still comments. Never write to Supabase / `logs` from the dev loop.
-
+8. A PR body carries no `## Lab Note` section, even where an older plan under `docs/superpowers/plans/` asks for one: the Arkaik map records what shipped, and Lab posts are written in the admin.

@@ -23,15 +23,14 @@ and none crosses a data contract:
 | Architecture: Hilt, a ViewModel per screen, Navigation 3 (M38 D4 and D5 superseded) | #848, #849, #852 |
 | Five-tab M3 navigation bar, Home first; iOS has the same five tabs in a floating tab bar | #852, #1383 |
 | `core/` vs `features/` package split; iOS groups by feature all the way down | #851 |
-| M3-evo Material 3 Expressive theme: palette, orange error (was amber, now `sand`), type (#921 asks whether iOS follows) | #853, #990 |
+| M3-evo Material 3 Expressive theme: palette, orange error (was amber, now `sand`), type (iOS generates its colours from `ColorSchemes.kt`, #921) | #853, #990 |
 | Stock Material 3 controls instead of ports of the iOS ones | #854 |
 | Large screens: readable column, navigation rail, list-detail panes | #855, #940 |
 | No Rive runtime; the Welcome logo is a static vector | #856 |
 | The system Photo Picker stays modal (Play policy): a photo moment is 4 taps, not iOS's 3 | #1515 |
 
 Anything else that differs is drift, not design. Fix it rather than documenting
-it. One known drift runs the other way: Android's pebble detail is the held
-card (#1135) and iOS still has the old read page; the iOS mirror is #1146.
+it.
 
 History: the app was bootstrapped in **M38 · Android App**
 (`docs/superpowers/specs/2026-07-10-android-bootstrap-design.md`, decisions
@@ -195,7 +194,7 @@ The files, in the order you touch them when adding a destination:
 - **`navigation/PebblesKeys.kt`**: every destination is a `@Serializable`
   `PebblesKey`, because the stacks survive process death. Two marker interfaces
   carry the rules, so there is no second list to fall out of sync:
-  `TopLevelKey` is one of the four tabs, and `BarKey` keeps the navigation bar
+  `TopLevelKey` is one of the five tabs, and `BarKey` keeps the navigation bar
   visible. A new key that is neither renders as a modal by default, which is the
   safe default.
 - **`navigation/PebblesEntryProvider.kt`**: key → screen. Each entry carries its
@@ -206,7 +205,7 @@ The files, in the order you touch them when adding a destination:
   `closeDetail` keep list-detail panes honest. **`rootAt` is the auth gate's
   only entry point, never `replaceAll`**, because the gate also runs on a cold
   restore. `NavigatorRootAtTest` guards this; do not delete it as redundant.
-- **`navigation/NavigationState.kt`**: four per-tab stacks with
+- **`navigation/NavigationState.kt`**: one back stack per tab, with
   exit-through-home back. `rememberViewModelStoreNavEntryDecorator` scopes each
   ViewModel to its entry, so popping an entry destroys its ViewModel. A fresh
   entry starts at `Loading`, and nothing needs a manual reset.
@@ -376,7 +375,7 @@ ceremony. The trigger to revisit is a **second regular contributor** or a
   with warm ink): a Theme Builder re-export resets the error roles and drops
   Sand, so redo those by hand first (as #990 did), then run it through the
   recipe, or the neutrals revert to the seed's.
-- **material3 is pinned to `1.5.0-alpha27`** in `libs.versions.toml` for the
+- **material3 is pinned to `1.5.0-rc01`** in `libs.versions.toml` for the
   Expressive API. Drop the pin when 1.5.0 stable is in the BOM, and do not
   move to an alpha that drags Compose ui/foundation off the BOM's stable line.
 - **Large screens (#855):** every screen's content is capped at 600 dp by
@@ -619,8 +618,8 @@ skill. The rules that never bend:
 - **Never widen the threshold in `app/build.gradle.kts`** to paper over a
   host-platform difference, and keep the plugin's `strictly` pin.
 - **A mapped preview keeps its name, or the mapping moves with it.**
-  `apps/android/arkaik-shots.json` maps Arkaik node ids to reference stems
-  (18 entries today); the check step in `android.yml`, right after checkout and
+  `apps/android/arkaik-shots.json` maps Arkaik node ids to reference stems;
+  the check step in `android.yml`, right after checkout and
   before Gradle, fails when a stem no longer resolves to exactly one PNG.
   Renaming a preview, adding a variant to it, or deleting it means editing the
   mapping in the same PR. Only Light/Paper, default-size, English renders fill a

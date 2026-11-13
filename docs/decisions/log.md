@@ -2020,3 +2020,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** Any minimum duration or fixed hold added back to the launch path reintroduces the delay this entry removes. The mark is never described as a koru or a fern, and is never placed inside a triangle (clearance findings). The Android wobble splash is #1646; Android keeps the system splash until then.
 - **Supersedes / Superseded-by:** supersedes the iOS half of **2026-07-17 — App-open loader is a native handcrafted-glyph animation, gated on a loader-settle event** (the draw-on and the minimum boil); its readiness gate stays.
 - **Refs:** #1643, #1644, #1645, #1646.
+
+## 2026-11-14 — The PR Lab Note is retired
+
+- **Status:** taken
+- **Scope:** docs, infra
+- **Context:** #1651 — an audit of the agent instruction files found the Lab Note rule unfollowed: the last 11 merged `feat` PRs all carried `no-lab-note` and no note, and the workflow that posted notes at merge had been removed in #705.
+- **Decision:** A PR body carries no `## Lab Note` section. The rule leaves `CLAUDE.md` and the PR template; the `lab-note` skill, the `lab-note-reminder.yml` workflow and the `lab-note@ariko` plugin enablement are deleted.
+- **Why:** The hosted Arkaik map already records what shipped (its GitHub App moves a node's status at PR-open and at merge), so the note repeated it. A rule nobody follows also teaches agents to discount the file it sits in.
+- **Consequences:** Lab posts are written by hand in the admin; its clipboard YAML prefill (`apps/admin/lib/logs/parse-lab-note.ts`) stays and still accepts the old snippet. Plans written before this date still contain a Lab Note step: skip it. The `no-lab-note` label has no reader left. The Arkaik journal gets no `deliverable.shipped` entry from a note.
+- **Supersedes / Superseded-by:** supersedes the PR-authoring half of **2026-07-17 — Lab Notes are a YAML snippet that prefills the admin from the clipboard (#601)**; the admin prefill stays.
+- **Refs:** #1651, #705, `CLAUDE.md`, `.github/PULL_REQUEST_TEMPLATE.md`.
