@@ -37,6 +37,8 @@ import app.pbbls.android.core.data.RecordFlowMemory
 import app.pbbls.android.core.data.RecordFlowMemorying
 import app.pbbls.android.core.data.ReferenceDataService
 import app.pbbls.android.core.data.ReferenceDataServicing
+import app.pbbls.android.core.data.ReportService
+import app.pbbls.android.core.data.ReportServicing
 import app.pbbls.android.core.data.SettingsLinksService
 import app.pbbls.android.core.data.SettingsLinksServicing
 import app.pbbls.android.core.data.SnapBoundsDecoder
@@ -162,4 +164,8 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindSnapBoundsDecoder(impl: CoilSnapBoundsDecoder): SnapBoundsDecoder
+
+    @Binds
+    @Singleton
+    fun bindReportServicing(impl: ReportService): ReportServicing
 }

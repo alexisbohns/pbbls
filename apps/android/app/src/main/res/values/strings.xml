@@ -809,6 +809,32 @@
     <string name="connections_error_own_invite">That\'s your own invite link.</string>
     <string name="connections_error_session">Please sign in again.</string>
 
+    <!-- Report (#839) -->
+    <string name="report_reason_harassment">Harassment</string>
+    <string name="report_reason_hate">Hate</string>
+    <string name="report_reason_impersonation">Impersonation</string>
+    <string name="report_reason_sexual">Sexual content</string>
+    <string name="report_reason_violence">Violence</string>
+    <string name="report_reason_self_harm">Self-harm</string>
+    <string name="report_reason_illegal">Illegal</string>
+    <string name="report_reason_spam">Spam</string>
+    <string name="report_reason_other">Other</string>
+    <string name="report_error_unavailable">This is no longer available.</string>
+    <string name="report_error_own">You can\'t report your own.</string>
+    <string name="report_error_generic">Couldn\'t send the report. Try again.</string>
+    <string name="report_title_glyph">Report this glyph</string>
+    <string name="report_title_person">Report this person</string>
+    <string name="report_title_named">Report %1$s</string>
+    <string name="report_reasons_header">Why are you reporting?</string>
+    <string name="report_details_header">Add details (optional)</string>
+    <string name="report_details_placeholder">What happened?</string>
+    <string name="report_block_named">Also remove and block %1$s</string>
+    <string name="report_block_person">Also remove and block this person</string>
+    <string name="report_block_footer">Blocking also stops them joining again through your invite link.</string>
+    <string name="report_send">Send report</string>
+    <string name="report_sending">Sending</string>
+    <string name="report_sent">Thanks. We\'ll look at it.</string>
+
     <!-- Achievements (M48) -->
     <string name="achievements_title">Achievements</string>
     <string name="achievements_card_subtitle">Badges along your path</string>

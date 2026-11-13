@@ -804,6 +804,32 @@
     <string name="connections_error_own_invite">C\'est ton propre lien d\'invitation.</string>
     <string name="connections_error_session">Reconnecte-toi.</string>
 
+    <!-- Report (#839) -->
+    <string name="report_reason_harassment">Harcèlement</string>
+    <string name="report_reason_hate">Haine</string>
+    <string name="report_reason_impersonation">Usurpation d\'identité</string>
+    <string name="report_reason_sexual">Contenu sexuel</string>
+    <string name="report_reason_violence">Violence</string>
+    <string name="report_reason_self_harm">Automutilation</string>
+    <string name="report_reason_illegal">Illégal</string>
+    <string name="report_reason_spam">Spam</string>
+    <string name="report_reason_other">Autre</string>
+    <string name="report_error_unavailable">Ce n\'est plus disponible.</string>
+    <string name="report_error_own">Tu ne peux pas signaler ce qui est à toi.</string>
+    <string name="report_error_generic">Impossible d\'envoyer le signalement. Réessaie.</string>
+    <string name="report_title_glyph">Signaler ce glyphe</string>
+    <string name="report_title_person">Signaler cette personne</string>
+    <string name="report_title_named">Signaler %1$s</string>
+    <string name="report_reasons_header">Pourquoi tu signales ?</string>
+    <string name="report_details_header">Ajouter des détails (facultatif)</string>
+    <string name="report_details_placeholder">Que s\'est-il passé ?</string>
+    <string name="report_block_named">Retirer et bloquer aussi %1$s</string>
+    <string name="report_block_person">Retirer et bloquer aussi cette personne</string>
+    <string name="report_block_footer">Bloquer l\'empêche aussi de revenir par ton lien d\'invitation.</string>
+    <string name="report_send">Envoyer le signalement</string>
+    <string name="report_sending">Envoi en cours</string>
+    <string name="report_sent">Merci. On va regarder.</string>
+
     <!-- Achievements (M48) -->
     <string name="achievements_title">Succès</string>
     <string name="achievements_card_subtitle">Tes badges le long du chemin</string>

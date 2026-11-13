@@ -5,6 +5,7 @@ import app.pbbls.android.core.model.AuthMode
 import app.pbbls.android.core.model.CardFace
 import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.core.model.GlyphShelf
+import app.pbbls.android.core.model.ReportTarget
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -204,6 +205,12 @@ sealed interface PebblesKey : NavKey {
     @Serializable
     data class AcceptInvite(
         val token: String,
+    ) : PebblesKey
+
+    /** Report a person or a glyph (#839). A modal: neither a tab nor a bar key. */
+    @Serializable
+    data class Report(
+        val target: ReportTarget,
     ) : PebblesKey
 
     @Serializable
