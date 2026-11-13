@@ -54,15 +54,16 @@ data class ConnectionsCovers(
  * never confirmed. The request and its reconcile are one
  * `withContext(NonCancellable)` step in [viewModelScope] now.
  *
- * No resume refresh, unlike the souls and collections lists — not because the
- * list cannot go stale, but because a resume hook would not fix the case where
- * it does. This destination has no child to come back from; the one way a
- * connection appears while the list is up is accepting an invite link, and that
- * surface sits *above* the nav host, so this entry never leaves RESUMED and no
- * resume event fires. The new peer is therefore missing until the list is left
- * and re-entered. Unchanged from before the migration, and it wants a signal
- * from the accept surface rather than a lifecycle hook — filed rather than
- * papered over.
+ * **Resume refresh.** Like the souls and collections lists, this one re-reads
+ * on a return: the view model is scoped to the back stack entry, which outlives
+ * a trip to a child. The child that matters is the report screen: a report sent
+ * with "Also remove and block" has already severed the connection on the server,
+ * so the row must leave when the report closes. The refresh is quiet, never
+ * through [ConnectionsUiState.Loading], so the list stays up. One case it does
+ * not cover: accepting an invite link, which sits *above* the nav host, so this
+ * entry never leaves RESUMED and no resume event fires. The new peer is missing
+ * until the list is left and re-entered; that wants a signal from the accept
+ * surface rather than a lifecycle hook, and is filed rather than papered over.
  */
 @HiltViewModel
 class ConnectionsViewModel
@@ -73,6 +74,7 @@ class ConnectionsViewModel
         private var connections: List<Connection> = emptyList()
         private var hasFailed = false
         private var isLoaded = false
+        private var resumeCount = 0
 
         private val _uiState = MutableStateFlow<ConnectionsUiState>(ConnectionsUiState.Loading)
         val uiState: StateFlow<ConnectionsUiState> = _uiState.asStateFlow()
@@ -92,6 +94,21 @@ class ConnectionsViewModel
             loadJob?.cancel()
             _uiState.value = ConnectionsUiState.Loading
             isLoaded = false
+            loadJob = viewModelScope.launch { fetch() }
+        }
+
+        /**
+         * The destination came back to the foreground. The first resume is skipped
+         * because `init` has already loaded; every later one is a return, and
+         * re-reads without the spinner. A failed refresh keeps the list that is up.
+         */
+        fun onResumed() {
+            resumeCount += 1
+            if (resumeCount > 1) reload()
+        }
+
+        private fun reload() {
+            loadJob?.cancel()
             loadJob = viewModelScope.launch { fetch() }
         }
 

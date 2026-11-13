@@ -64,6 +64,7 @@ private fun ConnectionsListPreview() {
             uiState = ConnectionsUiState.Content(sampleConnections),
             onRetry = {},
             onRemoveRequest = {},
+            onReport = {},
             onOpenInvite = {},
             onDismiss = {},
         )
@@ -79,6 +80,7 @@ private fun ConnectionsEmptyPreview() {
             uiState = ConnectionsUiState.Content(emptyList()),
             onRetry = {},
             onRemoveRequest = {},
+            onReport = {},
             onOpenInvite = {},
             onDismiss = {},
         )
@@ -94,8 +96,26 @@ private fun ConnectionsListDarkPreview() {
             uiState = ConnectionsUiState.Content(sampleConnections),
             onRetry = {},
             onRemoveRequest = {},
+            onReport = {},
             onOpenInvite = {},
             onDismiss = {},
+        )
+    }
+}
+
+@PreviewTest
+@Preview(name = "Connections · row menu", showBackground = true)
+@Composable
+private fun ConnectionsRowMenuPreview() {
+    PebblesTheme {
+        ConnectionsContent(
+            uiState = ConnectionsUiState.Content(sampleConnections),
+            onRetry = {},
+            onRemoveRequest = {},
+            onReport = {},
+            onOpenInvite = {},
+            onDismiss = {},
+            initialMenuFor = "c1",
         )
     }
 }

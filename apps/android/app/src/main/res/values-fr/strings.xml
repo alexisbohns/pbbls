@@ -779,6 +779,7 @@
     <string name="connections_load_error">Impossible de charger tes connexions. Réessaie.</string>
     <string name="connections_unnamed_peer">Quelqu\'un</string>
     <string name="connections_remove_action">Retirer</string>
+    <string name="connections_more_a11y">Plus d\'options pour %1$s</string>
     <string name="connections_remove_title">Retirer %1$s ?</string>
     <string name="connections_remove_message">Vous perdrez tous les deux la connexion. Bloquer l\'empêche aussi de revenir par ton lien d\'invitation.</string>
     <string name="connections_remove_confirm">Retirer</string>
@@ -829,6 +830,7 @@
     <string name="report_send">Envoyer le signalement</string>
     <string name="report_sending">Envoi en cours</string>
     <string name="report_sent">Merci. On va regarder.</string>
+    <string name="report_action">Signaler</string>
 
     <!-- Achievements (M48) -->
     <string name="achievements_title">Succès</string>

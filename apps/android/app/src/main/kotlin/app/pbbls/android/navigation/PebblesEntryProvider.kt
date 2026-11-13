@@ -194,6 +194,9 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         ConnectionsScreen(
             onDismiss = navigator::goBack,
             onOpenInvite = { navigator.navigate(PebblesKey.Invite) },
+            onReport = { row ->
+                navigator.navigate(PebblesKey.Report(ReportTarget.Connection(row.connectionId, row.peer.displayName)))
+            },
         )
     }
 
