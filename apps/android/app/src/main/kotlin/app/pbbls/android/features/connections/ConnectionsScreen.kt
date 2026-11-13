@@ -270,6 +270,13 @@ private fun ConnectionRow(
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.connections_remove_action)) },
+                    leadingIcon = {
+                        PbblsGlyphImage(
+                            glyph = PbblsGlyph.REMOVE,
+                            size = PbblsGlyphSize.ROW,
+                            contentDescription = null,
+                        )
+                    },
                     onClick = {
                         menuOpen = false
                         onRemoveRequest()
