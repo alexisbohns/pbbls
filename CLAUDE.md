@@ -62,9 +62,8 @@ Keep CLAUDE.md short. Read these when relevant — don't pre-load:
 - **Why something is the way it is** → `docs/decisions/log.md`. Search it before making an architectural call: `grep -n '^## ' docs/decisions/log.md` lists every entry by date and title; read the entries on your topic, not the whole file. It is append-only and supersede-don't-edit, so the *last* entry on a topic wins.
 - **How a feature was designed / built** → `docs/superpowers/specs/<date>-<slug>-design.md` and `docs/superpowers/plans/<date>-<slug>.md`. Post-ship "Lessons learned" live in the plan.
 - **Postgres / Supabase technique** → `.agents/skills/supabase-postgres-best-practices/` (RLS, indexing, locking, pooling).
-- **PR Lab Notes** → `lab-note` skill (`.claude/skills/lab-note/`); see the Lab Note section below.
 
-CI gates worth knowing about: `arkaik.yml` validates the legacy bundle + journal on any `docs/arkaik/**` change (it should now rarely run — see below), `android.yml` builds on `apps/android/**`, `web.yml` runs ESLint + the Vitest suite on **every** PR (no path filter, so it can be a required check), `supabase.yml` typechecks, replays the migration chain on a local stack and runs the contract harnesses on `packages/supabase/**` (harnesses also nightly), `lab-note-reminder.yml` advises at PR-open (at merge the Arkaik GitHub App reads the note from the PR body; no workflow posts it).
+CI gates worth knowing about: `arkaik.yml` validates the legacy bundle + journal on any `docs/arkaik/**` change (it should now rarely run — see below), `android.yml` builds on `apps/android/**`, `web.yml` runs ESLint + the Vitest suite on **every** PR (no path filter, so it can be a required check), and `supabase.yml` typechecks, replays the migration chain on a local stack and runs the contract harnesses on `packages/supabase/**` (harnesses also nightly).
 
 ## The map is hosted — never edit `docs/arkaik/bundle.json`
 
@@ -160,9 +159,4 @@ Anything bigger than a single focused change is planned as **parts** (one part =
 5. Run lint, **the workspace test suite**, and build at the **scope of your change** (per task-size triage above), confirm green, then open the PR.
 6. **Never write a Kritik finding id (`F-…`) in a PR body unless that PR closes it.** The Arkaik App resolves *every* id it finds in the body — it does not distinguish "closes" from "mentions", so listing follow-up work by finding id marks that work done. Reference follow-ups by GitHub issue number instead. Five launch-gating PLT-04 findings were silently closed this way by #832 ([arkaik#440](https://github.com/alexisbohns/arkaik/issues/440)); the matrix then reports a store-compliance pillar as satisfied when no client has shipped it, and a hosted session cannot re-open a finding to repair it.
 7. If this PR established or reversed a **significant** decision, append one entry to `docs/decisions/log.md` (usually a no-op). Significance bar: would a future agent or human waste real time rediscovering or wrongly reversing it? Supersede-don't-edit — status changes are new appended entries, never edits to prior ones.
-8. **Lab Note (EN/FR)** — required for user-facing PRs; see the section below.
-
-### Lab Note requirement — read before opening a PR
-
-**The gate.** The PR has the `feat` label, **or** it touches a user-visible Arkaik view node → the PR body MUST carry one `## Lab Note (EN/FR)` section. Invoke the repo-local `lab-note` skill (`.claude/skills/lab-note/`) to author it; it takes precedence over the `lab-note@ariko` plugin skill and holds the schema, the quoting rules and the tone guide. Chore, refactor, infra, or docs-only → **no note**: delete the section from the PR body and add the `no-lab-note` label if the advisory reminder still comments. Never write to Supabase / `logs` from the dev loop.
-
+8. A PR body carries no `## Lab Note` section, even where an older plan under `docs/superpowers/plans/` asks for one: the Arkaik map records what shipped, and Lab posts are written in the admin.
