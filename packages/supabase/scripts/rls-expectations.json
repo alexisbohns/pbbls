@@ -589,19 +589,19 @@
     },
     "public.log_reactions": {
       "anon": {
-        "select": "all",
+        "select": "none",
         "insert": "none",
         "update": "none",
         "delete": "none"
       },
       "authenticated": {
-        "select": "all",
+        "select": "own",
         "insert": "own",
         "update": "none",
         "delete": "own"
       },
       "seed": "none",
-      "note": "Lab log reactions. Everyone, anon included, reads every reaction (user_id included). Not seedable without an admin publishing a log; only the blanket read is probed."
+      "note": "Lab log reactions. Each signed-in user reads only their own (#1530); everyone else gets counts from log_reaction_count through v_logs_with_counts. Not seedable without an admin publishing a log; only the blanket read is probed."
     },
     "public.logs": {
       "anon": {
@@ -1584,6 +1584,13 @@
         "p_owner": "$A"
       },
       "note": "Edge functions / migrations only; execute revoked from anon and authenticated."
+    },
+    "public.log_reaction_count": {
+      "kind": "public-read",
+      "args": {
+        "p_log_id": "$pebble"
+      },
+      "note": "Lab reaction count behind v_logs_with_counts: a number only, and 0 for a log the caller can't read (a draft, or any other id)."
     },
     "public.mark_achievements_seen": {
       "kind": "owner-only",
