@@ -2924,6 +2924,7 @@ export type Database = {
           size: number
         }[]
       }
+      log_reaction_count: { Args: { p_log_id: string }; Returns: number }
       mark_achievements_seen: { Args: { p_card: string }; Returns: undefined }
       path_moments: {
         Args: never
