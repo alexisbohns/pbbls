@@ -53,8 +53,8 @@ class ReportServiceTest {
 
     @Test
     fun `the receipt decodes the payload report_person returned on prod, verbatim`() {
-        // packages/supabase/fixtures/report-person-receipt.json
-        val raw = """{"id":"8ce2b8e9-1a29-456c-86a1-eb0d3b27c10a","status":"open","created_at":"2026-11-12T20:54:43Z"}"""
+        // packages/supabase/fixtures/report-person-receipt.json, copied byte for byte.
+        val raw = requireNotNull(javaClass.classLoader?.getResource("report-person-receipt.json")).readText()
         val receipt = Json { ignoreUnknownKeys = true }.decodeFromString(ReportReceipt.serializer(), raw)
         assertEquals("8ce2b8e9-1a29-456c-86a1-eb0d3b27c10a", receipt.id)
         assertEquals("open", receipt.status)
@@ -72,7 +72,8 @@ class ReportServiceTest {
     @Test
     fun `server conditions map to the three messages`() {
         assertEquals(R.string.report_error_unavailable, reportErrorMessage(DataError.Conflict("not_found")))
-        assertEquals(R.string.report_error_unavailable, reportErrorMessage(DataError.NotFound))
+        // A bare 404 (a missing function, say) is not the server's `not_found` verdict.
+        assertEquals(R.string.report_error_generic, reportErrorMessage(DataError.NotFound))
         assertEquals(R.string.report_error_own, reportErrorMessage(DataError.Conflict("cannot_report_own")))
         assertEquals(R.string.report_error_generic, reportErrorMessage(DataError.Conflict("invalid_reason")))
         assertEquals(R.string.report_error_generic, reportErrorMessage(DataError.Network))

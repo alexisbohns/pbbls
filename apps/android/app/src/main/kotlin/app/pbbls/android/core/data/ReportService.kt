@@ -116,7 +116,6 @@ data class ReportReceipt(
 @StringRes
 fun reportErrorMessage(error: DataError): Int =
     when (error) {
-        DataError.NotFound -> R.string.report_error_unavailable
         is DataError.Conflict ->
             when (error.code) {
                 "not_found" -> R.string.report_error_unavailable
@@ -124,6 +123,6 @@ fun reportErrorMessage(error: DataError): Int =
                 else -> R.string.report_error_generic
             }
 
-        DataError.Network, DataError.Unauthorized, DataError.Quota, is DataError.Unknown ->
+        DataError.NotFound, DataError.Network, DataError.Unauthorized, DataError.Quota, is DataError.Unknown ->
             R.string.report_error_generic
     }

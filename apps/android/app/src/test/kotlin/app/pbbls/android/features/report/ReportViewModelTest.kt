@@ -12,7 +12,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -144,11 +143,24 @@ class ReportViewModelTest {
     }
 
     @Test
+    fun `the cap never splits a surrogate pair`() {
+        val vm = model().apply { start(connection) }
+        val man = "👨" // 1 code point, 2 chars
+        vm.onDetailChange("a".repeat(999) + man + man)
+        assertEquals("a".repeat(999) + man, vm.detail)
+        assertEquals(1001, vm.detail.length)
+        assertEquals(1000, vm.detail.codePointCount(0, vm.detail.length))
+        assertTrue(Character.isLowSurrogate(vm.detail.last()))
+    }
+
+    @Test
     fun `start is idempotent for the same target`() {
         val vm = model().apply { start(connection) }
         vm.reason = ReportReason.SPAM
         vm.start(connection)
         assertEquals(ReportReason.SPAM, vm.reason)
-        assertNull(model().target)
+        val other = ReportTarget.Glyph("g-1")
+        vm.start(other)
+        assertEquals(other, vm.target)
     }
 }
