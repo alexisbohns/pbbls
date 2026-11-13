@@ -22,6 +22,9 @@ struct ConsentService: ConsentServicing {
             .select("kind, document_version")
             .is("withdrawn_at", value: nil)
             .is("superseded_at", value: nil)
+            // One attempt: the consent gate holds the app on this read, and the SDK's retries (three
+            // more, 60 s each) would outlast the gate's ceiling (`ConsentGateModel.ledgerRead`).
+            .retry(enabled: false)
             .execute()
             .value
     }
