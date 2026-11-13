@@ -65,7 +65,6 @@ struct ThemeLiteralsTests {
     /// Permanent: hits that are not chrome colours.
     static let allowlist: [String: (count: Int, reason: String)] = [
         "Features/Path/Render/PebbleAnimatedRenderView.swift": (1, "stroke-reveal mask"),
-        "Features/Welcome/HandcraftedLogoView.swift": (1, "stroke-reveal mask"),
         "Features/Connections/InviteSheet.swift": (1, "QR quiet zone must be white for scanners"),
         "Features/Capture/CaptureFlowView.swift": (1, "role: .destructive in a system dialog"),
         "Features/Path/MomentDeleteDialog.swift": (1, "role: .destructive in a system dialog"),

@@ -1,9 +1,9 @@
 import SwiftUI
 
 /// Pre-login landing AND loader. `RootView` keeps this view mounted for
-/// the entire loader hold so `HandcraftedLogoView` plays through without
-/// an interrupting view-swap: it draws on, then boils in place until the
-/// app is ready. While `contentRevealed` is false only the logo is
+/// the entire loader hold so `WobblingLogoView` plays through without
+/// an interrupting view-swap: the mark wobbles in place until the app is
+/// ready, then holds still. While `contentRevealed` is false only the logo is
 /// visible, centered at 33% width. When the parent flips `contentRevealed`
 /// true, the carousel + sign-in buttons + disclaimer are inserted with a
 /// `move(.bottom)` transition that pushes the logo up to its final header
@@ -16,9 +16,9 @@ import SwiftUI
 /// swaps to the tab bar.
 struct WelcomeView: View {
     let contentRevealed: Bool
-    /// True once the app is ready to be shown (drives boil → settle).
+    /// True once the app is ready to be shown (drives wobble → settle).
     let appReady: Bool
-    /// Fired when the loader fully settles (draw + boil done, app ready) —
+    /// Fired when the loader settles (the app is ready; at once if it already is) —
     /// bubbles to RootView's gate.
     var onLoaderSettled: () -> Void = {}
     let onCreateAccount: () -> Void
@@ -56,7 +56,7 @@ struct WelcomeView: View {
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
 
-                HandcraftedLogoView(
+                WobblingLogoView(
                     shouldSettle: appReady,
                     onSettled: onLoaderSettled
                 )

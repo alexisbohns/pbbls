@@ -2009,3 +2009,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** Android (#839) and web (#840) report people through `report_person`. A person reported from their invite and again after connecting is one open report. Remove-and-block calls `remove_connection(id, true)` in the same transaction; it is called, never re-emitted.
 - **Supersedes / Superseded-by:** none.
 - **Refs:** #838, #1008, `docs/superpowers/specs/2026-11-12-report-person-design.md`.
+
+## 2026-11-13 — New brand mark; the iOS launch logo only wobbles, and leaves the moment the app is ready
+
+- **Status:** taken
+- **Scope:** all
+- **Context:** The pebble-with-creature logo is replaced by a new mark: a pebble outline holding a spiral that reads as a fossil shell and a fingerprint, with a P at its centre (sr05-a, chosen from the 2026-11-13 mark study after a first-pass clearance of brand lookalikes, stock and trademark conflicts and cultural readings). On iOS the launch loader drew the old logo stroke by stroke, then boiled for at least `minBoilTicks` and settled only on a variant-0 frame, so even an instantly ready app waited several seconds.
+- **Decision:** `apps/ios/Pebbles/Resources/pbbls-mark.svg` (one filled even-odd path, viewBox 0 0 1024 1024) is the master of the mark; Android's launcher drawables and the web icons are generated from it. Icons keep their palettes. The iOS launch logo has no draw-on and no minimum: the mark wobbles (4 fps ping-pong over 3 jittered variants) from the first frame, and the app shows as soon as it is ready, readiness alone (auth resolved and reference data settled, or the 8 s ceiling). Reduce Motion shows the static mark behind the same gate.
+- **Why:** The loader's job is to reflect real readiness; a choreography with a floor turned a fast launch into a slow one. A filled mark cannot be drawn on stroke by stroke, and the wobble alone carries the hand-made feel.
+- **Consequences:** Any minimum duration or fixed hold added back to the launch path reintroduces the delay this entry removes. The mark is never described as a koru or a fern, and is never placed inside a triangle (clearance findings). The Android wobble splash is #1646; Android keeps the system splash until then.
+- **Supersedes / Superseded-by:** supersedes the iOS half of **2026-07-17 — App-open loader is a native handcrafted-glyph animation, gated on a loader-settle event** (the draw-on and the minimum boil); its readiness gate stays.
+- **Refs:** #1643, #1644, #1645, #1646.
