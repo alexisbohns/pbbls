@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:week-roll": "tsx scripts/test-week-roll.ts",
     "generate:splash": "tsx scripts/generate-splash-screens.ts",
+    "generate:icons": "tsx scripts/generate-app-icons.ts",
     "generate:m3": "tsx scripts/generate-m3-theme.ts",
     "generate:ios-colors": "tsx scripts/generate-ios-colors.ts",
     "generate:stone-carvings": "tsx scripts/generate-stone-carvings.ts"
