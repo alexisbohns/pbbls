@@ -44,11 +44,15 @@ grant execute on function public.log_reaction_count(uuid) to anon, authenticated
 
 -- ---------------------------------------------------------------------------
 -- 3. The view, same columns (base: 20260514000001). Still security_invoker, so
--- logs RLS keeps deciding which logs appear.
+-- logs RLS keeps deciding which logs appear. The lateral join stays: without
+-- it the view over one table becomes auto-updatable, a write path it never had.
 -- ---------------------------------------------------------------------------
 create or replace view public.v_logs_with_counts
 with (security_invoker = true) as
 select
   l.*,
-  public.log_reaction_count(l.id) as reaction_count
-from public.logs l;
+  rc.reaction_count
+from public.logs l
+left join lateral (
+  select public.log_reaction_count(l.id) as reaction_count
+) rc on true;
