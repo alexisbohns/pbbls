@@ -69,7 +69,7 @@ struct ThemeLiteralsTests {
         "Features/Connections/InviteSheet.swift": (1, "QR quiet zone must be white for scanners"),
         "Features/Capture/CaptureFlowView.swift": (1, "role: .destructive in a system dialog"),
         "Features/Path/MomentDeleteDialog.swift": (1, "role: .destructive in a system dialog"),
-        "Features/Profile/Sheets/SettingsSheet.swift": (1, "role: .destructive in a system dialog"),
+        "Features/Account/AccountDeletion.swift": (1, "role: .destructive in a system dialog"),
         "Features/Profile/Lists/SoulsListView.swift": (1, "role: .destructive in a system dialog"),
         "Features/Connections/ConnectionsListView.swift": (2, "role: .destructive in a system dialog"),
         "Features/Profile/Lists/CollectionsListView.swift": (1, "role: .destructive in a system dialog"),

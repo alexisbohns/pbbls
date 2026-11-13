@@ -22,8 +22,6 @@ struct SettingsSheet: View {
 
     @State private var displayName: String
     @State private var pickedGlyph: Glyph?
-    /// The "Confirm it's you" password (#977). Never persisted, cleared after every attempt.
-    @State private var currentPassword: String = ""
     @State private var newPassword: String = ""
     @State private var handle: String
     @State private var isPublicProfile: Bool
@@ -39,24 +37,19 @@ struct SettingsSheet: View {
     @AppStorage(HomeShortcutsPreference.layoutKey) private var shortcutsLayout = HomeShortcutsLayout.row
     @AppStorage(HomeShortcutsPreference.stonesKey) private var shortcutsStones = true
     @State private var isPresentingGlyphPicker = false
-    @State private var isPresentingDeleteConfirm = false
     #if DEBUG
     @Environment(OnboardingGateModel.self) private var onboardingGate
     @State private var isPresentingStoneLab = false
     @State private var isPresentingSpineLab = false
     @State private var isPresentingIconLab = false
     #endif
-    @State private var isDeleting = false
-    @State private var deleteError: String?
-    /// The action waiting on a recent sign-in, or nil.
-    @State private var reauthPurpose: ReauthPurpose?
-    @State private var isPresentingReauth = false
-    /// Set after a failed attempt; the alert re-presents with it.
-    @State private var reauthError: String?
+    /// Delete account: its dialogs, recent sign-in and the edge-function call (#1533).
+    @State private var deletion = AccountDeletion()
+    /// The recent sign-in a password change or going public waits on (#976).
+    @State private var saveAuth = RecentAuthPrompt()
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable { case displayName, newPassword, handle }
-    private enum ReauthPurpose { case save, delete }
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "settings-sheet")
 
@@ -107,16 +100,6 @@ struct SettingsSheet: View {
 
     private var isSignInFresh: Bool {
         RecentAuth.isFresh(accessToken: supabase.session?.accessToken)
-    }
-
-    private var reauthMethod: ReauthMethod {
-        ReauthMethod(providers: (supabase.session?.user.identities ?? []).map(\.provider))
-    }
-
-    /// Deleting an account with an Apple identity revokes the Apple grant
-    /// (#1456), which needs a fresh authorization code from the Apple sheet.
-    private var hasAppleIdentity: Bool {
-        (supabase.session?.user.identities ?? []).contains { $0.provider == "apple" }
     }
 
     private var isDirty: Bool {
@@ -173,7 +156,7 @@ struct SettingsSheet: View {
                     PebbleToolbarButton("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    if isSaving {
+                    if isSaving || saveAuth.isWorking {
                         ProgressView()
                     } else {
                         PebbleToolbarButton("Save") { Task { await save() } }
@@ -217,54 +200,13 @@ struct SettingsSheet: View {
                 IconLabView()
             }
             #endif
-            .confirmationDialog(
-                "Delete your account?",
-                isPresented: $isPresentingDeleteConfirm,
-                titleVisibility: .visible
-            ) {
-                Button("Delete forever", role: .destructive) {
-                    Task { await confirmDelete() }
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("This permanently deletes your account and everything in it: pebbles, snaps, souls, collections, glyphs and karma. Glyphs other pebblers bought stay available to them, without your name attached. This cannot be undone.")
-            }
-            .alert(
-                "Couldn't delete",
-                isPresented: Binding(
-                    get: { deleteError != nil },
-                    set: { if !$0 { deleteError = nil } }
-                ),
-                presenting: deleteError
-            ) { _ in
-                Button("OK", role: .cancel) { deleteError = nil }
-            } message: { message in
-                Text(message)
-            }
-            .alert("Confirm it's you", isPresented: $isPresentingReauth) {
-                switch reauthMethod {
-                case .password:
-                    SecureField("Password", text: $currentPassword)
-                        .textContentType(.password)
-                    Button("Confirm") { Task { await submitReauth() } }
-                        .disabled(currentPassword.isEmpty)
-                case .google:
-                    Button("Continue with Google") { Task { await submitReauth() } }
-                case .apple:
-                    Button("Continue with Apple") { Task { await submitReauth() } }
-                }
-                Button("Cancel", role: .cancel) { cancelReauth() }
-            } message: {
-                if let reauthError {
-                    Text(reauthError)
-                } else {
-                    switch reauthMethod {
-                    case .password: Text("Enter your password to continue.")
-                    case .google: Text("Continue with Google to confirm it's you.")
-                    case .apple: Text("Continue with Apple to confirm it's you.")
-                    }
-                }
-            }
+            .accountDeletion(
+                deletion,
+                // swiftlint:disable:next line_length
+                message: "This permanently deletes your account and everything in it: pebbles, snaps, souls, collections, glyphs and karma. Glyphs other pebblers bought stay available to them, without your name attached. This cannot be undone.",
+                onDeleted: { dismiss() }
+            )
+            .recentAuthPrompt(saveAuth)
         }
     }
 
@@ -626,76 +568,25 @@ struct SettingsSheet: View {
                     .foregroundStyle(Color.pebbles.onSurface)
             }
             .buttonStyle(.plain)
-            .disabled(isDeleting)
+            .disabled(deletion.isBusy)
             .pebblesListRow(position: .top)
             Button {
-                isPresentingDeleteConfirm = true
+                deletion.begin()
             } label: {
                 HStack {
                     Label { Text("Delete account") } icon: { PbblsGlyphView(.trash, .row) }
                         .foregroundStyle(Color.pebbles.error)
                     Spacer()
-                    if isDeleting {
+                    if deletion.isBusy {
                         ProgressView()
                     }
                 }
             }
             .buttonStyle(.plain)
-            .disabled(isDeleting)
+            .disabled(deletion.isBusy)
             .pebblesListRow(position: .bottom)
         } header: {
             Text("Account").pebblesSectionHeader()
-        }
-    }
-
-    /// Deletion needs a recent sign-in (#976): a stale session goes through
-    /// "Confirm it's you" between the confirmation and the call.
-    private func confirmDelete() async {
-        guard !isDeleting, reauthPurpose == nil else { return }
-        guard isSignInFresh else {
-            requestReauth(for: .delete)
-            return
-        }
-        await deleteAccount()
-    }
-
-    /// Full erasure via the delete-account edge function (purge + storage +
-    /// auth user), then a local sign-out: the server session is already gone,
-    /// and the session stream flipping to signed-out swaps RootView to Welcome.
-    ///
-    /// An Apple account also sends a fresh Apple authorization code so the
-    /// server revokes the grant (#1456). An Apple re-auth already produced one;
-    /// otherwise the Apple sheet runs once here, and closing it abandons the
-    /// deletion.
-    private func deleteAccount(appleCode: String? = nil) async {
-        guard !isDeleting else { return }
-        isDeleting = true
-        do {
-            var code = appleCode
-            if code == nil && hasAppleIdentity {
-                code = try await supabase.appleAuthorizationCodeForDeletion()
-            }
-            if let code {
-                try await supabase.client.functions.invoke(
-                    "delete-account",
-                    options: FunctionInvokeOptions(body: ["apple_authorization_code": code])
-                )
-            } else {
-                try await supabase.client.functions.invoke("delete-account")
-            }
-            await supabase.signOut()
-            dismiss()
-        } catch let error where RecentAuth.isReauthRequired(error) {
-            // The server's clock disagrees with ours (a 428): confirm, then retry.
-            logger.info("delete-account wants a recent sign-in")
-            isDeleting = false
-            requestReauth(for: .delete)
-        } catch is CancellationError {
-            isDeleting = false
-        } catch {
-            logger.error("account deletion failed: \(error.localizedDescription, privacy: .private)")
-            deleteError = String(localized: "We couldn't delete your account. Nothing was removed. Please try again.")
-            isDeleting = false
         }
     }
 
@@ -717,87 +608,10 @@ struct SettingsSheet: View {
         return nil
     }
 
-    // MARK: - Recent sign-in (#976, #977)
-
-    private func requestReauth(for purpose: ReauthPurpose) {
-        reauthPurpose = purpose
-        reauthError = nil
-        currentPassword = ""
-        isPresentingReauth = true
-    }
-
-    private func cancelReauth() {
-        reauthPurpose = nil
-        reauthError = nil
-        currentPassword = ""
-    }
-
-    /// Password: signs in again as the same user. Google and Apple: re-run the
-    /// provider sheet. On success the pending action runs at once; a failure
-    /// re-presents the alert with the reason.
-    private func submitReauth() async {
-        guard let purpose = reauthPurpose else { return }
-        let method = reauthMethod
-        if method == .password && currentPassword.isEmpty {
-            cancelReauth()
-            return
-        }
-        // The row and toolbar spinners double as the alert's working state.
-        switch purpose {
-        case .save: isSaving = true
-        case .delete: isDeleting = true
-        }
-        let appleCode: String?
-        do {
-            appleCode = try await reauthenticate(with: method)
-        } catch {
-            isSaving = false
-            isDeleting = false
-            reauthFailed(with: error)
-            return
-        }
-        cancelReauth()
-        isSaving = false
-        isDeleting = false
-        switch purpose {
-        case .save: await performSave()
-        case .delete: await deleteAccount(appleCode: appleCode)
-        }
-    }
-
-    /// Returns Apple's authorization code for an Apple re-auth, nil otherwise.
-    private func reauthenticate(with method: ReauthMethod) async throws -> String? {
-        switch method {
-        case .password:
-            try await supabase.reauthenticate(password: currentPassword)
-            return nil
-        case .google:
-            try await supabase.reauthenticateWithGoogle()
-            return nil
-        case .apple:
-            return try await supabase.reauthenticateWithApple()
-        }
-    }
-
-    private func reauthFailed(with error: Error) {
-        currentPassword = ""
-        // Closing the provider sheet abandons the action. A mismatch already
-        // signed that other account out, and RootView swaps to Welcome.
-        if error is CancellationError || error is ReauthAccountMismatchError {
-            cancelReauth()
-            return
-        }
-        logger.error("re-auth failed: \(error.localizedDescription, privacy: .private)")
-        reauthError = RecentAuth.isWrongPassword(error)
-            ? String(localized: "That password doesn't match. Try again.")
-            : String(localized: "We couldn't confirm it's you. Please try again.")
-        isPresentingReauth = true
-    }
-
     private func save() async {
-        guard isDirty, !isSaving, reauthPurpose == nil else { return }
+        guard isDirty, !isSaving, !saveAuth.isPending, !deletion.recentAuth.isPending else { return }
         if saveNeedsRecentAuth && !isSignInFresh {
-            requestReauth(for: .save)
+            saveAuth.request { _ in await performSave() }
             return
         }
         await performSave()
@@ -882,7 +696,7 @@ struct SettingsSheet: View {
             // the whole save after the re-auth is safe.
             logger.info("settings save wants a recent sign-in")
             isSaving = false
-            requestReauth(for: .save)
+            saveAuth.request { _ in await performSave() }
         } catch {
             logger.error("settings save failed: \(error.localizedDescription, privacy: .private)")
             saveError = String(localized: "Couldn't save your changes. Please try again.")
