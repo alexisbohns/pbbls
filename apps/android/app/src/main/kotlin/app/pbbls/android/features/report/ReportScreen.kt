@@ -52,6 +52,9 @@ import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.ReportReason
 import app.pbbls.android.core.model.ReportTarget
 
+/** The M3 disabled content alpha, applied by hand: the top-bar button paints its own colour. */
+private const val DISABLED_ALPHA = 0.38f
+
 /**
  * Report a person or a glyph (#839, ports iOS `ReportSheet`): one reason,
  * optional details and, for a connection, remove-and-block in the same step.
@@ -117,6 +120,7 @@ fun ReportContent(
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
+    val disabled = colors.onSurface.copy(alpha = DISABLED_ALPHA)
     val sent = phase is ReportPhase.Sent
     val sending = phase is ReportPhase.Sending
     // From the parameters, never from the ViewModel: its `canSend` reads a flow
@@ -139,6 +143,8 @@ fun ReportContent(
                         text = stringResource(R.string.action_cancel),
                         onClick = onCancel,
                         enabled = !sending,
+                        // The shared button paints its own colour, which hides the disabled dim.
+                        color = if (sending) disabled else colors.onSurfaceVariant,
                     )
                 }
             },
@@ -158,7 +164,7 @@ fun ReportContent(
                             text = stringResource(R.string.report_send),
                             onClick = onSend,
                             enabled = canSend,
-                            color = colors.primary,
+                            color = if (canSend) colors.primary else disabled,
                         )
                 }
             },
@@ -293,7 +299,13 @@ private fun ListGroupItemScope.ReasonItem(
         selected = selected,
         onClick = onClick,
         shapes = shapes,
-        colors = colors,
+        // The RadioButton alone shows the choice, as iOS shows only a check: the selected
+        // container stays the unselected one, and its text stays the ordinary content colour.
+        colors =
+            colors.copy(
+                selectedContainerColor = colors.containerColor,
+                selectedContentColor = colors.contentColor,
+            ),
         enabled = enabled,
         // The row is the one control TalkBack reads ("radio button, selected");
         // the RadioButton takes no click, so it is not a second focus target.
