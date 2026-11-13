@@ -10,6 +10,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.core.model.AuthMode
 import app.pbbls.android.core.model.GlyphShelf
+import app.pbbls.android.core.model.ReportTarget
 import app.pbbls.android.core.ui.GlyphCarveSlot
 import app.pbbls.android.core.ui.GlyphPickerSlot
 import app.pbbls.android.core.ui.HomeMonthSlot
@@ -51,6 +52,7 @@ import app.pbbls.android.features.profile.SoulDetailScreen
 import app.pbbls.android.features.profile.SoulFormScreen
 import app.pbbls.android.features.profile.SoulsListScreen
 import app.pbbls.android.features.profile.support.CrisisResourcesScreen
+import app.pbbls.android.features.report.ReportScreen
 import app.pbbls.android.features.welcome.WelcomeScreen
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -404,6 +406,15 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 
     entry<PebblesKey.AcceptInvite>(metadata = NavTransitions.forKey(PebblesKey.AcceptInvite(""))) { key ->
         AcceptInviteScreen(token = key.token, onDismiss = navigator::goBack)
+    }
+
+    entry<PebblesKey.Report>(metadata = NavTransitions.forKey(PebblesKey.Report(ReportTarget.Glyph("")))) { key ->
+        ReportScreen(
+            target = key.target,
+            onCancel = navigator::goBack,
+            // Part 2 pops the invite too; for now every report just closes.
+            onFinished = { navigator.goBack() },
+        )
     }
 }
 
