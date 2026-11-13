@@ -424,13 +424,10 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     entry<PebblesKey.Report>(metadata = NavTransitions.forKey(PebblesKey.Report(ReportTarget.Glyph("")))) { key ->
         ReportScreen(
             target = key.target,
-            onCancel = navigator::goBack,
-            // A reported invite is not accepted: pop the invite beneath the report too, so Done lands where the
-            // link was opened. Both pops stay on this tab's stack (the invite was pushed there, so it sits above its root).
-            onFinished = {
-                navigator.goBack()
-                if (key.target is ReportTarget.Invite) navigator.goBack()
-            },
+            // Both exits are idempotent: a double tap, or Done and Back together, must not pop what is beneath.
+            onCancel = { navigator.closeDetail(key) },
+            // A reported invite is not accepted, so its accept sheet closes with the report.
+            onFinished = { navigator.closeReport(key) },
         )
     }
 }

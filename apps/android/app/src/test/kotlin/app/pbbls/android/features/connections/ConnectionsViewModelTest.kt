@@ -136,8 +136,43 @@ class ConnectionsViewModelTest {
             viewModel.onResumed()
             advanceUntilIdle()
 
+            // The refresh ran, hit the failure, and the list survived it.
+            assertEquals(2, service.listCount)
+            assertNull(service.failNext)
             val state = viewModel.uiState.value as ConnectionsUiState.Content
             assertEquals(listOf("a"), state.connections.map { it.connectionId })
+        }
+
+    /** The list read could land before the server severs the connection and bring the removed row back. */
+    @Test
+    fun `a resume while a removal is in flight does not reload`() =
+        runTest {
+            val service = FakeConnectionsService(connections = listOf(connection("a"), connection("b")))
+            val viewModel = viewModel(service)
+            advanceUntilIdle()
+            viewModel.onResumed()
+
+            val gate = CompletableDeferred<Unit>()
+            service.writeGate = gate
+            viewModel.requestRemoval(connection("a"))
+            viewModel.confirmRemoval(block = true)
+            advanceUntilIdle()
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(1, service.listCount)
+            assertEquals(
+                listOf("b"),
+                (viewModel.uiState.value as ConnectionsUiState.Content).connections.map { it.connectionId },
+            )
+
+            // Once the request has finished, a return refreshes again.
+            service.connections = listOf(connection("b"))
+            gate.complete(Unit)
+            advanceUntilIdle()
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(2, service.listCount)
         }
 
     // MARK: - Removal

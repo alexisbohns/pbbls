@@ -76,6 +76,9 @@ class ConnectionsViewModel
         private var isLoaded = false
         private var resumeCount = 0
 
+        /** Removals whose request has not finished: a resume reload then would bring the row back. */
+        private var removalsInFlight = 0
+
         private val _uiState = MutableStateFlow<ConnectionsUiState>(ConnectionsUiState.Loading)
         val uiState: StateFlow<ConnectionsUiState> = _uiState.asStateFlow()
 
@@ -101,10 +104,15 @@ class ConnectionsViewModel
          * The destination came back to the foreground. The first resume is skipped
          * because `init` has already loaded; every later one is a return, and
          * re-reads without the spinner. A failed refresh keeps the list that is up.
+         *
+         * Skipped while a removal is in flight: the list read could land before the
+         * server has severed the connection and put the optimistically removed row
+         * back. The removal's own success path needs no reload, and its failure path
+         * reconciles.
          */
         fun onResumed() {
             resumeCount += 1
-            if (resumeCount > 1) reload()
+            if (resumeCount > 1 && removalsInFlight == 0) reload()
         }
 
         private fun reload() {
@@ -161,22 +169,34 @@ class ConnectionsViewModel
             connections = connections.filterNot { it.connectionId == target.connectionId }
             publish()
 
+            removalsInFlight += 1
             viewModelScope.launch {
                 withContext(NonCancellable) {
-                    runCatchingCancellable {
-                        service.remove(connectionId = target.connectionId, block = block)
-                    }.onFailure {
-                        Log.e(TAG, "connection removal failed", it)
-                        val res = connectionsErrorMessage(it.toDataError())
-                        _covers.update { covers -> covers.copy(removeErrorRes = res) }
-                        // `fetch()` directly, not `reload()`: reload launches a
-                        // fresh child of viewModelScope, which NonCancellable
-                        // does not cover, so the reconcile would be cancelled
-                        // exactly in the case this block exists for.
-                        loadJob?.cancel()
-                        fetch()
+                    try {
+                        removeAndReconcile(target, block)
+                    } finally {
+                        removalsInFlight -= 1
                     }
                 }
+            }
+        }
+
+        private suspend fun removeAndReconcile(
+            target: Connection,
+            block: Boolean,
+        ) {
+            runCatchingCancellable {
+                service.remove(connectionId = target.connectionId, block = block)
+            }.onFailure {
+                Log.e(TAG, "connection removal failed", it)
+                val res = connectionsErrorMessage(it.toDataError())
+                _covers.update { covers -> covers.copy(removeErrorRes = res) }
+                // `fetch()` directly, not `reload()`: reload launches a
+                // fresh child of viewModelScope, which NonCancellable
+                // does not cover, so the reconcile would be cancelled
+                // exactly in the case this block exists for.
+                loadJob?.cancel()
+                fetch()
             }
         }
     }
