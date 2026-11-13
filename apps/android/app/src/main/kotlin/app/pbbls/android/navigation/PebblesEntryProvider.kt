@@ -224,7 +224,12 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         clazzContentKey = { key -> "glyph-detail:${key.item.id}" },
         metadata = NavTransitions.push + PanePairs.metadataFor<PebblesKey.GlyphDetail>(),
     ) { key ->
-        GlyphDetailScreen(item = key.item)
+        GlyphDetailScreen(
+            item = key.item,
+            // Report is a full page: BottomSheetSceneStrategy claims only an entry that asks for the sheet,
+            // so pushed on top it replaces the sheet scene, and Back brings the sheet back.
+            onReport = { navigator.navigate(PebblesKey.Report(ReportTarget.Glyph(key.item.id))) },
+        )
     }
 
     entry<PebblesKey.Lab>(metadata = NavTransitions.forKey(PebblesKey.Lab)) {

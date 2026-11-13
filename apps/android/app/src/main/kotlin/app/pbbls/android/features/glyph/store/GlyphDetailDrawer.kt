@@ -23,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,11 +72,16 @@ private const val TAG = "glyph-detail"
  * landscape phone's 3-button bar), never the start, which the rail or the
  * sheet already owns. In the sheet the top is consumed by the sheet's own
  * insets, so only the bottom and end are left.
+ *
+ * [onReport] opens the report screen (#839), which this feature cannot import:
+ * the host fills it. The panel offers it only for a priced glyph the user does
+ * not own.
  */
 @Composable
 fun GlyphDetailScreen(
     item: GlyphGridItem,
     modifier: Modifier = Modifier,
+    onReport: (() -> Unit)? = null,
     viewModel: GlyphDetailViewModel = hiltViewModel(),
 ) {
     val balance by viewModel.balance.collectAsStateWithLifecycle()
@@ -87,6 +93,7 @@ fun GlyphDetailScreen(
             market = viewModel.market,
             onRecorded = { result -> viewModel.onRecorded(item, result) },
             hapticsOn = viewModel.hapticsOn,
+            onReport = onReport,
         )
     }
 }
@@ -131,6 +138,11 @@ internal fun GlyphSwapPanel(
      * hand control back to the caller".
      */
     onSwapped: (BuyGlyphResult) -> Unit = {},
+    /**
+     * Opens the report screen. Null where a pushed entry would land under the host
+     * (the tabbed picker's sheet), so no Report is offered there.
+     */
+    onReport: (() -> Unit)? = null,
 ) {
     var isOwned by remember(item.id) { mutableStateOf(item.owned) }
     var acquiredAt by remember(item.id) { mutableStateOf(item.acquiredAt) }
@@ -149,6 +161,7 @@ internal fun GlyphSwapPanel(
         isBuying = isBuying,
         errorRes = errorRes,
         hapticsOn = hapticsOn,
+        onReport = onReport,
         onConfirm = {
             isBuying = true
             errorRes = null
@@ -199,6 +212,7 @@ internal fun GlyphDetailDrawerContent(
     errorRes: Int?,
     onConfirm: suspend () -> Boolean,
     hapticsOn: Boolean,
+    onReport: (() -> Unit)? = null,
 ) {
     val colors = MaterialTheme.colorScheme
     val canAfford = currentBalance >= item.price
@@ -336,6 +350,18 @@ internal fun GlyphDetailDrawerContent(
                 style = MaterialTheme.typography.labelMediumEmphasized,
                 color = colors.error,
             )
+        }
+
+        // A market glyph you don't own (iOS: price > 0 && !isOwned); the server's
+        // cannot_report_own covers the rest.
+        if (onReport != null && item.price > 0 && !isOwned) {
+            TextButton(onClick = onReport) {
+                Text(
+                    text = stringResource(R.string.report_title_glyph),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.onSurfaceVariant,
+                )
+            }
         }
     }
 }
