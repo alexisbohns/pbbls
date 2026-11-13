@@ -39,6 +39,7 @@
     "db:verify:purge": "deno run --allow-env --allow-net scripts/verify-account-purge.ts",
     "db:verify:moderation": "deno run --allow-env --allow-net scripts/verify-moderation-state.ts",
     "db:verify:sweep": "deno run --allow-env --allow-net scripts/verify-orphan-snap-sweep.ts",
+    "db:seed:review": "deno run --allow-env --allow-net scripts/seed-review-account.ts",
     "db:reference:pull": "deno run --allow-env --allow-net --allow-write scripts/pull-reference-data.ts"
   }
 }
