@@ -394,10 +394,10 @@ ceremony. The trigger to revisit is a **second regular contributor** or a
   (the themed-icon layer minSdk 33 exists for). Both drawables, and Welcome's
   `drawable/pbbls_logo.xml` (#856), are produced by
   `node scripts/logo-svg-to-launcher-icon.mjs` from the *iOS* brand mark
-  (`apps/ios/Pebbles/Resources/pbbls-logo-loader.svg`). Re-run it when the mark
-  changes rather than editing the XML, or the two surfaces drift. There are no
-  `mipmap-*dpi` PNG buckets: the layers are vectors, so one file serves all
-  densities.
+  (`apps/ios/Pebbles/Resources/pbbls-mark.svg`, one filled even-odd path, #1644).
+  Re-run it when the mark changes rather than editing the XML, or the two
+  surfaces drift. There are no `mipmap-*dpi` PNG buckets: the layers are
+  vectors, so one file serves all densities.
 - **`values/colors.xml` is only for what the platform reads before Compose
   runs**: the icon ground and the splash background (with its `values-night`
   override). It duplicates three values from `core/designsystem/ColorSchemes.kt`
