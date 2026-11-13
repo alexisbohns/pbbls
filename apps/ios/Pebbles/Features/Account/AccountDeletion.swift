@@ -11,7 +11,8 @@ import os
 final class AccountDeletion {
     var isConfirming = false
     private(set) var isDeleting = false
-    var error: String?
+    /// The last attempt failed and nothing was removed. The caller words the alert.
+    var didFail = false
     let recentAuth = RecentAuthPrompt()
 
     /// Deleting, or confirming it's you on the way there. Drives the caller's spinner.
@@ -79,7 +80,7 @@ final class AccountDeletion {
             isDeleting = false
         } catch {
             logger.error("account deletion failed: \(error.localizedDescription, privacy: .private)")
-            self.error = String(localized: "We couldn't delete your account. Nothing was removed. Please try again.")
+            didFail = true
             isDeleting = false
         }
     }
@@ -93,14 +94,16 @@ final class AccountDeletion {
 
 private struct AccountDeletionModifier: ViewModifier {
     @Bindable var deletion: AccountDeletion
+    let title: LocalizedStringResource
     let message: LocalizedStringResource
+    let failure: LocalizedStringResource
     let onDeleted: () -> Void
     @Environment(SupabaseService.self) private var supabase
 
     func body(content: Content) -> some View {
         content
             .confirmationDialog(
-                "Delete your account?",
+                Text(title),
                 isPresented: $deletion.isConfirming,
                 titleVisibility: .visible
             ) {
@@ -111,30 +114,28 @@ private struct AccountDeletionModifier: ViewModifier {
             } message: {
                 Text(message)
             }
-            .alert(
-                "Couldn't delete",
-                isPresented: Binding(
-                    get: { deletion.error != nil },
-                    set: { if !$0 { deletion.error = nil } }
-                ),
-                presenting: deletion.error
-            ) { _ in
-                Button("OK", role: .cancel) { deletion.error = nil }
-            } message: { message in
-                Text(message)
+            .alert("Couldn't delete", isPresented: $deletion.didFail) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(failure)
             }
             .recentAuthPrompt(deletion.recentAuth)
     }
 }
 
 extension View {
-    /// Draws `deletion`'s confirmation (with `message`), its error and its
-    /// "Confirm it's you" alert. `onDeleted` runs after the local sign-out.
+    /// Draws `deletion`'s confirmation (`title`, `message`), its failure alert
+    /// and its "Confirm it's you" alert. `onDeleted` runs after the local
+    /// sign-out. Settings and the gate word them differently in French (vous, tu).
     func accountDeletion(
         _ deletion: AccountDeletion,
+        title: LocalizedStringResource = "Delete your account?",
         message: LocalizedStringResource,
+        failure: LocalizedStringResource = "We couldn't delete your account. Nothing was removed. Please try again.",
         onDeleted: @escaping () -> Void = {}
     ) -> some View {
-        modifier(AccountDeletionModifier(deletion: deletion, message: message, onDeleted: onDeleted))
+        modifier(AccountDeletionModifier(
+            deletion: deletion, title: title, message: message, failure: failure, onDeleted: onDeleted
+        ))
     }
 }
