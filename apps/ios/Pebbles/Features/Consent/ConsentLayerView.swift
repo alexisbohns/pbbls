@@ -21,7 +21,7 @@ struct ConsentLayerView: View {
                     // The launch's loader, in the same place: the surface can last a few seconds
                     // (`OnboardingBounds`), and never as an empty screen. The logo hides itself from
                     // VoiceOver, so the label goes on an element of its own.
-                    HandcraftedLogoView(shouldSettle: false, startSettled: true)
+                    WobblingLogoView(shouldSettle: false, mode: .cover)
                         .containerRelativeFrame(.horizontal) { width, _ in width * 0.33 }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .accessibilityElement(children: .ignore)

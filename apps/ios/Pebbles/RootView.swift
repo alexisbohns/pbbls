@@ -2,20 +2,21 @@ import SwiftUI
 import os
 
 /// Top-level auth gate. The loader and pre-login welcome are merged into
-/// a single `WelcomeView`, which hosts `HandcraftedLogoView` as its splash:
-/// the logo plays a draw-on, then boils in place until the app is ready.
+/// a single `WelcomeView`, which hosts `WobblingLogoView` as its splash:
+/// the mark wobbles in place from the first frame until the app is ready.
 ///
 /// At cold launch `WelcomeView` is rendered with `contentRevealed: false`
-/// — only the logo is visible, centered, drawing on then boiling. It boils
-/// against `dataReady` (auth resolved AND both reference-data services
-/// settled — success or failure — OR the safety ceiling elapsed) and, once it
-/// has also boiled its minimum, emits `onLoaderSettled`. That event sets
+/// — only the logo is visible, centered, wobbling. It wobbles against
+/// `dataReady` (auth resolved AND both reference-data services
+/// settled — success or failure — OR the safety ceiling elapsed) and emits
+/// `onLoaderSettled` the moment that is true (at once, if it already is), with
+/// no minimum duration. That event sets
 /// `loaderSettled`, making `canProceed` true, and one of two things happens:
 ///   - if the user is unauthenticated, `contentRevealed` flips true and
 ///     `WelcomeView` slides the carousel + sign-in buttons + disclaimer
-///     in from the bottom, pushing the logo up to its header position;
+///     in from the bottom, pushing the (now static) logo up to its header position;
 ///   - if the user is authenticated, the stack swaps to `PebblesTabView`, with the
-///     loader held over it (via `startSettled`) until the first timeline load
+///     loader held over it (cover mode: it wobbles until removed) until the first timeline load
 ///     settles — so `PathView`'s own spinner never flashes. A launch restored
 ///     onto another tab skips the loader: `restoreTabs()` marks the feed as
 ///     handed off, since `TabView` only builds Path when it is first shown.
@@ -68,7 +69,7 @@ struct RootView: View {
 
     /// Safety ceiling: if reference data never settles (e.g. a wedged
     /// network beyond the client's own timeout), open the app anyway rather
-    /// than boiling indefinitely. Normal launches settle in well under this.
+    /// than wobbling indefinitely. Normal launches settle in well under this.
     private static let loaderCeilingSeconds: TimeInterval = 8
 
     private enum AuthRoute: Hashable {
@@ -98,9 +99,9 @@ struct RootView: View {
             || loaderCeilingReached
     }
 
-    /// The app is shown only once the loader has fully settled — drawn on AND
-    /// boiled the minimum AND `dataReady`. The handcrafted logo IS the loader,
-    /// so its own settle event (not a computed time) drives the transition.
+    /// The app is shown only once the loader has settled, which is `dataReady`
+    /// reaching the splash. The wobbling logo IS the loader, so its own settle
+    /// event (not a computed time) drives the transition.
     private var canProceed: Bool { loaderSettled }
 
     private var canShowAuthedTabs: Bool {
@@ -175,9 +176,9 @@ struct RootView: View {
 
                     if holdsLoader {
                         // Hold the loader over the home feed load so its own
-                        // spinner never flashes. `startSettled` skips a second
-                        // draw-on — the logo just boils, then fades out.
-                        HandcraftedLogoView(shouldSettle: false, startSettled: true)
+                        // spinner never flashes. Cover mode: the logo just
+                        // wobbles, then fades out.
+                        WobblingLogoView(shouldSettle: false, mode: .cover)
                             .containerRelativeFrame(.horizontal) { width, _ in width * 0.33 }
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .background(Color.pebbles.surface.ignoresSafeArea())
