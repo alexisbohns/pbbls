@@ -34,7 +34,7 @@ There is no root `test` task. Tests: Vitest on web, Swift Testing on iOS (never 
 
 ## Task-size triage (read first)
 
-Match ceremony to task size. Heavy workflows on small tasks are the main reason agent work feels slow.
+Match ceremony to task size. Heavy workflows on small tasks are the main reason agent work feels slow. This triage decides whether a process skill (brainstorming, planning, TDD, review) or a subagent runs; a skill's or a plugin's own "always invoke me" wording does not override it.
 
 **Small (≤ ~150 LOC, single file or tightly scoped):**
 - Skip brainstorming, planning, TDD ceremony. Just make the change.
@@ -59,7 +59,7 @@ Keep CLAUDE.md short. Read these when relevant — don't pre-load:
 - **UI / styling / a11y** → `docs/agents/ui-and-styling.md` (atomic design, shadcn-first, base-nova quirks, theming, WCAG)
 - **Data layer / Supabase / async** → `docs/agents/data-and-async.md` (DataProvider, auth deadlock, withTimeout, error logging)
 - **Product architecture map** → `arkaik` skill (`.claude/skills/arkaik/`). The map is **hosted**, not a file in this repo — see below
-- **Why something is the way it is** → `docs/decisions/log.md`. Read it before making an architectural call — it is append-only and supersede-don't-edit, so the *last* entry on a topic wins.
+- **Why something is the way it is** → `docs/decisions/log.md`. Search it before making an architectural call: `grep -n '^## ' docs/decisions/log.md` lists every entry by date and title; read the entries on your topic, not the whole file. It is append-only and supersede-don't-edit, so the *last* entry on a topic wins.
 - **How a feature was designed / built** → `docs/superpowers/specs/<date>-<slug>-design.md` and `docs/superpowers/plans/<date>-<slug>.md`. Post-ship "Lessons learned" live in the plan.
 - **Postgres / Supabase technique** → `.agents/skills/supabase-postgres-best-practices/` (RLS, indexing, locking, pooling).
 - **PR Lab Notes** → `lab-note` skill (`.claude/skills/lab-note/`); see the Lab Note section below.
