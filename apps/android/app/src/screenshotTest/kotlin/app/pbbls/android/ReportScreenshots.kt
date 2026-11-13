@@ -41,18 +41,10 @@ private fun ReportPreviewFrame(
 
 @PreviewTest
 @Preview(name = "Report · connection", showBackground = true, heightDp = 1200)
+@PreviewLargeFont
+@PreviewFrench
 @Composable
 private fun ReportConnectionPreview() {
-    ReportPreviewFrame(
-        target = ReportTarget.Connection("c1", "Ana"),
-        reason = ReportReason.HARASSMENT,
-    )
-}
-
-@PreviewTest
-@Preview(name = "Report · connection fr", showBackground = true, locale = "fr", heightDp = 1200)
-@Composable
-private fun ReportConnectionFrenchPreview() {
     ReportPreviewFrame(
         target = ReportTarget.Connection("c1", "Ana"),
         reason = ReportReason.HARASSMENT,

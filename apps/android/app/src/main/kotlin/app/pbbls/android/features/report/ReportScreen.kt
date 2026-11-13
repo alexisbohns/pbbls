@@ -40,7 +40,6 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.ListGroup
-import app.pbbls.android.core.designsystem.ListGroupHeader
 import app.pbbls.android.core.designsystem.ListGroupItemScope
 import app.pbbls.android.core.designsystem.ListGroupSwitchItem
 import app.pbbls.android.core.designsystem.PbblsGlyph
@@ -236,18 +235,17 @@ private fun ReportForm(
                 },
         )
 
-        Column {
-            ListGroupHeader(text = stringResource(R.string.report_details_header))
-            OutlinedTextField(
-                value = detail,
-                onValueChange = onDetail,
-                enabled = enabled,
-                placeholder = { Text(stringResource(R.string.report_details_placeholder)) },
-                minLines = 3,
-                maxLines = 8,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
+        OutlinedTextField(
+            value = detail,
+            onValueChange = onDetail,
+            enabled = enabled,
+            // The label is the field's accessible name once text replaces the placeholder.
+            label = { Text(stringResource(R.string.report_details_header)) },
+            placeholder = { Text(stringResource(R.string.report_details_placeholder)) },
+            minLines = 3,
+            maxLines = 8,
+            modifier = Modifier.fillMaxWidth(),
+        )
 
         if (target.offersBlock) {
             ListGroup(
