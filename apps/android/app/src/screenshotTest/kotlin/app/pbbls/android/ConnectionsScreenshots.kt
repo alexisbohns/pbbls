@@ -149,6 +149,27 @@ private fun AcceptValidPreview() {
             onAccept = {},
             onRetry = {},
             onDismiss = {},
+            onReport = {},
+        )
+    }
+}
+
+@PreviewTest
+@Preview(name = "Accept · valid invite, accepting", showBackground = true)
+@Composable
+private fun AcceptValidAcceptingPreview() {
+    PebblesTheme {
+        AcceptInviteContent(
+            // Both buttons are disabled while the accept is in flight.
+            uiState =
+                AcceptInviteUiState.Ready(
+                    InvitePreview(status = "valid", inviter = peer("Lea")),
+                    isAccepting = true,
+                ),
+            onAccept = {},
+            onRetry = {},
+            onDismiss = {},
+            onReport = {},
         )
     }
 }
@@ -167,6 +188,7 @@ private fun AcceptAlreadyConnectedPreview() {
             onAccept = {},
             onRetry = {},
             onDismiss = {},
+            onReport = {},
         )
     }
 }
@@ -182,6 +204,7 @@ private fun AcceptUnusablePreview() {
             onAccept = {},
             onRetry = {},
             onDismiss = {},
+            onReport = {},
         )
     }
 }

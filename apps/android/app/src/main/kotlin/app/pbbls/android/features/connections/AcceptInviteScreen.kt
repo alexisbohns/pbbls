@@ -43,11 +43,16 @@ import app.pbbls.android.core.ui.GlyphViewCase
  * replacing the earlier cover composed above the nav host) —
  * `rememberViewModelStoreNavEntryDecorator()` scopes `hiltViewModel()` to this
  * entry, so [AcceptInviteViewModel] is destroyed when it pops.
+ *
+ * A valid invite also offers a quiet Report (#839): [onReport] gets the
+ * inviter's name and the host opens the report screen, which this feature
+ * cannot import.
  */
 @Composable
 fun AcceptInviteScreen(
     token: String,
     onDismiss: () -> Unit,
+    onReport: (inviterName: String?) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AcceptInviteViewModel = hiltViewModel(),
 ) {
@@ -67,6 +72,7 @@ fun AcceptInviteScreen(
         onAccept = viewModel::accept,
         onRetry = viewModel::retry,
         onDismiss = onDismiss,
+        onReport = onReport,
         modifier = modifier,
     )
 }
@@ -79,6 +85,7 @@ fun AcceptInviteContent(
     onAccept: () -> Unit,
     onRetry: () -> Unit,
     onDismiss: () -> Unit,
+    onReport: (inviterName: String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -122,7 +129,7 @@ fun AcceptInviteContent(
 
                     is AcceptInviteUiState.Ready ->
                         if (uiState.preview.isValid) {
-                            ConsentPrompt(uiState, onAccept)
+                            ConsentPrompt(uiState, onAccept, onReport)
                         } else {
                             UnusableInvite(onDismiss)
                         }
@@ -204,6 +211,7 @@ private fun ColumnScope.AcceptedPeer(
 private fun ColumnScope.ConsentPrompt(
     state: AcceptInviteUiState.Ready,
     onAccept: () -> Unit,
+    onReport: (inviterName: String?) -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     val inviter = state.preview.inviter
@@ -247,6 +255,14 @@ private fun ColumnScope.ConsentPrompt(
             text = stringResource(R.string.connections_accept_action),
             style = MaterialTheme.typography.labelLarge,
             color = colors.primary,
+        )
+    }
+    // Quiet, and only here: an unusable invite has no inviter to report.
+    TextButton(onClick = { onReport(inviter?.displayName) }, enabled = !state.isAccepting) {
+        Text(
+            text = stringResource(R.string.report_action),
+            style = MaterialTheme.typography.labelLarge,
+            color = colors.onSurfaceVariant,
         )
     }
 }

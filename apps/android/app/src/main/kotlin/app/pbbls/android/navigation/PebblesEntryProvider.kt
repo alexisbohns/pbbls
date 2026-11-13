@@ -413,15 +413,24 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     }
 
     entry<PebblesKey.AcceptInvite>(metadata = NavTransitions.forKey(PebblesKey.AcceptInvite(""))) { key ->
-        AcceptInviteScreen(token = key.token, onDismiss = navigator::goBack)
+        AcceptInviteScreen(
+            token = key.token,
+            onDismiss = navigator::goBack,
+            // RootScreen already cleared the parked token when it pushed this entry.
+            onReport = { name -> navigator.navigate(PebblesKey.Report(ReportTarget.Invite(key.token, name))) },
+        )
     }
 
     entry<PebblesKey.Report>(metadata = NavTransitions.forKey(PebblesKey.Report(ReportTarget.Glyph("")))) { key ->
         ReportScreen(
             target = key.target,
             onCancel = navigator::goBack,
-            // Part 2 pops the invite too; for now every report just closes.
-            onFinished = { navigator.goBack() },
+            // A reported invite is not accepted: pop the invite beneath the report too, so Done lands where the
+            // link was opened. Both pops stay on this tab's stack (the invite was pushed there, so it sits above its root).
+            onFinished = {
+                navigator.goBack()
+                if (key.target is ReportTarget.Invite) navigator.goBack()
+            },
         )
     }
 }
