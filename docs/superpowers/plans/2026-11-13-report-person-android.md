@@ -932,4 +932,18 @@ Screenshots of the three entry points onto the three Arkaik acceptances. Move th
 
 ## Binding notes learned while building
 
-(Appended part by part.)
+- **Hilt test graph.** A new `…Servicing` binding needs a provider in `test/.../testing/FakeServicesModule.kt` too, or `hiltJavaCompileDebugUnitTest` fails for the whole suite, not just the new tests.
+- **Lint `warningsAsErrors`.** A string added before its first use fails `UnusedResources`, so `report_action` moved to the part that uses it.
+- **Back while sending.** Turning `NavigationBackHandler` off hands the gesture to `NavDisplay`, which pops the entry mid-send. Keep the handler on and swallow the gesture.
+- **Finishing a report is idempotent.** Done and back can both fire while the entry composes its exit. `Navigator.closeReport(key)` pops only while the report is on top, and pops the invite beneath only when its token matches.
+- **Resume refresh vs. an optimistic removal.** A resume reload during an in-flight `remove_connection` brought the row back. Skip the reload while removals are pending.
+- **Found only on the Pixel 8:**
+  - disabled top-bar buttons never dim, app-wide (#1634); the report screen works around it locally;
+  - selected `SegmentedListItem` rows turn green in this theme, so the reason rows keep their container and show the radio only;
+  - Remove had no leading icon next to Report's;
+  - a recreated activity reopens a dismissed invite link (#1633, which predates this work).
+- **Device pass mechanics.**
+  - `adb shell input text` drops text typed before the field has focus. Tap, wait, then type.
+  - On the consent gate, a tap on a label hits its document link; tap the checkbox at the row's left edge instead.
+  - Per-app French is `cmd locale set-app-locales app.pbbls.android --locales fr-FR` (and `""` to reset).
+  - A reporter cannot read their own `content_reports` rows (RLS), so the read-back proves the blocks and connections, and the app's Thanks state proves the inserts.
