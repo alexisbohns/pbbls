@@ -3,11 +3,13 @@
  * Generate the adaptive launcher-icon layers (#846) and the bare Welcome mark
  * (#856) from the iOS brand mark.
  *
- * Source of truth is `apps/ios/Pebbles/Resources/pbbls-logo-loader.svg` — the
- * same stroked line art the iOS app icon renders and the loader draws on. This
- * script re-expresses it as two Android VectorDrawables (foreground + the
- * monochrome layer themed icons tint) so the two surfaces can never drift:
- * re-run it instead of hand-editing the XML.
+ * Source of truth is `apps/ios/Pebbles/Resources/pbbls-mark.svg` — the master
+ * mark (#1644), one filled even-odd path: a pebble outline holding a spiral,
+ * with a P at its centre. This script re-expresses it as Android VectorDrawables
+ * (foreground, the monochrome layer themed icons tint, and the bare Welcome
+ * mark) so the surfaces can never drift: re-run it instead of hand-editing the
+ * XML. The even-odd fill is kept (`android:fillType="evenOdd"`); the spiral and
+ * the P are holes in the pebble, not separate shapes.
  *
  *   node apps/android/scripts/logo-svg-to-launcher-icon.mjs
  *
@@ -16,16 +18,20 @@
  * of the 108dp adaptive canvas — inside the 66dp circle every launcher mask is
  * guaranteed to show, with room to spare. Fitting the box instead (the #846
  * geometry, 66dp a side) put the pebble's bulges 37.8dp out, and round and
- * squircle masks cut them off (#856). The group
- * transform carries the scale, which means stroke widths scale with it and the
- * path data stays byte-identical to the SVG's.
+ * squircle masks cut them off (#856). The group transform carries the scale,
+ * so the path data stays byte-identical to the SVG's.
+ *
+ * The mark is one ~16 000 character path, far past lint's 800 character
+ * `VectorPath` limit, so every drawable carries `tools:ignore="VectorPath"`.
+ * Each is inflated once (launcher, splash, Welcome), and reducing precision or
+ * simplifying the curves would let Android drift from the master SVG.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const SRC = resolve(here, "../../ios/Pebbles/Resources/pbbls-logo-loader.svg");
+const SRC = resolve(here, "../../ios/Pebbles/Resources/pbbls-mark.svg");
 const OUT = resolve(here, "../app/src/main/res/drawable");
 
 /**
@@ -49,16 +55,20 @@ const attr = (tag, name) =>
 const paths = [...svg.matchAll(/<path\b([^>]*)\/>/gs)].map((m) => ({
   id: attr(m[1], "id"),
   d: attr(m[1], "d"),
-  stroke: attr(m[1], "stroke"),
   fill: attr(m[1], "fill"),
-  strokeWidth: Number(attr(m[1], "stroke-width") ?? 0),
-  cap: attr(m[1], "stroke-linecap"),
-  join: attr(m[1], "stroke-linejoin"),
+  fillRule: attr(m[1], "fill-rule"),
+  stroke: attr(m[1], "stroke"),
 }));
 if (paths.length === 0) throw new Error(`no <path> elements in ${SRC}`);
+for (const p of paths) {
+  if (p.stroke && p.stroke !== "none") {
+    throw new Error("the mark is filled art; a stroked path means the export changed");
+  }
+  if (p.fill === "none") throw new Error("unfilled path in the mark");
+}
 
 /**
- * Sample every path into points. The mark only uses absolute M/L/C/Z; anything
+ * Sample every path into points. The mark only uses absolute M/Q/Z (L and C are handled too); anything
  * else means the export changed and the bounds below would silently lie, so it
  * throws rather than guessing.
  */
@@ -91,6 +101,18 @@ function samplePoints(d) {
         ]);
       }
       cur = [x, y];
+    } else if (cmd === "Q") {
+      const [x1, y1, x, y] = [num(), num(), num(), num()];
+      const [x0, y0] = cur;
+      for (let k = 1; k <= 20; k += 1) {
+        const t = k / 20;
+        const u = 1 - t;
+        points.push([
+          u * u * x0 + 2 * u * t * x1 + t * t * x,
+          u * u * y0 + 2 * u * t * y1 + t * t * y,
+        ]);
+      }
+      cur = [x, y];
     } else if (cmd === "Z" || cmd === "z") {
       cur = start;
     } else {
@@ -102,23 +124,22 @@ function samplePoints(d) {
 
 const box = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
 for (const p of paths) {
-  const pad = p.strokeWidth / 2;
   for (const [x, y] of samplePoints(p.d)) {
-    box.minX = Math.min(box.minX, x - pad);
-    box.maxX = Math.max(box.maxX, x + pad);
-    box.minY = Math.min(box.minY, y - pad);
-    box.maxY = Math.max(box.maxY, y + pad);
+    box.minX = Math.min(box.minX, x);
+    box.maxX = Math.max(box.maxX, x);
+    box.minY = Math.min(box.minY, y);
+    box.maxY = Math.max(box.maxY, y);
   }
 }
 const inkW = box.maxX - box.minX;
 const inkH = box.maxY - box.minY;
-// Radius of the ink around the ink box's centre, strokes included.
+// Radius of the ink around the ink box's centre.
 const cx = (box.minX + box.maxX) / 2;
 const cy = (box.minY + box.maxY) / 2;
 let inkRadius = 0;
 for (const p of paths) {
   for (const [x, y] of samplePoints(p.d)) {
-    inkRadius = Math.max(inkRadius, Math.hypot(x - cx, y - cy) + p.strokeWidth / 2);
+    inkRadius = Math.max(inkRadius, Math.hypot(x - cx, y - cy));
   }
 }
 const scale = ART_RADIUS_DP / inkRadius;
@@ -157,6 +178,8 @@ function render(ink, header, geo = launcherGeometry) {
     '<?xml version="1.0" encoding="utf-8"?>',
     header,
     '<vector xmlns:android="http://schemas.android.com/apk/res/android"',
+    '    xmlns:tools="http://schemas.android.com/tools"',
+    '    tools:ignore="VectorPath"',
     `    android:width="${geo.width.toFixed(2).replace(/\.00$/, "")}dp"`,
     `    android:height="${geo.height.toFixed(2).replace(/\.00$/, "")}dp"`,
     `    android:viewportWidth="${geo.width.toFixed(2).replace(/\.00$/, "")}"`,
@@ -170,13 +193,8 @@ function render(ink, header, geo = launcherGeometry) {
   for (const p of paths) {
     lines.push("        <path");
     if (p.id) lines.push(`            android:name="${p.id}"`);
-    if (p.fill && p.fill !== "none") lines.push(`            android:fillColor="${ink}"`);
-    if (p.stroke && p.stroke !== "none") {
-      lines.push(`            android:strokeColor="${ink}"`);
-      lines.push(`            android:strokeWidth="${p.strokeWidth}"`);
-      if (p.cap) lines.push(`            android:strokeLineCap="${p.cap}"`);
-      if (p.join) lines.push(`            android:strokeLineJoin="${p.join}"`);
-    }
+    lines.push(`            android:fillColor="${ink}"`);
+    if (p.fillRule === "evenodd") lines.push('            android:fillType="evenOdd"');
     lines.push(`            android:pathData="${p.d}" />`);
   }
   lines.push("    </group>", "</vector>", "");
@@ -184,7 +202,7 @@ function render(ink, header, geo = launcherGeometry) {
 }
 
 const generated = (extra) =>
-  `<!--\n  GENERATED by apps/android/scripts/logo-svg-to-launcher-icon.mjs (#846) from\n  apps/ios/Pebbles/Resources/pbbls-logo-loader.svg. Do not hand-edit — re-run\n  the script when the brand mark changes.\n${extra}-->`;
+  `<!--\n  GENERATED by apps/android/scripts/logo-svg-to-launcher-icon.mjs (#846, #1644) from\n  apps/ios/Pebbles/Resources/pbbls-mark.svg. Do not hand-edit — re-run\n  the script when the brand mark changes.\n${extra}-->`;
 
 writeFileSync(
   resolve(OUT, "ic_launcher_foreground.xml"),

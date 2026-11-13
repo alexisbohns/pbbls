@@ -11,14 +11,16 @@ import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
 
 /**
- * The Pebbles brand mark, inked in `primary` — the colour iOS
- * `HandcraftedLogoView` draws it in (`accent.primary`).
+ * The Pebbles brand mark (#1644): a pebble outline holding a spiral, with
+ * a P at its centre, inked in `primary`.
  *
- * `R.drawable.pbbls_logo` is generated from the same iOS SVG as the launcher
- * icon (`scripts/logo-svg-to-launcher-icon.mjs`), so the two surfaces share one
- * source. It replaced the Rive logo (#856): Rive's native library was loaded on
- * every cold start to play one animation on a screen signed-in users never see.
- * The iOS draw-on reveal is not ported; this is the settled, static frame.
+ * `R.drawable.pbbls_logo` is generated from the iOS master mark
+ * (`apps/ios/Pebbles/Resources/pbbls-mark.svg`, one filled even-odd path) by
+ * `scripts/logo-svg-to-launcher-icon.mjs`, the same run that produces the
+ * launcher icon, so the surfaces share one source. It replaced the Rive logo
+ * (#856): Rive's native library was loaded on every cold start to play one
+ * animation on a screen signed-in users never see.
+ * The splash animation is not ported here; this is the settled, static mark.
  */
 @Composable
 fun PebblesLogo(modifier: Modifier = Modifier) {
