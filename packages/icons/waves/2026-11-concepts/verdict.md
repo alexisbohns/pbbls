@@ -1,7 +1,7 @@
 # Verdict
 
-221 drawings kept under 62 concepts; 6 abandoned.
-72 finalists, 150 starred, 55 redrawn in a refinement round, 21 variants dropped.
+297 drawings kept under 82 concepts; 3 abandoned.
+93 finalists, 205 starred, 55 redrawn in a refinement round, 21 variants dropped.
 
 ## s1-delivery
 
@@ -73,7 +73,29 @@
 - **reliability**: `pillar` ★, `stone-shake` ★
 - **solved**: `lock-open` ★, `puzzle-piece` ★
 - **verification**: `chermarks` (finalist), `eye-check` (finalist), `search-check` (finalist)
+## s5-status
 
-Concepts with no finalist: delivery, changelog, flow, journal, log, ledger, record, commitment, data, database, api, architecture, agentic, view, inform, affordance, resolved, delivery, changelog, flow, journal, log, ledger, record, commitment, data, database, api, architecture, agentic, view, inform, affordance, resolved.
+- **priority**: `arrow-node-up` ★, `stones-decrease` ★, `sunrise-arrow` (finalist)
+- **priority-critical**: `gauge-high-2` ★, `square-exclamation` ★, `triangles-upward` ★
+- **priority-high**: `bars-high` (finalist), `cairn-high` (finalist), `slider-high` (finalist), `triangle-up` ★
+- **priority-low**: `bars-low` (finalist), `cairn-low` (finalist), `gauge-low-2` ★, `slider-low` (finalist), `triangle-down` ★
+- **priority-medium**: `bar-medium` (finalist), `cairn-medium` (finalist), `gauge-medium-2` ★, `slider-medium` (finalist)
+- **priority-undefined**: `bars-undefined` ★, `gauge-undefined` ★, `slider-undefined` (finalist), `stones-3` (finalist)
+- **status-approved**: `flag-check` (finalist), `square-checks` ★
+- **status-archived**: `circle-chevron-down-stop` ★, `pouch-stone` ★, `sqaure-archive` ★
+- **status-backlog**: `square-hourglass` (finalist)
+- **status-blocked**: `circle-arrow-right-stop` ★, `square-lock` ★
+- **status-deprecated**: `circle-slash` ★, `flower-down-soil` ★, `square-sunset` ★, `stones-thought` ★
+- **status-development**: `circle-half` ★, `signal-nodes` ★, `sprout-soil` ★, `square-code` (finalist), `stone-hash` ★
+- **status-draft**: `circle-pen` ★, `flag-scribble` (finalist), `square-scribble` ★
+- **status-idea**: `spark-badge` ★, `square-bulb` (finalist)
+- **status-live**: `cairn-bowl` ★, `circle-stone` ★, `circle-stone-emmit` ★, `flower-soil` ★, `pebble-flow` ★, `square-play` ★
+- **status-rejected**: `circle-x` ★, `circle-x-olive` ★, `flag-x` (finalist), `nodes-edge-x` ★, `sprout-soil-inverted` ★, `square-arrow-down-left` ★
+- **status-release**: `circle-arrow-up` ★, `circle-arrow-up-right` ★, `sprout-bud-soil` ★, `square-plane` ★
+- **status-supersede**: `circle-arrow-bottom-left` ★, `node-segment-cut-down` ★, `sprout-soil-seed` ★, `square-rotate-clockwise` ★, `stone-divided-up` ★, `stone-to-stone` ★, `supersed` (finalist)
+- **status-superseded**: `circle-arrow-up-right-2` ★, `node-segment-cut-up` ★, `square-rotate-backward` ★, `stone-divided` ★, `superseded` (finalist)
+- **status-warning**: `circle-exclamation` (finalist), `exlamation` ★, `square-zap` ★
 
-Abandoned: changelog/h42.pebbles, flow/h44.pebbles, page/h41.classical, changelog/h42.pebbles, flow/h44.pebbles, page/h41.classical.
+Concepts with no finalist: delivery, changelog, flow, journal, log, ledger, record, commitment, data, database, api, architecture, agentic, view, inform, affordance, resolved.
+
+Abandoned: changelog/h42.pebbles, flow/h44.pebbles, page/h41.classical.
