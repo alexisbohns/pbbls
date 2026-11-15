@@ -31,7 +31,7 @@ struct CropSource: Identifiable {
         let advertised = item.supportedContentTypes.map(\.identifier)
         do {
             guard let data = try await item.loadTransferable(type: Data.self) else {
-                logger.warning("picker item carried no data representation")
+                logger.warning("picker item carried no data representation (advertised types: \(advertised.count))")
                 return nil
             }
             return await make(from: data, fallbackUTI: advertised.first)

@@ -30,6 +30,12 @@ struct CaptureFlowView: View {
     @State private var model: CaptureFlowModel
     @State private var snaps: SnapUploadCoordinator?
     @State private var pickedPhoto: PhotosPickerItem?
+    /// Bumped to give the photo step a brand-new picker. Clearing `pickedPhoto`
+    /// does not reset the inline picker's own selection: tapping the same cell
+    /// again hands back an item with no representations at all (empty
+    /// `supportedContentTypes`, `loadTransferable` returns nil), so re-picking
+    /// the photo just cancelled opens nothing. A fresh picker starts clean.
+    @State private var pickerEpoch = 0
     /// The photo open in the crop editor (spec D1), cleared by Cancel or Done.
     @State private var cropping: CropSession?
     /// A loaded photo waiting for the screen to be free: the camera cover and
@@ -188,7 +194,7 @@ struct CaptureFlowView: View {
                 onCancel: {
                     cropping = nil
                     pickGate.release(session.token)
-                    pickedPhoto = nil
+                    resetPicker()
                 },
                 onDone: { image, date in finishCrop(session, image: image, captureDate: date) }
             )
@@ -244,6 +250,7 @@ struct CaptureFlowView: View {
         switch model.step {
         case .photo:
             RecordPhotoStep(selection: $pickedPhoto)
+                .id(pickerEpoch)
                 .overlay {
                     if pickGate.isLoading {
                         ProgressView()
@@ -372,6 +379,13 @@ struct CaptureFlowView: View {
 // MARK: - Crop
 
 extension CaptureFlowView {
+    /// Forgets the pick and gives the picker a fresh selection state, so the
+    /// same photo can be picked again (see `pickerEpoch`).
+    private func resetPicker() {
+        pickedPhoto = nil
+        pickerEpoch += 1
+    }
+
     /// Nothing else is on screen to collide with the editor's cover.
     private var canPresentCrop: Bool {
         cropping == nil && !isCameraOnScreen && !isCloseConfirmPresented
@@ -398,7 +412,7 @@ extension CaptureFlowView {
             guard let source else {
                 // Unreadable or unsupported (logged by the source): the same
                 // pick can be tried again.
-                pickedPhoto = nil
+                resetPicker()
                 return
             }
             pendingCrop = CropSession(source: source, token: token)
@@ -448,7 +462,7 @@ extension CaptureFlowView {
         prompt = nil
         completing = nil
         model = CaptureFlowModel(startingAt: startsAtMomentPage ? .moment : .photo)
-        pickedPhoto = nil
+        resetPicker()
         cropping = nil
         pendingCrop = nil
         pickGate.clear()
