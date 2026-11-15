@@ -62,7 +62,7 @@ export function buildGlyph(row: IconRow, source: string, overrides: Record<strin
     // Paths of the same role fill together, so they never carve each other (a mark's dot inside its lit blob).
     const together = (q: GlyphPath) => q.role === p.role && (p.role === "mark" || q.step === p.step)
     const inner = paths.flatMap((q, j) => (j !== i && !q.hidden && !together(q) ? [j] : []))
-    const carved = carveSolid([p.d], inner.map((j) => paths[j]?.d ?? ""))
+    const carved = carveSolid([p.d], inner.map((j) => paths[j]?.d ?? ""), [], { inkOutside: false })
     if (carved.keep.length === inner.length) return
     p.fill = carved.d
     p.cuts = inner.filter((_, n) => !carved.keep.includes(n))
