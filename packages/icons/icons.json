@@ -11195,6 +11195,375 @@
       "status": "candidate",
       "migrated": [],
       "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "accessibility",
+      "meaning": "Accessibility: a figure showing access for everyone.",
+      "tags": { "category": ["body"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-outlined-quarters",
+      "meaning": "Stone outlined quarters: a stone outlined in four quarters.",
+      "tags": { "category": ["stones", "charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-lines",
+      "meaning": "Circle lines: lines drawn inside a circle.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "database-shield",
+      "meaning": "Database shield: a database guarded by a shield.",
+      "tags": { "category": ["privacy"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "clipboard-check-x",
+      "meaning": "Clipboard check x: a clipboard with a tick and a cross.",
+      "tags": { "category": ["documents", "actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "search-signal",
+      "meaning": "Search signal: a magnifying glass finding a signal.",
+      "tags": { "category": ["maps", "web"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "briefcase",
+      "meaning": "Briefcase: a case for work papers.",
+      "tags": { "category": ["collections"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "doctor",
+      "meaning": "Doctor: a stethoscope.",
+      "tags": { "category": ["body"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "heart-signal",
+      "meaning": "Heart signal: a heart with a signal beside it.",
+      "tags": { "category": ["body"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-signal-2",
+      "meaning": "Stone signal: a stone sending out a signal.",
+      "tags": { "category": ["stones", "web"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "thermometer",
+      "meaning": "Thermometer: an instrument for measuring temperature.",
+      "tags": { "category": ["body"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-shapes",
+      "meaning": "Circle shapes: shapes gathered inside a circle.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "community-underline",
+      "meaning": "Community underline: a community with a line beneath it.",
+      "tags": { "category": ["souls"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "parachute",
+      "meaning": "Parachute: a parachute floating down.",
+      "tags": { "category": ["sky"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-stone-stack",
+      "meaning": "Pebble stone stack: stones stacked one on another.",
+      "tags": { "category": ["stones", "cairns"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "castle",
+      "meaning": "Castle: a castle with towers.",
+      "tags": { "category": ["cairns", "places"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "tower",
+      "meaning": "Tower: a tall tower.",
+      "tags": { "category": ["places"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "coffee",
+      "meaning": "Coffee: a cup of coffee.",
+      "tags": { "category": ["food"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pill",
+      "meaning": "Pill: a pill for taking.",
+      "tags": { "category": ["body"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "wellness",
+      "meaning": "Wellness: a figure in a calm, healthy pose.",
+      "tags": { "category": ["body"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "fibonacci-spiral",
+      "meaning": "Fibonacci spiral: a spiral following the Fibonacci sequence.",
+      "tags": { "category": ["glyphs"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "tulip",
+      "meaning": "Tulip: a tulip flower.",
+      "tags": { "category": ["plants"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "magnet",
+      "meaning": "Magnet: a magnet pulling things together.",
+      "tags": { "category": ["tools"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "clap",
+      "meaning": "Clap: a film clapperboard.",
+      "tags": { "category": ["devices"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "theatre",
+      "meaning": "Theatre: a stage with a curtain.",
+      "tags": { "category": ["places"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "kite",
+      "meaning": "Kite: a kite flying on a string.",
+      "tags": { "category": ["sky", "play"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "spring-stone",
+      "meaning": "Spring stone: a stone on a coiled spring.",
+      "tags": { "category": ["stones", "tools"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "bubble-star",
+      "meaning": "Bubble star: a star inside a bubble.",
+      "tags": { "category": ["awards"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "scale-stones-empower",
+      "meaning": "Scale stones empower: stones on a scale, tipped to lift one up.",
+      "tags": { "category": ["stones", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "gift-ribbon",
+      "meaning": "Gift ribbon: a gift tied with a ribbon.",
+      "tags": { "category": ["awards"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-podium",
+      "meaning": "Stone podium: stones arranged on a podium.",
+      "tags": { "category": ["stones", "awards"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "simplify",
+      "meaning": "Simplify: reduce a thing to its essentials.",
+      "tags": { "category": ["tools"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "library-books",
+      "meaning": "Library books: books on library shelves.",
+      "tags": { "category": ["documents"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "variety-scribble",
+      "meaning": "Variety scribble: several scribbled marks in mixed styles.",
+      "tags": { "category": ["glyphs"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "variety-shapes",
+      "meaning": "Variety shapes: several different shapes together.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "variety-stones",
+      "meaning": "Variety stones: stones of several kinds together.",
+      "tags": { "category": ["stones"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "instant-photo",
+      "meaning": "Instant photo: a photo printed straight from a camera.",
+      "tags": { "category": ["devices"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stack-jar",
+      "meaning": "Stack jar: stones stacked inside a jar.",
+      "tags": { "category": ["collections", "cairns"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-jar",
+      "meaning": "Stones jar: stones gathered in a jar.",
+      "tags": { "category": ["stones", "collections"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-butterfly",
+      "meaning": "Abstract butterfly: a butterfly drawn in an abstract style.",
+      "tags": { "category": ["animals"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "abstract-flower",
+      "meaning": "Abstract flower: a flower drawn in an abstract style.",
+      "tags": { "category": ["plants"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
     }
   ]
 }
