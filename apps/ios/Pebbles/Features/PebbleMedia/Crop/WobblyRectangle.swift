@@ -2,7 +2,8 @@ import SwiftUI
 
 /// A rectangle drawn by hand (spec "hand-drawn parts"): each corner nudged and
 /// each edge bowed in or out by up to `amount` of its length, the same way for
-/// the same seed. Small corner rounding keeps it a pebble, not a sketch.
+/// the same seed. Edges are curves, not lines, so it reads as a pebble, not a
+/// sketch.
 struct WobblyRectangle: Shape {
     let seed: String
     var amount: CGFloat = 0.03
@@ -20,6 +21,10 @@ struct WobblyRectangle: Shape {
         for i in 0..<4 {
             let from = corners[i], to = corners[(i + 1) % 4]
             let length = hypot(to.x - from.x, to.y - from.y)
+            guard length > 0 else {
+                path.addLine(to: to)
+                continue
+            }
             // Outward normal for a clockwise outline in y-down space.
             let normal = CGPoint(x: (to.y - from.y) / length, y: -(to.x - from.x) / length)
             let bow = rng.unit() * length * amount

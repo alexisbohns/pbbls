@@ -4,7 +4,7 @@ import SwiftUI
 /// same chain the renderer uses — scale, turn, offset — so what is in the
 /// window is exactly what Done keeps.
 struct CropCanvas: View {
-    @Bindable var model: PhotoCropModel
+    let model: PhotoCropModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @GestureState private var isGesturing = false
 
@@ -21,7 +21,9 @@ struct CropCanvas: View {
                     .rotationEffect(.radians(g.theta))
                     .offset(x: g.windowOffset.width * unit, y: g.windowOffset.height * unit)
                     .position(x: window.midX, y: window.midY)
-                scrim(window: window, in: proxy.size)
+                CropScrim(window: window)
+                    .fill(Color.pebbles.surface.opacity(0.78), style: FillStyle(eoFill: true))
+                    .allowsHitTesting(false)
                 if model.isInteracting || model.isRotating {
                     CropGrid(divisions: model.isRotating ? 6 : 3)
                         .stroke(Color.pebbles.surface.opacity(0.6), lineWidth: 0.75)
@@ -36,7 +38,12 @@ struct CropCanvas: View {
             .contentShape(Rectangle())
             .gesture(gesture(windowHeight: unit))
             .animation(reduceMotion ? nil : .spring(duration: 0.3), value: model.geometry.ratio)
+            .onChange(of: isGesturing) { _, active in
+                // Also runs when the system cancels the touch, which never reaches `onEnded`.
+                if !active { endGesture() }
+            }
             .accessibilityElement()
+            .accessibilityAddTraits(.isImage)
             .accessibilityLabel(Text("Photo"))
             .accessibilityAction(named: Text("Zoom in")) { model.zoom(by: 1.25) }
             .accessibilityAction(named: Text("Zoom out")) { model.zoom(by: 0.8) }
@@ -54,15 +61,6 @@ struct CropCanvas: View {
         return CGRect(x: (size.width - width) / 2, y: (size.height - height) / 2, width: width, height: height)
     }
 
-    private func scrim(window: CGRect, in size: CGSize) -> some View {
-        Path { path in
-            path.addRect(CGRect(origin: .zero, size: size))
-            path.addRect(window)
-        }
-        .fill(Color.pebbles.surface.opacity(0.78), style: FillStyle(eoFill: true))
-        .allowsHitTesting(false)
-    }
-
     private func gesture(windowHeight: CGFloat) -> some Gesture {
         SimultaneousGesture(DragGesture(minimumDistance: 0), MagnifyGesture())
             .updating($isGesturing) { _, state, _ in state = true }
@@ -71,13 +69,14 @@ struct CropCanvas: View {
                                      magnification: value.second?.magnification ?? 1,
                                      windowHeight: windowHeight)
             }
-            .onEnded { _ in
-                if reduceMotion {
-                    model.gestureEnded()
-                } else {
-                    withAnimation(.spring(duration: 0.35, bounce: 0.15)) { model.gestureEnded() }
-                }
-            }
+    }
+
+    private func endGesture() {
+        if reduceMotion {
+            model.gestureEnded()
+        } else {
+            withAnimation(.spring(duration: 0.35, bounce: 0.15)) { model.gestureEnded() }
+        }
     }
 }
 
@@ -95,6 +94,24 @@ struct CropGrid: Shape {
             path.move(to: CGPoint(x: rect.minX, y: y))
             path.addLine(to: CGPoint(x: rect.maxX, y: y))
         }
+        return path
+    }
+}
+
+/// Everything but the window, filled even-odd. The window is animatable, so the
+/// scrim follows it when the format changes.
+struct CropScrim: Shape {
+    var window: CGRect
+
+    var animatableData: CGRect.AnimatableData {
+        get { window.animatableData }
+        set { window.animatableData = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.addRect(rect)
+        path.addRect(window)
         return path
     }
 }

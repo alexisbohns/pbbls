@@ -44,9 +44,14 @@ final class PhotoCropModel {
         gestureStart = start
         isInteracting = true
         let units = CGSize(width: translation.width / windowHeight, height: translation.height / windowHeight)
-        geometry = start.zoomed(by: magnification).panned(by: units).rubberBanded()
+        // Clamp the pinch first: panning divides by the scale, so an over-pinch
+        // would otherwise move the photo faster or slower than the finger.
+        var zoomed = start.zoomed(by: magnification)
+        zoomed.scale = min(max(zoomed.scale, zoomed.minScale), zoomed.maxScale)
+        geometry = zoomed.panned(by: units).rubberBanded()
     }
 
+    /// Safe to call twice (a finished gesture and a cancelled one both end here).
     func gestureEnded() {
         gestureStart = nil
         isInteracting = false
