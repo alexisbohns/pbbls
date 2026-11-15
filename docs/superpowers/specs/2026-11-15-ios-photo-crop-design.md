@@ -8,7 +8,7 @@ A picked or captured photo goes to the Path as whatever shape it was taken in. P
 
 ## Decisions
 
-1. **The editor opens after every new photo** — an inline pick in Capture, a camera shot, a pick in `EditMomentSheet`. "Done" crops, then runs today's `ingest` (process + upload) and moves on; nothing uploads before Done. "Cancel" returns to the picker with the selection cleared. "Change photo" goes back to the picker, so a new pick opens the editor again.
+1. **The editor opens after every new photo** — an inline pick in Capture, a camera shot in Capture, a pick in `EditMomentSheet`. Home's camera shortcut is left alone: it records a moment in one shot with no form, so its photo uploads as taken. "Done" crops, then runs today's `ingest` (process + upload) and moves on; nothing uploads before Done. "Cancel" returns to the picker with the selection cleared. "Change photo" goes back to the picker, so a new pick opens the editor again.
 2. **Already-saved photos are not editable.** Only their 1024 px copy exists; re-cropping it would degrade the image.
 3. **Five fixed formats, no free crop:** 4:5, 3:4, 1:1, 4:3, 5:4. The editor opens on the one closest to the photo's own ratio (compared in log space, so 3:4 and 4:3 are equidistant from 1:1; ties go to the portrait one).
 4. **No empty space, ever.** The photo always covers the crop window, at any angle, zoom and pan.
