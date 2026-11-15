@@ -42,7 +42,7 @@ struct CropRatioTests {
     }
 
     @Test("accessibility label reads the two numbers")
-    func label() {
+    func widthAndHeight() {
         #expect(CropRatio.fourFive.width == 4)
         #expect(CropRatio.fourFive.height == 5)
     }

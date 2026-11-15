@@ -68,4 +68,48 @@ struct ImagePipelineCroppedTests {
         let image = try ImagePipeline.decodeOriented(buffer as Data, maxEdge: 2048)
         #expect(image.width == 1536 && image.height == 2048)
     }
+
+    @Test("decodeOriented never upscales a small photo")
+    func decodeOrientedKeepsSmall() throws {
+        let buffer = NSMutableData()
+        let destination = try #require(CGImageDestinationCreateWithData(
+            buffer as CFMutableData, UTType.png.identifier as CFString, 1, nil))
+        CGImageDestinationAddImage(destination, try Self.solid(width: 600, height: 800), nil)
+        #expect(CGImageDestinationFinalize(destination))
+        let image = try ImagePipeline.decodeOriented(buffer as Data, maxEdge: 2048)
+        #expect(image.width == 600 && image.height == 800)
+    }
+
+    /// Deterministic noise (splitmix64), so the byte-cap test never flakes.
+    private static func noise(width: Int, height: Int, amplitude: Int) throws -> CGImage {
+        var state: UInt64 = 0x9E37_79B9_7F4A_7C15
+        func next() -> UInt64 {
+            state &+= 0x9E37_79B9_7F4A_7C15
+            var z = state
+            z = (z ^ (z >> 30)) &* 0xBF58_476D_1CE4_E5B9
+            z = (z ^ (z >> 27)) &* 0x94D0_49BB_1331_11EB
+            return z ^ (z >> 31)
+        }
+        var pixels = [UInt8](repeating: 255, count: width * height * 4)
+        for i in 0..<(width * height) {
+            let base = 128 + (i % width) * 40 / width
+            for c in 0..<3 {
+                pixels[i * 4 + c] = UInt8(max(0, min(255, base + Int(next() % UInt64(amplitude * 2 + 1)) - amplitude)))
+            }
+        }
+        let space = try #require(CGColorSpace(name: CGColorSpace.sRGB))
+        let provider = try #require(CGDataProvider(data: Data(pixels) as CFData))
+        return try #require(CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32,
+                                    bytesPerRow: width * 4, space: space,
+                                    bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue),
+                                    provider: provider, decode: nil, shouldInterpolate: true,
+                                    intent: .defaultIntent))
+    }
+
+    @Test("a noisy 1024 px crop still fits the 1 MB and 300 KB caps", arguments: [40, 127])
+    func byteCaps(amplitude: Int) throws {
+        let processed = try ImagePipeline.process(Self.noise(width: 1024, height: 1024, amplitude: amplitude))
+        #expect(processed.original.count <= 1_048_576)
+        #expect(processed.thumb.count <= 307_200)
+    }
 }

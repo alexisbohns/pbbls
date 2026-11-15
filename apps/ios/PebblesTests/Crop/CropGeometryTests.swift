@@ -28,13 +28,20 @@ struct CropGeometryTests {
 
     @Test("min scale covers exactly: a hair less leaves a corner out", arguments: [-45.0, -17.0, 0.0, 9.5, 33.0, 45.0])
     func minScaleIsExact(angle: Double) {
-        var g = CropGeometry.initial(imageSize: Self.landscape)
-        g.ratio = .fourFive
-        g.angle = angle
-        g.scale = g.minScale
-        #expect(covers(g))
-        g.scale = g.minScale * 0.999
-        #expect(!covers(g))
+        for size in [Self.portrait, Self.landscape] {
+            for ratio in CropRatio.allCases {
+                for turns in 0..<4 {
+                    var g = CropGeometry.initial(imageSize: size)
+                    g.ratio = ratio
+                    g.quarterTurns = turns
+                    g.angle = angle
+                    g.scale = g.minScale
+                    #expect(covers(g), "\(size) \(ratio) \(turns) \(angle)")
+                    g.scale = g.minScale * 0.999
+                    #expect(!covers(g), "\(size) \(ratio) \(turns) \(angle)")
+                }
+            }
+        }
     }
 
     @Test("normalising always covers, whatever the pan, zoom, turn and format")
@@ -85,7 +92,18 @@ struct CropGeometryTests {
         #expect(turned.quarterTurns == 1)
         #expect(turned.ratio == .fourThree)
         // Here the turned window spans the whole photo, so the focus is pulled to the centre.
+        #expect(turned.focus == .zero)
         #expect(turned == turned.normalized())
+    }
+
+    @Test("turning a quarter on a zoomed-in photo leaves the focus where it was")
+    func quarterTurnKeepsRoomyFocus() {
+        var g = CropGeometry.initial(imageSize: Self.portrait)
+        g.scale = g.minScale * 3
+        g.focus = CGPoint(x: 40, y: 60)
+        let turned = g.turnedQuarter()
+        #expect(turned.focus == CGPoint(x: 40, y: 60))
+        #expect(turned.quarterTurns == 1)
     }
 
     @Test("changing the angle raises the scale only as far as coverage needs")
