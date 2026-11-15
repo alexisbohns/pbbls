@@ -56,6 +56,51 @@ enum ImagePipeline {
         return ProcessedImage(original: original, thumb: thumb)
     }
 
+    /// The crop editor's output (spec "Pipeline"): already upright, already
+    /// cropped, carrying no metadata. Same sizes, caps and encode as a pick.
+    static func process(_ image: CGImage) throws -> ProcessedImage {
+        let original = try encodeCapped(
+            resized(image, maxEdge: originalMaxEdge), startQuality: originalStartQuality, byteCap: originalMaxBytes)
+        let thumb = try encodeCapped(
+            resized(image, maxEdge: thumbMaxEdge), startQuality: thumbStartQuality, byteCap: thumbMaxBytes)
+        return ProcessedImage(original: original, thumb: thumb)
+    }
+
+    /// Decodes `data` upright (EXIF orientation baked) with its long edge at
+    /// most `maxEdge`: the crop editor's working image.
+    static func decodeOriented(_ data: Data, maxEdge: CGFloat) throws -> CGImage {
+        let source = try makeImageSource(data)
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceShouldCacheImmediately: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxEdge
+        ]
+        guard let image = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else {
+            throw ImagePipelineError.decodeFailed
+        }
+        return image
+    }
+
+    /// Downscales into an opaque sRGB bitmap with its long edge at most
+    /// `maxEdge`; never upscales. Opaque either way, as `makeOpaque`.
+    static func resized(_ image: CGImage, maxEdge: CGFloat) -> CGImage {
+        let longEdge = CGFloat(max(image.width, image.height))
+        guard longEdge > maxEdge else { return makeOpaque(image) }
+        let factor = maxEdge / longEdge
+        let width = Int((CGFloat(image.width) * factor).rounded())
+        let height = Int((CGFloat(image.height) * factor).rounded())
+        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+              let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8,
+                                      bytesPerRow: 0, space: space,
+                                      bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else {
+            return makeOpaque(image)
+        }
+        context.interpolationQuality = .high
+        context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+        return context.makeImage() ?? makeOpaque(image)
+    }
+
     private static func makeImageSource(_ data: Data) throws -> CGImageSource {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
               CGImageSourceGetCount(source) > 0 else {
@@ -82,11 +127,14 @@ enum ImagePipeline {
         // JPEG cannot store alpha. Handing ImageIO an RGBA image makes it log
         // a warning per encode and strip the channel itself, so drop it once
         // here, before the quality-step loop re-encodes the same pixels.
-        let cgImage = makeOpaque(thumbnail)
+        return try encodeCapped(makeOpaque(thumbnail), startQuality: startQuality, byteCap: byteCap)
+    }
 
+    /// Re-encodes at falling quality until the bytes fit `byteCap`.
+    private static func encodeCapped(_ image: CGImage, startQuality: CGFloat, byteCap: Int) throws -> Data {
         var quality = startQuality
         for _ in 0...qualitySteps {
-            let data = try encodeJPEG(cgImage, quality: quality)
+            let data = try encodeJPEG(image, quality: quality)
             if data.count <= byteCap {
                 return data
             }
