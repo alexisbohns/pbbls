@@ -2,8 +2,8 @@ import SwiftUI
 import os
 
 /// The crop editor (spec "Layout"): follows the app theme, top bar, canvas,
-/// the current tool's panel, then the tool tabs in thumb reach. Filters will
-/// be a third `CropTool` and tab.
+/// the current tool's panel, then the tool group in thumb reach. Filters will
+/// be a third `CropTool` in it.
 struct PhotoCropEditor: View {
     @State private var model: PhotoCropModel
     @State private var isRendering = false
@@ -120,26 +120,8 @@ struct PhotoCropEditor: View {
     }
 
     private var tabs: some View {
-        HStack(spacing: Spacing.xxl) {
-            tab(.ratio, glyph: .rectangleDashed, label: "Ratio")
-            tab(.rotate, glyph: .setSquare, label: "Rotate")
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private func tab(_ tool: CropTool, glyph: PbblsGlyph, label: LocalizedStringResource) -> some View {
-        let selected = model.tool == tool
-        let colour = selected ? Color.pebbles.primary : Color.pebbles.onSurfaceVariant
-        return Button { model.tool = tool } label: {
-            VStack(spacing: Spacing.xs) {
-                PbblsGlyphView(glyph, size: 24, style: AnyShapeStyle(colour))
-                Text(label).pebblesFont(.captionEmphasized).foregroundStyle(colour)
-            }
-            .frame(minWidth: 64, minHeight: 52)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(selected ? .isSelected : [])
+        CropToolGroup(tools: CropTool.allCases, selection: $model.tool)
+            .padding(.horizontal, Spacing.lg)
     }
 
     /// Cancel wins over a render in flight: its result is dropped.
