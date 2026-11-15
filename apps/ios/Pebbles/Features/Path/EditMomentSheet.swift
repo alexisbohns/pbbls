@@ -85,6 +85,12 @@ struct EditMomentSheet: View {
             isSaving || hasPendingSnap || snaps?.isProcessingPick == true || pickGate.isActive
         )
         .onDisappear {
+            // Presenting the crop editor's full-screen cover can fire the
+            // sheet's `onDisappear` although the sheet stays: cleaning up then
+            // would close the coordinator and reject the photo Done is about
+            // to ingest. The sheet itself going away has no editor open (Cancel
+            // and Done clear `cropping` first).
+            guard cropping == nil else { return }
             // A photo still loading must open nothing once the sheet is gone.
             pickGate.clear()
             // Safety net for any dismissal that skipped Cancel. Idempotent:
