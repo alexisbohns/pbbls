@@ -286,4 +286,32 @@ struct SnapUploadCoordinatorPickTests {
         #expect(!repo.calls.contains(.deleteFilesBySnapId(snapId: latest, userId: userId)))
         #expect(repo.deletesInCancelledTask.isEmpty)
     }
+
+    @Test("a cropped image attaches, uploads and keeps the date read before the crop")
+    func croppedIngest() async throws {
+        let repo = SnapUploadCoordinatorTests.FakeRepo()
+        let coordinator = SnapUploadCoordinator(repo: repo, retryDelay: .milliseconds(1))
+        let image = try ImagePipelineCroppedTests.solid(width: 800, height: 1000)
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+
+        await coordinator.ingest(cropped: image, captureDate: date, userId: UUID())
+
+        guard case .pending(let snap) = coordinator.formSnap else {
+            Issue.record("expected a pending snap, got \(String(describing: coordinator.formSnap))"); return
+        }
+        #expect(snap.state == .uploaded)
+        #expect(coordinator.pickedCaptureDate == date)
+        #expect(!coordinator.isBlocking)
+    }
+
+    @Test("a cropped image landing after close attaches and uploads nothing")
+    func croppedAfterClose() async throws {
+        let repo = SnapUploadCoordinatorTests.FakeRepo()
+        let coordinator = SnapUploadCoordinator(repo: repo, retryDelay: .milliseconds(1))
+        await coordinator.cancelAndCleanup(userId: UUID())
+        await coordinator.ingest(cropped: try ImagePipelineCroppedTests.solid(width: 100, height: 100),
+                                 captureDate: nil, userId: UUID())
+        #expect(coordinator.formSnap == nil)
+        #expect(repo.calls.isEmpty)
+    }
 }
