@@ -200,7 +200,7 @@ struct CaptureFlowView: View {
             title: model.step.title(prompt: prompt),
             subtitle: model.step.subtitle,
             action: action(for: model.step),
-            // The grid runs to the bottom under the two controls; nothing floats.
+            // The grid fills the space above the two controls; nothing floats.
             contentFillsHeight: model.step == .photo,
             fixedSlot: model.step == .photo
                 ? AnyView(RecordPhotoControls(onJustWrite: { model.advance() }, onCamera: { showsCamera = true }))
@@ -263,7 +263,7 @@ struct CaptureFlowView: View {
     }
 
     /// The one action a step offers. The photo step has none: its controls
-    /// are the fixed slot above the grid.
+    /// are the fixed slot under the grid.
     private func action(for step: CaptureStep) -> RecordStepAction? {
         switch step {
         case .photo:

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The photo step's fixed-slot controls (record-flow D3): the way past the
+/// The photo step's controls under the grid (record-flow D3): the way past the
 /// grid without a picture, and the camera — only where there is one (not on
 /// a simulator). Owned by `CaptureFlowView`, which advances and presents.
 struct RecordPhotoControls: View {
