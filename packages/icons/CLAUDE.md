@@ -41,7 +41,7 @@ A wave (`waves/<yyyy-mm-slug>/`) records how a set was chosen: briefs, seed, eac
 
 - `build.py <wave>` builds the hub (`<wave>/gallery/index.html`, per-hand pages, the library and the lit series); `game-build.py <wave>` the blind pick-three game; `pick3-build.py <wave>` the round-3 picker; `rename-build.py <wave>` the rename sheet. `gallery/` is gitignored; share a hub as a private artifact.
 - `tally.py <wave>` prints a Borda count (3/2/1) of `results-picks.json` per id and context: an input to the verdict, never a substitute for it.
-- `extract.py <wave> [--only name,…]` writes `src/<name>.svg` from the wave's `library.svg` with the canonical root; run `format` after it.
+- `extract.py <wave> [--only name,…] [--keep-dots name,…]` writes `src/<name>.svg` from the wave's `library.svg` with the canonical root and, when the library keeps forms, the roles read off them (its docstring has the rules); it lists the drawings that need a call. Run `format` after it.
 
 ## When `Icons` is red
 
