@@ -2510,4 +2510,86 @@ enum PbblsGlyph: String, CaseIterable, Sendable {
     case exclamation = "exclamation"
     /// Square zap: a lightning bolt inside a square.
     case squareZap = "square-zap"
+    /// Accessibility: a figure showing access for everyone.
+    case accessibility = "accessibility"
+    /// Stone outlined quarters: a stone outlined in four quarters.
+    case stoneOutlinedQuarters = "stone-outlined-quarters"
+    /// Circle lines: lines drawn inside a circle.
+    case circleLines = "circle-lines"
+    /// Database shield: a database guarded by a shield.
+    case databaseShield = "database-shield"
+    /// Clipboard check x: a clipboard with a tick and a cross.
+    case clipboardCheckX = "clipboard-check-x"
+    /// Search signal: a magnifying glass finding a signal.
+    case searchSignal = "search-signal"
+    /// Briefcase: a case for work papers.
+    case briefcase = "briefcase"
+    /// Doctor: a stethoscope.
+    case doctor = "doctor"
+    /// Heart signal: a heart with a signal beside it.
+    case heartSignal = "heart-signal"
+    /// Stone signal: a stone sending out a signal.
+    case stoneSignal2 = "stone-signal-2"
+    /// Thermometer: an instrument for measuring temperature.
+    case thermometer = "thermometer"
+    /// Circle shapes: shapes gathered inside a circle.
+    case circleShapes = "circle-shapes"
+    /// Community underline: a community with a line beneath it.
+    case communityUnderline = "community-underline"
+    /// Parachute: a parachute floating down.
+    case parachute = "parachute"
+    /// Pebble stone stack: stones stacked one on another.
+    case pebbleStoneStack = "pebble-stone-stack"
+    /// Castle: a castle with towers.
+    case castle = "castle"
+    /// Tower: a tall tower.
+    case tower = "tower"
+    /// Coffee: a cup of coffee.
+    case coffee = "coffee"
+    /// Pill: a pill for taking.
+    case pill = "pill"
+    /// Wellness: a figure in a calm, healthy pose.
+    case wellness = "wellness"
+    /// Fibonacci spiral: a spiral following the Fibonacci sequence.
+    case fibonacciSpiral = "fibonacci-spiral"
+    /// Tulip: a tulip flower.
+    case tulip = "tulip"
+    /// Magnet: a magnet pulling things together.
+    case magnet = "magnet"
+    /// Clap: a film clapperboard.
+    case clap = "clap"
+    /// Theatre: a stage with a curtain.
+    case theatre = "theatre"
+    /// Kite: a kite flying on a string.
+    case kite = "kite"
+    /// Spring stone: a stone on a coiled spring.
+    case springStone = "spring-stone"
+    /// Bubble star: a star inside a bubble.
+    case bubbleStar = "bubble-star"
+    /// Scale stones empower: stones on a scale, tipped to lift one up.
+    case scaleStonesEmpower = "scale-stones-empower"
+    /// Gift ribbon: a gift tied with a ribbon.
+    case giftRibbon = "gift-ribbon"
+    /// Stone podium: stones arranged on a podium.
+    case stonePodium = "stone-podium"
+    /// Simplify: reduce a thing to its essentials.
+    case simplify = "simplify"
+    /// Library books: books on library shelves.
+    case libraryBooks = "library-books"
+    /// Variety scribble: several scribbled marks in mixed styles.
+    case varietyScribble = "variety-scribble"
+    /// Variety shapes: several different shapes together.
+    case varietyShapes = "variety-shapes"
+    /// Variety stones: stones of several kinds together.
+    case varietyStones = "variety-stones"
+    /// Instant photo: a photo printed straight from a camera.
+    case instantPhoto = "instant-photo"
+    /// Stack jar: stones stacked inside a jar.
+    case stackJar = "stack-jar"
+    /// Stones jar: stones gathered in a jar.
+    case stonesJar = "stones-jar"
+    /// Abstract butterfly: a butterfly drawn in an abstract style.
+    case abstractButterfly = "abstract-butterfly"
+    /// Abstract flower: a flower drawn in an abstract style.
+    case abstractFlower = "abstract-flower"
 }

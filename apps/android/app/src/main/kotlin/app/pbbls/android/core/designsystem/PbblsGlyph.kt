@@ -3740,6 +3740,129 @@ enum class PbblsGlyph(
 
     /** Square zap: a lightning bolt inside a square. */
     SQUARE_ZAP("square-zap"),
+
+    /** Accessibility: a figure showing access for everyone. */
+    ACCESSIBILITY("accessibility"),
+
+    /** Stone outlined quarters: a stone outlined in four quarters. */
+    STONE_OUTLINED_QUARTERS("stone-outlined-quarters"),
+
+    /** Circle lines: lines drawn inside a circle. */
+    CIRCLE_LINES("circle-lines"),
+
+    /** Database shield: a database guarded by a shield. */
+    DATABASE_SHIELD("database-shield"),
+
+    /** Clipboard check x: a clipboard with a tick and a cross. */
+    CLIPBOARD_CHECK_X("clipboard-check-x"),
+
+    /** Search signal: a magnifying glass finding a signal. */
+    SEARCH_SIGNAL("search-signal"),
+
+    /** Briefcase: a case for work papers. */
+    BRIEFCASE("briefcase"),
+
+    /** Doctor: a stethoscope. */
+    DOCTOR("doctor"),
+
+    /** Heart signal: a heart with a signal beside it. */
+    HEART_SIGNAL("heart-signal"),
+
+    /** Stone signal: a stone sending out a signal. */
+    STONE_SIGNAL_2("stone-signal-2"),
+
+    /** Thermometer: an instrument for measuring temperature. */
+    THERMOMETER("thermometer"),
+
+    /** Circle shapes: shapes gathered inside a circle. */
+    CIRCLE_SHAPES("circle-shapes"),
+
+    /** Community underline: a community with a line beneath it. */
+    COMMUNITY_UNDERLINE("community-underline"),
+
+    /** Parachute: a parachute floating down. */
+    PARACHUTE("parachute"),
+
+    /** Pebble stone stack: stones stacked one on another. */
+    PEBBLE_STONE_STACK("pebble-stone-stack"),
+
+    /** Castle: a castle with towers. */
+    CASTLE("castle"),
+
+    /** Tower: a tall tower. */
+    TOWER("tower"),
+
+    /** Coffee: a cup of coffee. */
+    COFFEE("coffee"),
+
+    /** Pill: a pill for taking. */
+    PILL("pill"),
+
+    /** Wellness: a figure in a calm, healthy pose. */
+    WELLNESS("wellness"),
+
+    /** Fibonacci spiral: a spiral following the Fibonacci sequence. */
+    FIBONACCI_SPIRAL("fibonacci-spiral"),
+
+    /** Tulip: a tulip flower. */
+    TULIP("tulip"),
+
+    /** Magnet: a magnet pulling things together. */
+    MAGNET("magnet"),
+
+    /** Clap: a film clapperboard. */
+    CLAP("clap"),
+
+    /** Theatre: a stage with a curtain. */
+    THEATRE("theatre"),
+
+    /** Kite: a kite flying on a string. */
+    KITE("kite"),
+
+    /** Spring stone: a stone on a coiled spring. */
+    SPRING_STONE("spring-stone"),
+
+    /** Bubble star: a star inside a bubble. */
+    BUBBLE_STAR("bubble-star"),
+
+    /** Scale stones empower: stones on a scale, tipped to lift one up. */
+    SCALE_STONES_EMPOWER("scale-stones-empower"),
+
+    /** Gift ribbon: a gift tied with a ribbon. */
+    GIFT_RIBBON("gift-ribbon"),
+
+    /** Stone podium: stones arranged on a podium. */
+    STONE_PODIUM("stone-podium"),
+
+    /** Simplify: reduce a thing to its essentials. */
+    SIMPLIFY("simplify"),
+
+    /** Library books: books on library shelves. */
+    LIBRARY_BOOKS("library-books"),
+
+    /** Variety scribble: several scribbled marks in mixed styles. */
+    VARIETY_SCRIBBLE("variety-scribble"),
+
+    /** Variety shapes: several different shapes together. */
+    VARIETY_SHAPES("variety-shapes"),
+
+    /** Variety stones: stones of several kinds together. */
+    VARIETY_STONES("variety-stones"),
+
+    /** Instant photo: a photo printed straight from a camera. */
+    INSTANT_PHOTO("instant-photo"),
+
+    /** Stack jar: stones stacked inside a jar. */
+    STACK_JAR("stack-jar"),
+
+    /** Stones jar: stones gathered in a jar. */
+    STONES_JAR("stones-jar"),
+
+    /** Abstract butterfly: a butterfly drawn in an abstract style. */
+    ABSTRACT_BUTTERFLY("abstract-butterfly"),
+
+    /** Abstract flower: a flower drawn in an abstract style. */
+    ABSTRACT_FLOWER("abstract-flower"),
     ;
 
     companion object {
