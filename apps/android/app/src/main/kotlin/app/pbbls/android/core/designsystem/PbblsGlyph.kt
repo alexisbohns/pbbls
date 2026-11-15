@@ -2849,6 +2849,1020 @@ enum class PbblsGlyph(
 
     /** Shopping: shopping, a bag or a cart. */
     ABSTRACT_STONE_CURVE("abstract-stone-curve"),
+
+    /** Filter dots: dots sorted through a filter. */
+    FILTER_DOTS("filter-dots"),
+
+    /** Inbox full: an inbox with no room left. */
+    INBOX_FULL("inbox-full"),
+
+    /** Logs stack: logs piled one on another. */
+    LOGS_STACK("logs-stack"),
+
+    /** Stack fall: a stack of items tipping over. */
+    STACK_FALL("stack-fall"),
+
+    /** Stones pot: stones kept in a pot. */
+    STONES_POT("stones-pot"),
+
+    /** Stones stack: stones piled one on another. */
+    STONES_STACK_4("stones-stack-4"),
+
+    /** Stones shrink: stones underlined with an arrow that shrinks. */
+    STONES_UNDERLINE_SHRINK_ARROW("stones-underline-shrink-arrow"),
+
+    /** Cell dots: dots arranged in a grid cell. */
+    CELL_DOTS("cell-dots"),
+
+    /** Circle shaded: a circle with part of it filled in. */
+    CIRCLE_SHADED("circle-shaded"),
+
+    /** Community: several people gathered together. */
+    COMMUNITY("community"),
+
+    /** Door open: a door standing open. */
+    DOOR_OPEN("door-open"),
+
+    /** Flask lab: a laboratory flask for experiments. */
+    FLASK_LAB("flask-lab"),
+
+    /** Pebble sprout: a stone with a shoot growing from it. */
+    PEBBLE_SPROUT("pebble-sprout"),
+
+    /** Stones group: three stones gathered together. */
+    STONES_GROUP_3("stones-group-3"),
+
+    /** Stones group: five stones gathered together. */
+    STONES_GROUP_5("stones-group-5"),
+
+    /** Axis bounce: a bouncing motion along an axis. */
+    AXIS_BOUNCE("axis-bounce"),
+
+    /** Diff: two versions set side by side to compare changes. */
+    DIFF("diff"),
+
+    /** List timeline: a list of entries laid along a timeline. */
+    LIST_TIMELINE("list-timeline"),
+
+    /** Maze tunnel: a tunnel winding through a maze. */
+    MAZE_TUNNEL("maze-tunnel"),
+
+    /** Award: a prize given in recognition of achievement. */
+    AWARD("award"),
+
+    /** Certificate: a formal document confirming an achievement. */
+    CERTIFICATE("certificate"),
+
+    /** Circle split: a circle divided into two parts. */
+    CIRCLE_SPLIT("circle-split"),
+
+    /** Decision: a choice made between options. */
+    DECISION("decision"),
+
+    /** Fork: a split where a path divides in two. */
+    FORK("fork"),
+
+    /** Judge hammer: a gavel used to judge or rule. */
+    JUDGE_HAMMER("judge-hammer"),
+
+    /** Node decision: a node where a choice branches off. */
+    NODE_DECISION("node-decision"),
+
+    /** Stones underline: stones under a line, with one jumping across. */
+    STONES_UNDERLINE_JUMP("stones-underline-jump"),
+
+    /** Package arc: a package with an arc beneath it. */
+    PACKAGE_ARC_BOTTOM("package-arc-bottom"),
+
+    /** Stone bowl: a bowl made from a stone. */
+    STONE_BOWL_2("stone-bowl-2"),
+
+    /** Stone jump: a stone leaping through the air. */
+    STONE_JUMP("stone-jump"),
+
+    /** Edge direction: a line on an edge pointing a direction. */
+    EDGE_DIRECTION("edge-direction"),
+
+    /** Flow stone: a stone set in a flow of movement. */
+    FLOW_STONE("flow-stone"),
+
+    /** Flow stones: stones carried along in a flow. */
+    FLOW_STONES("flow-stones"),
+
+    /** Infinite: a loop with no end. */
+    INFINITE("infinite"),
+
+    /** Network arc: a curved link between network nodes. */
+    NETWORK_ARC("network-arc"),
+
+    /** Node direction: a node with an arrow pointing right. */
+    NODE_DIRECTION_RIGHT("node-direction-right"),
+
+    /** Stones wave: stones arranged in a wave. */
+    STONES_WAVE("stones-wave"),
+
+    /** Clock backward: a clock turned back in time. */
+    CLOCK_BACKWARD("clock-backward"),
+
+    /** Road horizon: a road running to the horizon. */
+    ROAD_HORIZON("road-horizon"),
+
+    /** Stone waves: a stone with waves running to the left. */
+    STONE_WAVES_LEFT("stone-waves-left"),
+
+    /** Target search: a target found by searching. */
+    TARGET_SEARCH("target-search"),
+
+    /** Clipboard checklist: a checklist held on a clipboard. */
+    CLIPBOARD_CHECKLIST("clipboard-checklist"),
+
+    /** Pebble bars: a stone bar chart with one bar struck through. */
+    PEBBLE_BARS_STRIKE("pebble-bars-strike"),
+
+    /** Shelves: shelves holding items. */
+    SHELVES("shelves"),
+
+    /** Squared square: a square set inside another square. */
+    SQUARED_SQUARE("squared-square"),
+
+    /** Book sheets: loose sheets bound like a book. */
+    BOOK_SHEETS("book-sheets"),
+
+    /** Sunshine up: sunshine rising upward. */
+    SUNSHINE_UP("sunshine-up"),
+
+    /** Book open text: an open book with text on its pages. */
+    BOOK_OPEN_TEXT("book-open-text"),
+
+    /** Book sheets vertical: sheets of a book set upright. */
+    BOOK_SHEETS_VERTICAL("book-sheets-vertical"),
+
+    /** Scale balance: a balance scale in equilibrium. */
+    SCALE_BALANCE("scale-balance"),
+
+    /** Stones comparison: stones set side by side to compare. */
+    STONES_COMPARISON("stones-comparison"),
+
+    /** Stones stack comparison: stone stacks side by side to compare. */
+    STONES_STACK_COMPARISON("stones-stack-comparison"),
+
+    /** Stop circle: a stop sign inside a circle. */
+    STOP_CIRCLE_2("stop-circle-2"),
+
+    /** Circle ring bell: a bell ringing inside a circle. */
+    CIRCLE_RING_BELL("circle-ring-bell"),
+
+    /** Receipt: a record of a payment. */
+    RECEIPT_3("receipt-3"),
+
+    /** Stones stack box: stones stacked in a box. */
+    STONES_STACK_BOX_4("stones-stack-box-4"),
+
+    /** Print echoes: printed marks repeated as echoes. */
+    PRINT_ECHOES("print-echoes"),
+
+    /** Stone arch: an arch built from stones. */
+    STONE_ARCH("stone-arch"),
+
+    /** Text circle: text arranged in a circle. */
+    TEXT_CIRCLE("text-circle"),
+
+    /** Text stone: text written on a stone. */
+    TEXT_PEBBLE("text-pebble"),
+
+    /** Cairn: a stacked pile of stones marking a path. */
+    CAIRN("cairn"),
+
+    /** Label tag: a tag tied to an item to name it. */
+    LABEL_TAG("label-tag"),
+
+    /** Label tag: a tag with a hole and two written marks. */
+    LABEL_TAG_2("label-tag-2"),
+
+    /** Package: a parcel wrapped and ready to send. */
+    PACKAGE("package"),
+
+    /** Shipment: goods packed for delivery. */
+    SHIPMENT("shipment"),
+
+    /** Stone speed: a stone moving fast with speed lines. */
+    STONE_SPEED_3("stone-speed-3"),
+
+    /** Stone speed underline: a fast stone with a line beneath it. */
+    STONE_SPEED_UNDERLINE("stone-speed-underline"),
+
+    /** Circle broken: a circle with a gap in its outline. */
+    CIRCLE_BROKEN_2("circle-broken-2"),
+
+    /** Flask: a laboratory flask. */
+    FLASK("flask"),
+
+    /** Flask particles: particles rising from a flask. */
+    FLASK_PARTICLES("flask-particles"),
+
+    /** Flask tube check: a test tube and flask with a tick. */
+    FLASK_TUBE_CHECK("flask-tube-check"),
+
+    /** Pin waves: a map pin sending out waves. */
+    PIN_WAVES("pin-waves"),
+
+    /** Recipient stick: a stick marker pointing at a recipient. */
+    RECIPIENT_STICK("recipient-stick"),
+
+    /** Signal pin: a pin marking a signal. */
+    SIGNAL_PIN("signal-pin"),
+
+    /** Square check: a checked box. */
+    SQUARE_CHECK("square-check"),
+
+    /** Stone arcs: a stone with arcs around it. */
+    STONE_ARCS("stone-arcs"),
+
+    /** Stones balance: stones balanced on one another. */
+    STONES_BALANCE("stones-balance"),
+
+    /** Circle spark: a spark inside a circle. */
+    CIRCLE_SPARK("circle-spark"),
+
+    /** Destination flag: a flag marking a destination. */
+    DESTINATION_FLAG("destination-flag"),
+
+    /** Spark to stone: a spark turning into a stone. */
+    SPARK_TO_STONE("spark-to-stone"),
+
+    /** Code square: code brackets inside a square. */
+    CODE_SQUARE("code-square"),
+
+    /** Stone accolade: a stone given as an honour. */
+    STONE_ACCOLADE("stone-accolade"),
+
+    /** Building columns: a building fronted by columns. */
+    BUILDING_COLUMNS("building-columns"),
+
+    /** Building flat: a flat, low building. */
+    BUILDING_FLAT("building-flat"),
+
+    /** Stone bridge: a bridge built from stone. */
+    STONE_BRIDGE("stone-bridge"),
+
+    /** Triangles: a set of triangles. */
+    TRIANGLES("triangles"),
+
+    /** Branch bud: a bud on a branch. */
+    BRANCH_BUD("branch-bud"),
+
+    /** Branch buds: several buds on a branch. */
+    BRANCH_BUDS("branch-buds"),
+
+    /** Git branch: a branch splitting off a line of work. */
+    GIT_BRANCH("git-branch"),
+
+    /** Git branch create: a new branch being started. */
+    GIT_BRANCH_CREATE("git-branch-create"),
+
+    /** Stones: a group of stones piled together. */
+    STONES_8("stones-8"),
+
+    /** Edge: the boundary line of a shape. */
+    EDGE("edge"),
+
+    /** Git fork: a line of work splitting into two. */
+    GIT_FORK_SM("git-fork-sm"),
+
+    /** Git diamond: a diamond-shaped commit node in a history. */
+    GIT_DIAMOND("git-diamond"),
+
+    /** Git tree: a branching tree of commits. */
+    GIT_TREE("git-tree"),
+
+    /** Git triangle: a triangle-shaped commit node. */
+    GIT_TRIANGLE("git-triangle"),
+
+    /** Path stones: stones laid along a path. */
+    PATH_STONES("path-stones"),
+
+    /** Ripples line: ripples spreading along a line. */
+    RIPPLES_LINE("ripples-line"),
+
+    /** Graph: a chart of points and lines. */
+    GRAPH("graph"),
+
+    /** Chip component: a computer chip component. */
+    CHIP_COMPONENT("chip-component"),
+
+    /** Puzzle: a puzzle piece. */
+    PUZZLE("puzzle"),
+
+    /** Git merge: two lines of work joining into one. */
+    GIT_MERGE("git-merge"),
+
+    /** Git merge down: a merge flowing downward into one line. */
+    GIT_MERGE_DOWN("git-merge-down"),
+
+    /** Stones network: stones linked together in a network. */
+    STONES_NETWORK("stones-network"),
+
+    /** Node lines: a node joined by two lines. */
+    NODE_LINES_2("node-lines-2"),
+
+    /** Node lines: a node joined by three lines. */
+    NODE_LINES_3("node-lines-3"),
+
+    /** Node lines: a node joined by five lines. */
+    NODE_LINES_5("node-lines-5"),
+
+    /** Stone emits: a stone giving off rays. */
+    STONE_EMITS_2("stone-emits-2"),
+
+    /** Stone node: a stone acting as a node in a network. */
+    STONE_NODE("stone-node"),
+
+    /** Cairn stone add: a stone added to a cairn. */
+    CAIRN_STONE_ADD("cairn-stone-add"),
+
+    /** Node edge x: a node link cut off with a cross. */
+    NODE_EDGE_X("node-edge-x"),
+
+    /** Node node: two nodes linked together. */
+    NODE_NODE("node-node"),
+
+    /** Node plus: a node added to a network. */
+    NODE_PLUS("node-plus"),
+
+    /** Stone node plus: a stone node added to a network. */
+    STONE_NODE_PLUS("stone-node-plus"),
+
+    /** Alarm: an alarm clock ringing for a set time. */
+    ALARM("alarm"),
+
+    /** Bubbles: rising bubbles. */
+    BUBBLES("bubbles"),
+
+    /** Node seed: a seed sitting at a node. */
+    NODE_SEED("node-seed"),
+
+    /** Node spark: a spark lighting up a node. */
+    NODE_SPARK("node-spark"),
+
+    /** Stone shine: a stone catching the light. */
+    STONE_SHINE_2("stone-shine-2"),
+
+    /** Circle stones: stones arranged in a circle. */
+    CIRCLE_STONES_3("circle-stones-3"),
+
+    /** Node edge minus: a link removed from a node. */
+    NODE_EDGE_MINUS("node-edge-minus"),
+
+    /** Node minus: a node taken away. */
+    NODE_MINUS("node-minus"),
+
+    /** Node x: a node crossed out. */
+    NODE_X("node-x"),
+
+    /** Ipod station: a dock for a music player. */
+    IPOD_STATION("ipod-station"),
+
+    /** Rectangle exchange: two rectangles swapping places. */
+    RECTANGLE_EXCHANGE("rectangle-exchange"),
+
+    /** Servers: stacked server units. */
+    SERVERS("servers"),
+
+    /** Stone emit: a stone giving off a signal. */
+    STONE_EMIT_2("stone-emit-2"),
+
+    /** Atoms: atoms linked together. */
+    ATOMS("atoms"),
+
+    /** Circle network: a network of nodes inside a circle. */
+    CIRCLE_NETWORK("circle-network"),
+
+    /** System: parts working together as a whole. */
+    SYSTEM("system"),
+
+    /** File check: a file marked as checked. */
+    FILE_CHECK("file-check"),
+
+    /** Pouch check: a pouch with a tick on it. */
+    POUCH_CHECK("pouch-check"),
+
+    /** Receipt checks: a receipt with ticks on it. */
+    RECEIPT_CHECKS("receipt-checks"),
+
+    /** Accolades check: a tick given as an honour. */
+    ACCOLADES_CHECK("accolades-check"),
+
+    /** Stone code: code written on a stone. */
+    STONE_CODE("stone-code"),
+
+    /** Terminal: a command-line window. */
+    TERMINAL("terminal"),
+
+    /** Gauge small: a small gauge dial. */
+    GAUGE_SM("gauge-sm"),
+
+    /** Rule: a ruler for measuring lines. */
+    RULE("rule"),
+
+    /** Hourglass empty: an hourglass with no sand left. */
+    HOURGLASS_EMPTY("hourglass-empty"),
+
+    /** Stone scale up: a stone growing larger. */
+    STONE_SCALE_UP("stone-scale-up"),
+
+    /** Flag underline: a flag with a line beneath it. */
+    FLAG_UNDERLINE("flag-underline"),
+
+    /** Search exclamation: a magnifying glass with an alert mark. */
+    SEARCH_EXCLAMATION("search-exclamation"),
+
+    /** Plaster: a plaster bandage for a small wound. */
+    PLASTER("plaster"),
+
+    /** Square x: a cross inside a square. */
+    SQUARE_X("square-x"),
+
+    /** Circle gauge: a gauge dial inside a circle. */
+    CIRCLE_GAUGE("circle-gauge"),
+
+    /** Monitor: a computer screen. */
+    MONITOR("monitor"),
+
+    /** Board growth: a board showing growth. */
+    BOARD_GROWTH("board-growth"),
+
+    /** Eye signal: an eye with a signal beside it. */
+    EYE_SIGNAL("eye-signal"),
+
+    /** Target: a bullseye to aim at. */
+    TARGET("target"),
+
+    /** Stone scale: a stone weighed on a scale. */
+    STONE_SCALE("stone-scale"),
+
+    /** Stone speed: a stone moving fast. */
+    STONE_SPEED_2("stone-speed-2"),
+
+    /** Stopwatch: a timer for measuring a duration. */
+    STOPWATCH_2("stopwatch-2"),
+
+    /** Gemstone: a cut gem. */
+    GEMSTONE("gemstone"),
+
+    /** Clipboard check: a clipboard with a tick. */
+    CLIPBOARD_CHECK("clipboard-check"),
+
+    /** Shield check: a shield with a tick, protection confirmed. */
+    SHIELD_CHECK("shield-check"),
+
+    /** Stamp check: a stamp marked with a tick. */
+    STAMP_CHECK("stamp-check"),
+
+    /** Pillar: a tall column. */
+    PILLAR("pillar"),
+
+    /** Stone shake: a stone shaking. */
+    STONE_SHAKE("stone-shake"),
+
+    /** Lock open: an unlocked padlock. */
+    LOCK_OPEN("lock-open"),
+
+    /** Puzzle piece: a single puzzle piece. */
+    PUZZLE_PIECE("puzzle-piece"),
+
+    /** Checkmarks: two ticks, one after the other. */
+    CHECKMARKS("checkmarks"),
+
+    /** Eye check: an eye with a tick, seen and confirmed. */
+    EYE_CHECK("eye-check"),
+
+    /** Search check: a magnifying glass with a tick. */
+    SEARCH_CHECK("search-check"),
+
+    /** Door handle: a handle on a door. */
+    DOOR_HANDLE("door-handle"),
+
+    /** Letter underline: a letter with a line beneath it. */
+    LETTER_UNDERLINE("letter-underline"),
+
+    /** Stone pin: a stone marking a place on a map. */
+    STONE_PIN("stone-pin"),
+
+    /** Sunset chevron down: a setting sun above a downward chevron. */
+    SUNSET_CHEVRON_DOWN("sunset-chevron-down"),
+
+    /** Accordion collapsed: a closed accordion section. */
+    ACCORDION_COLLAPSED("accordion-collapsed"),
+
+    /** Cairn stack: stones stacked into a cairn. */
+    CAIRN_STACK("cairn-stack"),
+
+    /** Circle chevron up: an upward chevron in a circle. */
+    CIRCLE_CHEVRON_UP("circle-chevron-up"),
+
+    /** Collapse: items folding inward into one. */
+    COLLAPSE("collapse"),
+
+    /** Collapse square: a square with arrows folding inward. */
+    COLLAPSE_SQUARE("collapse-square"),
+
+    /** Pebble shrink: a stone getting smaller. */
+    PEBBLE_SHRINK("pebble-shrink"),
+
+    /** Circle half quarter: a circle with a quarter filled in. */
+    CIRCLE_HALF_QUARTER("circle-half-quarter"),
+
+    /** Disabled: a control that cannot be used. */
+    DISABLED("disabled"),
+
+    /** Interrupter: a switch that breaks a circuit. */
+    INTERRUPTER("interrupter"),
+
+    /** Rectangle hash: a rectangle with hash marks. */
+    RECTANGLE_HASH("rectangle-hash"),
+
+    /** Sunset sea: a sunset over the sea. */
+    SUNSET_SEA("sunset-sea"),
+
+    /** Toggle disabled: a switch that cannot be changed. */
+    TOGGLE_DISABLED("toggle-disabled"),
+
+    /** Enabled: a control switched on and ready. */
+    ENABLED("enabled"),
+
+    /** Instant picture: a photo printed straight from a camera. */
+    INSTANT_PICTURE("instant-picture"),
+
+    /** Stone checkmark: a stone marked with a tick. */
+    STONE_CHECKMARK("stone-checkmark"),
+
+    /** Stone shine top: a stone lit from the top. */
+    STONE_SHINE_TOP("stone-shine-top"),
+
+    /** Accordion expanded: an open accordion section. */
+    ACCORDION_EXPANDED("accordion-expanded"),
+
+    /** Circle chevron down: a downward chevron in a circle. */
+    CIRCLE_CHEVRON_DOWN("circle-chevron-down"),
+
+    /** Expand square: a square with arrows opening outward. */
+    EXPAND_SQUARE("expand-square"),
+
+    /** Ripples: rings spreading from a point. */
+    RIPPLES_2("ripples-2"),
+
+    /** Journey: a route travelled from start to finish. */
+    JOURNEY("journey"),
+
+    /** Stairs stone: a stone staircase. */
+    STAIRS_STONE("stairs-stone"),
+
+    /** Chart shapes: shapes arranged on a chart. */
+    CHART_SHAPES("chart-shapes"),
+
+    /** Fibonacci: a pattern from the Fibonacci sequence. */
+    FIBONACCI("fibonacci"),
+
+    /** Layout: a page split into three panels. */
+    LAYOUT_3("layout-3"),
+
+    /** Stones box: stones packed in a box. */
+    STONES_BOX("stones-box"),
+
+    /** Stones messy: stones scattered in a loose heap. */
+    STONES_MESSY("stones-messy"),
+
+    /** Hash: a hash sign. */
+    HASH("hash"),
+
+    /** Matrix: values arranged in rows and columns. */
+    MATRIX("matrix"),
+
+    /** Chart square: a bar chart inside a square. */
+    CHART_SQUARE("chart-square"),
+
+    /** Overview: a summary of the whole at a glance. */
+    OVERVIEW("overview"),
+
+    /** File text: a file with text on it. */
+    FILE_TEXT("file-text"),
+
+    /** Hanging note: a note hung from a peg. */
+    HANGING_NOTE("hanging-note"),
+
+    /** Page text: a page with text on it. */
+    PAGE_TEXT("page-text"),
+
+    /** Pebble text: text written on a stone. */
+    PEBBLE_TEXT("pebble-text"),
+
+    /** Stone text: text carved into a stone. */
+    STONE_TEXT("stone-text"),
+
+    /** Window text: a window showing text. */
+    WINDOW_TEXT("window-text"),
+
+    /** Folder text: a folder holding text. */
+    FOLDER_TEXT("folder-text"),
+
+    /** Layout overlap: layout panels overlapping. */
+    LAYOUT_OVERLAP("layout-overlap"),
+
+    /** Layout pane text: a layout panel with text. */
+    LAYOUT_PANE_TEXT("layout-pane-text"),
+
+    /** Layout sidebar text: a layout with a text sidebar. */
+    LAYOUT_SIDEBAR_TEXT("layout-sidebar-text"),
+
+    /** Perspective: a view drawn with depth. */
+    PERSPECTIVE("perspective"),
+
+    /** Copy text: text copied to another place. */
+    COPY_TEXT("copy-text"),
+
+    /** Dolmens: stone tables set upright, like ancient monuments. */
+    DOLMENS_3("dolmens-3"),
+
+    /** Screens: several screens side by side. */
+    SCREENS("screens"),
+
+    /** Squircles: rounded squares with smooth corners. */
+    SQUIRCLES_4("squircles-4"),
+
+    /** Triptych: three panels set side by side. */
+    TRIPTYCH("triptych"),
+
+    /** Walls: walls of stone blocks. */
+    WALLS("walls"),
+
+    /** Cursor menu: a menu opened at the cursor. */
+    CURSOR_MENU("cursor-menu"),
+
+    /** Node tooltip: a tooltip attached to a node. */
+    NODE_TOOLTIP("node-tooltip"),
+
+    /** Pebble chat bubble: a stone-shaped speech bubble. */
+    PEBBLE_CHAT_BUBBLE("pebble-chat-bubble"),
+
+    /** Tooltip: a small label appearing beside an item. */
+    TOOLTIP("tooltip"),
+
+    /** Tooltip bubble: a speech bubble giving a short tip. */
+    TOOLTIP_BUBBLE("tooltip-bubble"),
+
+    /** Search chart: a magnifying glass over a chart. */
+    SEARCH_CHART("search-chart"),
+
+    /** Arrow node up: a node with an arrow pointing up. */
+    ARROW_NODE_UP("arrow-node-up"),
+
+    /** Stones decrease: stones getting fewer. */
+    STONES_DECREASE("stones-decrease"),
+
+    /** Sunrise arrow: a rising sun with an upward arrow. */
+    SUNRISE_ARROW("sunrise-arrow"),
+
+    /** Gauge high: a gauge reading high. */
+    GAUGE_HIGH_2("gauge-high-2"),
+
+    /** Square exclamation: an exclamation mark in a square. */
+    SQUARE_EXCLAMATION("square-exclamation"),
+
+    /** Triangles upward: triangles pointing up. */
+    TRIANGLES_UPWARD("triangles-upward"),
+
+    /** Bars high: bars rising high on a chart. */
+    BARS_HIGH("bars-high"),
+
+    /** Cairn high: a tall cairn of stones. */
+    CAIRN_HIGH("cairn-high"),
+
+    /** Slider high: a slider set near the top. */
+    SLIDER_HIGH("slider-high"),
+
+    /** Triangle up: a triangle pointing up. */
+    TRIANGLE_UP("triangle-up"),
+
+    /** Bars low: short bars on a chart. */
+    BARS_LOW("bars-low"),
+
+    /** Cairn low: a short cairn of stones. */
+    CAIRN_LOW("cairn-low"),
+
+    /** Gauge low: a gauge reading low. */
+    GAUGE_LOW_2("gauge-low-2"),
+
+    /** Slider low: a slider set near the bottom. */
+    SLIDER_LOW("slider-low"),
+
+    /** Triangle down: a triangle pointing down. */
+    TRIANGLE_DOWN("triangle-down"),
+
+    /** Bar medium: a bar set at a middling level. */
+    BAR_MEDIUM("bar-medium"),
+
+    /** Cairn medium: a cairn of middling height. */
+    CAIRN_MEDIUM("cairn-medium"),
+
+    /** Gauge medium: a gauge reading the middle. */
+    GAUGE_MEDIUM_2("gauge-medium-2"),
+
+    /** Slider medium: a slider set to the middle. */
+    SLIDER_MEDIUM("slider-medium"),
+
+    /** Bars undefined: bars with no value shown. */
+    BARS_UNDEFINED("bars-undefined"),
+
+    /** Gauge undefined: a gauge with no reading. */
+    GAUGE_UNDEFINED("gauge-undefined"),
+
+    /** Slider undefined: a slider with no set value. */
+    SLIDER_UNDEFINED("slider-undefined"),
+
+    /** Stones: a small group of stones. */
+    STONES_3("stones-3"),
+
+    /** Flag check: a flag marked with a tick. */
+    FLAG_CHECK("flag-check"),
+
+    /** Square checks: several ticked squares. */
+    SQUARE_CHECKS("square-checks"),
+
+    /** Circle chevron down stop: a downward chevron in a circle, ending in a stop. */
+    CIRCLE_CHEVRON_DOWN_STOP("circle-chevron-down-stop"),
+
+    /** Pouch stone: a stone kept in a pouch. */
+    POUCH_STONE("pouch-stone"),
+
+    /** Square archive: a square box put away in an archive. */
+    SQUARE_ARCHIVE("square-archive"),
+
+    /** Square hourglass: an hourglass inside a square. */
+    SQUARE_HOURGLASS("square-hourglass"),
+
+    /** Circle arrow right stop: a right arrow in a circle, ending in a stop. */
+    CIRCLE_ARROW_RIGHT_STOP("circle-arrow-right-stop"),
+
+    /** Square lock: a padlock inside a square. */
+    SQUARE_LOCK("square-lock"),
+
+    /** Circle slash: a circle with a line through it. */
+    CIRCLE_SLASH("circle-slash"),
+
+    /** Flower down soil: a flower rooted down in soil. */
+    FLOWER_DOWN_SOIL("flower-down-soil"),
+
+    /** Square sunset: a sunset framed in a square. */
+    SQUARE_SUNSET("square-sunset"),
+
+    /** Stones thought: stones shown as a thought. */
+    STONES_THOUGHT("stones-thought"),
+
+    /** Circle half: a circle with half filled in. */
+    CIRCLE_HALF("circle-half"),
+
+    /** Signal nodes: signal waves linked by nodes. */
+    SIGNAL_NODES("signal-nodes"),
+
+    /** Sprout soil: a sprout growing from soil. */
+    SPROUT_SOIL("sprout-soil"),
+
+    /** Square code: code brackets inside a square. */
+    SQUARE_CODE("square-code"),
+
+    /** Stone hash: a hash sign marked on a stone. */
+    STONE_HASH("stone-hash"),
+
+    /** Circle pen: a pen writing inside a circle. */
+    CIRCLE_PEN("circle-pen"),
+
+    /** Flag scribble: a flag with a scribbled line. */
+    FLAG_SCRIBBLE("flag-scribble"),
+
+    /** Square scribble: a scribbled line inside a square. */
+    SQUARE_SCRIBBLE("square-scribble"),
+
+    /** Spark badge: a badge with a spark on it. */
+    SPARK_BADGE("spark-badge"),
+
+    /** Square bulb: a light bulb inside a square. */
+    SQUARE_BULB("square-bulb"),
+
+    /** Cairn bowl: a bowl of stones arranged as a cairn. */
+    CAIRN_BOWL("cairn-bowl"),
+
+    /** Circle stone: a stone within a circle. */
+    CIRCLE_STONE("circle-stone"),
+
+    /** Circle stone emit: a stone in a circle sending out marks. */
+    CIRCLE_STONE_EMIT("circle-stone-emit"),
+
+    /** Flower soil: a flower growing from soil. */
+    FLOWER_SOIL("flower-soil"),
+
+    /** Pebble flow: stones flowing along a path. */
+    PEBBLE_FLOW("pebble-flow"),
+
+    /** Square play: a play symbol inside a square. */
+    SQUARE_PLAY("square-play"),
+
+    /** Circle x: a cross inside a circle. */
+    CIRCLE_X("circle-x"),
+
+    /** Circle x olive: a cross in a circle, one arm ending in an olive-shaped tip. */
+    CIRCLE_X_OLIVE("circle-x-olive"),
+
+    /** Flag x: a flag marked with a cross. */
+    FLAG_X("flag-x"),
+
+    /** Nodes edge x: nodes linked by an edge that is cut. */
+    NODES_EDGE_X("nodes-edge-x"),
+
+    /** Sprout soil inverted: a sprout growing downward from soil. */
+    SPROUT_SOIL_INVERTED("sprout-soil-inverted"),
+
+    /** Square arrow down left: an arrow pointing down-left in a square. */
+    SQUARE_ARROW_DOWN_LEFT("square-arrow-down-left"),
+
+    /** Circle arrow up: an upward arrow in a circle. */
+    CIRCLE_ARROW_UP("circle-arrow-up"),
+
+    /** Circle arrow up right: a short arrow pointing up and right in a circle. */
+    CIRCLE_ARROW_UP_RIGHT("circle-arrow-up-right"),
+
+    /** Sprout bud soil: a bud sprouting from soil. */
+    SPROUT_BUD_SOIL("sprout-bud-soil"),
+
+    /** Square plane: a paper plane inside a square. */
+    SQUARE_PLANE("square-plane"),
+
+    /** Circle arrow bottom left: an arrow pointing down-left in a circle. */
+    CIRCLE_ARROW_BOTTOM_LEFT("circle-arrow-bottom-left"),
+
+    /** Node segment cut down: a node line cut downward. */
+    NODE_SEGMENT_CUT_DOWN("node-segment-cut-down"),
+
+    /** Sprout soil seed: a seed sprouting from soil. */
+    SPROUT_SOIL_SEED("sprout-soil-seed"),
+
+    /** Square rotate clockwise: a square turning clockwise. */
+    SQUARE_ROTATE_CLOCKWISE("square-rotate-clockwise"),
+
+    /** Stone divided up: a stone split upward. */
+    STONE_DIVIDED_UP("stone-divided-up"),
+
+    /** Stone to stone: a stone passing its shape to another. */
+    STONE_TO_STONE("stone-to-stone"),
+
+    /** Supersede: a new stone taking the place of an old one. */
+    SUPERSEDE("supersede"),
+
+    /** Circle arrow up right: a long arrow crossing the circle up and right. */
+    CIRCLE_ARROW_UP_RIGHT_2("circle-arrow-up-right-2"),
+
+    /** Node segment cut up: a node line cut upward. */
+    NODE_SEGMENT_CUT_UP("node-segment-cut-up"),
+
+    /** Square rotate backward: a square turning backward. */
+    SQUARE_ROTATE_BACKWARD("square-rotate-backward"),
+
+    /** Stone divided: a stone split in two. */
+    STONE_DIVIDED("stone-divided"),
+
+    /** Superseded: replaced by something newer. */
+    SUPERSEDED("superseded"),
+
+    /** Circle exclamation: an exclamation mark in a circle. */
+    CIRCLE_EXCLAMATION("circle-exclamation"),
+
+    /** Exclamation: an exclamation mark for attention. */
+    EXCLAMATION("exclamation"),
+
+    /** Square zap: a lightning bolt inside a square. */
+    SQUARE_ZAP("square-zap"),
+
+    /** Accessibility: a figure showing access for everyone. */
+    ACCESSIBILITY("accessibility"),
+
+    /** Stone outlined quarters: a stone outlined in four quarters. */
+    STONE_OUTLINED_QUARTERS("stone-outlined-quarters"),
+
+    /** Circle lines: lines drawn inside a circle. */
+    CIRCLE_LINES("circle-lines"),
+
+    /** Database shield: a database guarded by a shield. */
+    DATABASE_SHIELD("database-shield"),
+
+    /** Clipboard check x: a clipboard with a tick and a cross. */
+    CLIPBOARD_CHECK_X("clipboard-check-x"),
+
+    /** Search signal: a magnifying glass finding a signal. */
+    SEARCH_SIGNAL("search-signal"),
+
+    /** Briefcase: a case for work papers. */
+    BRIEFCASE("briefcase"),
+
+    /** Doctor: a stethoscope. */
+    DOCTOR("doctor"),
+
+    /** Heart signal: a heart with a signal beside it. */
+    HEART_SIGNAL("heart-signal"),
+
+    /** Stone signal: a stone sending out a signal. */
+    STONE_SIGNAL_2("stone-signal-2"),
+
+    /** Thermometer: an instrument for measuring temperature. */
+    THERMOMETER("thermometer"),
+
+    /** Circle shapes: shapes gathered inside a circle. */
+    CIRCLE_SHAPES("circle-shapes"),
+
+    /** Community underline: a community with a line beneath it. */
+    COMMUNITY_UNDERLINE("community-underline"),
+
+    /** Parachute: a parachute floating down. */
+    PARACHUTE("parachute"),
+
+    /** Pebble stone stack: stones stacked one on another. */
+    PEBBLE_STONE_STACK("pebble-stone-stack"),
+
+    /** Castle: a castle with towers. */
+    CASTLE("castle"),
+
+    /** Tower: a tall tower. */
+    TOWER("tower"),
+
+    /** Coffee: a cup of coffee. */
+    COFFEE("coffee"),
+
+    /** Pill: a pill for taking. */
+    PILL("pill"),
+
+    /** Wellness: a figure in a calm, healthy pose. */
+    WELLNESS("wellness"),
+
+    /** Fibonacci spiral: a spiral following the Fibonacci sequence. */
+    FIBONACCI_SPIRAL("fibonacci-spiral"),
+
+    /** Tulip: a tulip flower. */
+    TULIP("tulip"),
+
+    /** Magnet: a magnet pulling things together. */
+    MAGNET("magnet"),
+
+    /** Clap: a film clapperboard. */
+    CLAP("clap"),
+
+    /** Theatre: a stage with a curtain. */
+    THEATRE("theatre"),
+
+    /** Kite: a kite flying on a string. */
+    KITE("kite"),
+
+    /** Spring stone: a stone on a coiled spring. */
+    SPRING_STONE("spring-stone"),
+
+    /** Bubble star: a star inside a bubble. */
+    BUBBLE_STAR("bubble-star"),
+
+    /** Scale stones empower: stones on a scale, tipped to lift one up. */
+    SCALE_STONES_EMPOWER("scale-stones-empower"),
+
+    /** Gift ribbon: a gift tied with a ribbon. */
+    GIFT_RIBBON("gift-ribbon"),
+
+    /** Stone podium: stones arranged on a podium. */
+    STONE_PODIUM("stone-podium"),
+
+    /** Simplify: reduce a thing to its essentials. */
+    SIMPLIFY("simplify"),
+
+    /** Library books: books on library shelves. */
+    LIBRARY_BOOKS("library-books"),
+
+    /** Variety scribble: several scribbled marks in mixed styles. */
+    VARIETY_SCRIBBLE("variety-scribble"),
+
+    /** Variety shapes: several different shapes together. */
+    VARIETY_SHAPES("variety-shapes"),
+
+    /** Variety stones: stones of several kinds together. */
+    VARIETY_STONES("variety-stones"),
+
+    /** Instant photo: a photo printed straight from a camera. */
+    INSTANT_PHOTO("instant-photo"),
+
+    /** Stack jar: stones stacked inside a jar. */
+    STACK_JAR("stack-jar"),
+
+    /** Stones jar: stones gathered in a jar. */
+    STONES_JAR("stones-jar"),
+
+    /** Abstract butterfly: a butterfly drawn in an abstract style. */
+    ABSTRACT_BUTTERFLY("abstract-butterfly"),
+
+    /** Abstract flower: a flower drawn in an abstract style. */
+    ABSTRACT_FLOWER("abstract-flower"),
     ;
 
     companion object {

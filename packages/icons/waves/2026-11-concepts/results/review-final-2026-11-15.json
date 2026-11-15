@@ -1,0 +1,4970 @@
+{
+  "dec": {
+    "acceptances/h41.bold": "keep",
+    "acceptances/h43.bold": "keep",
+    "acceptances/h43.pebbles": "keep",
+    "affordance/h41.bold": "keep",
+    "affordance/h43.bold": "keep",
+    "affordance/h43.classical": "keep",
+    "affordance/h43.weird": "keep",
+    "agentic/h41.bold": "keep",
+    "agentic/h41.classical": "keep",
+    "agentic/h43.weird": "keep",
+    "api/h41.classical": "keep",
+    "api/h43.weird": "keep",
+    "architecture/h41.classical": "keep",
+    "architecture/h43.classical": "keep",
+    "architecture/h43.pebbles": "keep",
+    "architecture/h43.weird": "keep",
+    "backlog/h41.bold": "keep",
+    "backlog/h41.pebbles": "keep",
+    "backlog/h41.weird": "refine",
+    "backlog/h42.pebbles": "refine",
+    "backlog/h43.bold": "refine",
+    "backlog/h43.classical": "refine",
+    "backlog/h43.pebbles": "refine",
+    "beta/h41.pebbles": "keep",
+    "beta/h41.weird": "refine",
+    "beta/h42.classical": "keep",
+    "beta/h42.pebbles": "keep",
+    "beta/h43.bold": "keep",
+    "beta/h43.classical": "keep",
+    "beta/h43.pebbles": "refine",
+    "beta/h44.weird": "keep",
+    "branch/h41.bold": "keep",
+    "branch/h41.classical": "keep",
+    "branch/h41.weird": "keep",
+    "branch/h43.bold": "keep",
+    "changelog/h41.bold": "keep",
+    "changelog/h41.weird": "keep",
+    "changelog/h42.bold": "refine",
+    "changelog/h42.pebbles": "abandon",
+    "changelog/h42.weird": "keep",
+    "code-quality/h41.pebbles": "keep",
+    "code-quality/h43.bold": "keep",
+    "code-quality/h43.classical": "keep",
+    "collapse/h41.bold": "keep",
+    "collapse/h41.classical": "keep",
+    "collapse/h43.bold": "keep",
+    "collapse/h43.classical": "keep",
+    "collapse/h43.pebbles": "keep",
+    "collapse/h43.weird": "keep",
+    "commitment/h41.classical": "keep",
+    "commitment/h42.classical": "refine",
+    "criterion/h43.bold": "keep",
+    "criterion/h43.classical": "keep",
+    "data/h41.bold": "keep",
+    "decision/h41.bold": "keep",
+    "decision/h42.classical": "refine",
+    "decision/h43.pebbles": "refine",
+    "decision/h43.weird": "refine",
+    "decision/h44.pebbles": "refine",
+    "decision/h44.weird": "refine",
+    "delivery/h41.pebbles": "refine",
+    "delivery/h41.weird": "keep",
+    "delivery/h43.classical": "refine",
+    "disabled/h41.classical": "keep",
+    "disabled/h41.weird": "keep",
+    "disabled/h43.bold": "keep",
+    "disabled/h43.classical": "keep",
+    "disabled/h43.pebbles": "keep",
+    "disabled/h43.weird": "keep",
+    "edge/h41.classical": "keep",
+    "efficiency/h41.weird": "keep",
+    "efficiency/h43.bold": "keep",
+    "enabled/h41.bold": "keep",
+    "enabled/h41.pebbles": "keep",
+    "enabled/h43.classical": "keep",
+    "enabled/h43.pebbles": "keep",
+    "expand/h41.bold": "keep",
+    "expand/h41.pebbles": "keep",
+    "expand/h43.bold": "keep",
+    "expand/h43.classical": "keep",
+    "finding/h43.bold": "keep",
+    "finding/h43.classical": "keep",
+    "fixed/h41.classical": "keep",
+    "fixed/h43.bold": "keep",
+    "flow/h41.bold": "refine",
+    "flow/h41.pebbles": "keep",
+    "flow/h42.pebbles": "refine",
+    "flow/h43.classical": "refine",
+    "flow/h43.pebbles": "refine",
+    "flow/h44.classical": "refine",
+    "flow/h44.pebbles": "abandon",
+    "flow/h44.weird": "keep",
+    "fork/h43.classical": "keep",
+    "git/h41.classical": "keep",
+    "git/h41.weird": "keep",
+    "git/h43.bold": "keep",
+    "git/h43.classical": "refine",
+    "git/h43.pebbles": "refine",
+    "graph/h43.classical": "keep",
+    "history/h41.bold": "keep",
+    "history/h41.classical": "refine",
+    "history/h41.weird": "keep",
+    "history/h42.weird": "refine",
+    "integration/h41.classical": "keep",
+    "integration/h43.bold": "keep",
+    "inventory/h41.classical": "refine",
+    "inventory/h43.bold": "refine",
+    "inventory/h43.weird": "keep",
+    "inventory/h44.weird": "refine",
+    "journal/h41.weird": "keep",
+    "journal/h43.weird": "refine",
+    "journey/h41.bold": "keep",
+    "journey/h43.bold": "keep",
+    "layout/h41.pebbles": "keep",
+    "layout/h41.weird": "keep",
+    "layout/h43.bold": "keep",
+    "layout/h43.pebbles": "keep",
+    "layout/h43.weird": "keep",
+    "ledger/h41.bold": "refine",
+    "ledger/h42.pebbles": "refine",
+    "ledger/h42.weird": "refine",
+    "ledger/h43.weird": "refine",
+    "ledger/h44.bold": "refine",
+    "ledger/h44.pebbles": "refine",
+    "log/h43.classical": "refine",
+    "log/h43.pebbles": "refine",
+    "log/h44.pebbles": "refine",
+    "matrix/h41.weird": "keep",
+    "matrix/h43.bold": "keep",
+    "merge/h41.bold": "keep",
+    "merge/h41.classical": "keep",
+    "merge/h41.weird": "keep",
+    "monitoring/h41.bold": "keep",
+    "monitoring/h41.classical": "keep",
+    "node-add/h41.classical": "keep",
+    "node-add/h41.pebbles": "keep",
+    "node-add/h41.weird": "keep",
+    "node-add/h43.classical": "keep",
+    "node-add/h43.weird": "keep",
+    "node-new/h41.bold": "keep",
+    "node-new/h41.classical": "keep",
+    "node-new/h43.bold": "keep",
+    "node-new/h43.pebbles": "keep",
+    "node-new/h43.weird": "keep",
+    "node-remove/h41.bold": "keep",
+    "node-remove/h41.classical": "keep",
+    "node-remove/h43.classical": "keep",
+    "node-remove/h43.weird": "keep",
+    "node/h41.classical": "keep",
+    "node/h41.pebbles": "refine",
+    "node/h41.weird": "keep",
+    "node/h43.bold": "keep",
+    "node/h43.pebbles": "refine",
+    "observability/h41.bold": "keep",
+    "observability/h43.classical": "keep",
+    "observability/h43.weird": "keep",
+    "overview/h43.classical": "keep",
+    "overview/h43.pebbles": "keep",
+    "page/h41.bold": "keep",
+    "page/h41.classical": "abandon",
+    "page/h41.pebbles": "keep",
+    "page/h41.weird": "keep",
+    "page/h43.bold": "keep",
+    "page/h43.classical": "keep",
+    "page/h43.pebbles": "keep",
+    "pane/h41.classical": "keep",
+    "pane/h41.weird": "keep",
+    "pane/h43.bold": "keep",
+    "pane/h43.classical": "keep",
+    "pane/h43.weird": "keep",
+    "parity/h43.bold": "keep",
+    "performance/h41.weird": "keep",
+    "performance/h43.bold": "keep",
+    "quality-assurance/h41.bold": "keep",
+    "quality-assurance/h41.classical": "keep",
+    "quality-assurance/h43.classical": "keep",
+    "quality/h43.bold": "keep",
+    "record/h41.pebbles": "refine",
+    "record/h42.pebbles": "refine",
+    "record/h43.pebbles": "refine",
+    "record/h44.weird": "refine",
+    "release/h41.bold": "keep",
+    "release/h43.bold": "refine",
+    "release/h43.pebbles": "refine",
+    "reliability/h43.bold": "keep",
+    "reliability/h43.classical": "keep",
+    "screens/h41.classical": "keep",
+    "screens/h41.pebbles": "keep",
+    "screens/h41.weird": "keep",
+    "screens/h43.bold": "keep",
+    "screens/h43.classical": "keep",
+    "screens/h43.pebbles": "keep",
+    "server/h41.bold": "keep",
+    "server/h41.classical": "keep",
+    "server/h43.bold": "keep",
+    "server/h43.pebbles": "keep",
+    "shipment/h41.bold": "refine",
+    "shipment/h41.classical": "refine",
+    "shipment/h41.weird": "refine",
+    "shipment/h43.pebbles": "refine",
+    "solved/h41.classical": "keep",
+    "solved/h43.bold": "keep",
+    "system/h41.bold": "keep",
+    "system/h41.classical": "keep",
+    "system/h41.weird": "keep",
+    "test/h41.bold": "keep",
+    "test/h41.classical": "refine",
+    "test/h41.pebbles": "refine",
+    "test/h41.weird": "keep",
+    "test/h42.bold": "refine",
+    "test/h42.pebbles": "refine",
+    "test/h43.bold": "refine",
+    "test/h43.weird": "keep",
+    "test/h44.classical": "keep",
+    "test/h44.pebbles": "refine",
+    "tooltip/h41.bold": "keep",
+    "tooltip/h41.classical": "keep",
+    "tooltip/h43.bold": "keep",
+    "tooltip/h43.classical": "keep",
+    "tooltip/h43.pebbles": "keep",
+    "verification/h41.bold": "keep",
+    "verification/h43.bold": "keep",
+    "verification/h43.classical": "keep",
+    "view/h41.bold": "keep"
+  },
+  "finals": {
+    "acceptances": [
+      "h41.bold",
+      "h43.bold",
+      "h43.pebbles"
+    ],
+    "affordance": [],
+    "agentic": [],
+    "api": [],
+    "architecture": [],
+    "backlog": [
+      "h43.classical",
+      "h41.bold",
+      "h43.bold"
+    ],
+    "beta": [
+      "h42.classical"
+    ],
+    "branch": [
+      "h41.classical"
+    ],
+    "changelog": [],
+    "code-quality": [
+      "h41.pebbles",
+      "h43.classical",
+      "h43.bold"
+    ],
+    "collapse": [
+      "h43.weird",
+      "h41.bold"
+    ],
+    "commitment": [],
+    "criterion": [
+      "h43.bold"
+    ],
+    "data": [],
+    "database": [],
+    "decision": [
+      "h41.bold",
+      "h44.weird",
+      "h44.pebbles"
+    ],
+    "delivery": [],
+    "disabled": [
+      "h43.classical"
+    ],
+    "edge": [
+      "h41.classical"
+    ],
+    "efficiency": [],
+    "enabled": [
+      "h43.classical"
+    ],
+    "expand": [
+      "h43.classical"
+    ],
+    "finding": [
+      "h43.bold",
+      "h43.classical"
+    ],
+    "fixed": [
+      "h41.classical"
+    ],
+    "flow": [],
+    "fork": [
+      "h43.classical"
+    ],
+    "git": [
+      "h43.classical"
+    ],
+    "graph": [
+      "h43.classical"
+    ],
+    "history": [
+      "h41.classical"
+    ],
+    "inform": [],
+    "integration": [
+      "h43.bold"
+    ],
+    "inventory": [
+      "h43.bold"
+    ],
+    "journal": [],
+    "journey": [
+      "h41.bold",
+      "h43.bold"
+    ],
+    "layout": [
+      "h43.bold"
+    ],
+    "ledger": [],
+    "log": [],
+    "matrix": [
+      "h41.weird",
+      "h43.bold"
+    ],
+    "merge": [
+      "h41.bold",
+      "h41.classical"
+    ],
+    "monitoring": [
+      "h41.classical"
+    ],
+    "node": [
+      "h43.bold",
+      "h41.classical"
+    ],
+    "node-add": [
+      "h43.classical",
+      "h41.weird"
+    ],
+    "node-new": [
+      "h41.bold"
+    ],
+    "node-remove": [
+      "h41.bold",
+      "h43.classical",
+      "h41.classical"
+    ],
+    "observability": [
+      "h43.classical"
+    ],
+    "overview": [
+      "h43.pebbles"
+    ],
+    "page": [
+      "h43.bold",
+      "h43.classical",
+      "h41.bold"
+    ],
+    "pane": [
+      "h43.classical"
+    ],
+    "parity": [
+      "h43.bold"
+    ],
+    "performance": [
+      "h41.weird"
+    ],
+    "quality": [
+      "h43.bold"
+    ],
+    "quality-assurance": [
+      "h41.classical",
+      "h43.classical",
+      "h41.bold"
+    ],
+    "record": [],
+    "release": [
+      "h43.bold",
+      "h41.bold"
+    ],
+    "reliability": [],
+    "resolved": [],
+    "screens": [
+      "h41.weird"
+    ],
+    "server": [
+      "h41.classical"
+    ],
+    "shipment": [
+      "h41.bold",
+      "h41.classical"
+    ],
+    "solved": [],
+    "system": [
+      "h41.classical"
+    ],
+    "test": [
+      "h41.bold",
+      "h44.classical",
+      "h41.classical"
+    ],
+    "tooltip": [
+      "h41.classical"
+    ],
+    "verification": [
+      "h43.classical",
+      "h43.bold",
+      "h41.bold"
+    ],
+    "view": []
+  },
+  "names": {
+    "acceptances/h41.bold": "receipt-checks",
+    "acceptances/h43.bold": "file-check",
+    "acceptances/h43.pebbles": "pouch-check",
+    "affordance/h41.bold": "door-handle",
+    "affordance/h43.bold": "stone-pin",
+    "affordance/h43.classical": "letter-underline",
+    "affordance/h43.weird": "sunset-chevron-down",
+    "agentic/h41.bold": "destination-flag",
+    "agentic/h41.classical": "spark-to-stone",
+    "agentic/h43.weird": "circle-spark",
+    "api/h41.classical": "code-square",
+    "api/h43.weird": "stone-accolade",
+    "architecture/h41.classical": "building-columns",
+    "architecture/h43.classical": "building-flat",
+    "architecture/h43.pebbles": "stone-bridge",
+    "architecture/h43.weird": "triangles",
+    "backlog/h41.bold": "stack-fall",
+    "backlog/h41.pebbles": "stones-underline-shrink-arrow",
+    "backlog/h41.weird": "filter-dots",
+    "backlog/h42.pebbles": "stones-stack-4",
+    "backlog/h43.bold": "logs-stack",
+    "backlog/h43.classical": "inbox-full",
+    "backlog/h43.pebbles": "stones-pot",
+    "beta/h41.pebbles": "pebble-sprout",
+    "beta/h41.weird": "cell-dots",
+    "beta/h42.classical": "flask-lab",
+    "beta/h42.pebbles": "stones-group-3",
+    "beta/h43.bold": "door-open",
+    "beta/h43.classical": "community",
+    "beta/h43.pebbles": "stones-group-5",
+    "beta/h44.weird": "circle-shaded",
+    "branch/h41.bold": "branch-bud",
+    "branch/h41.classical": "git-branch",
+    "branch/h41.weird": "git-branch-create",
+    "branch/h43.bold": "branch-buds",
+    "changelog/h41.bold": "list-timeline",
+    "changelog/h41.weird": "maze-tunnel",
+    "changelog/h42.bold": "diff",
+    "changelog/h42.weird": "axis-bounce",
+    "code-quality/h41.pebbles": "stone-code",
+    "code-quality/h43.bold": "accolades-check",
+    "code-quality/h43.classical": "terminal",
+    "collapse/h41.bold": "accordion-collapsed",
+    "collapse/h41.classical": "collapse",
+    "collapse/h43.bold": "collapse-square",
+    "collapse/h43.classical": "circle-chevron-up",
+    "collapse/h43.pebbles": "cairn-stack",
+    "collapse/h43.weird": "pebble-shrink",
+    "commitment/h41.classical": "certificate",
+    "commitment/h42.classical": "award",
+    "criterion/h43.bold": "gauge-sm",
+    "criterion/h43.classical": "rule",
+    "data/h41.bold": "stones-8",
+    "decision/h41.bold": "judge-hammer",
+    "decision/h42.classical": "decision",
+    "decision/h43.pebbles": "stones-underline-jump",
+    "decision/h43.weird": "circle-split",
+    "decision/h44.pebbles": "node-decision",
+    "decision/h44.weird": "fork",
+    "delivery/h41.pebbles": "stone-bowl-2",
+    "delivery/h41.weird": "stone-jump",
+    "delivery/h43.classical": "package-arc-bottom",
+    "disabled/h41.classical": "toggle-disabled",
+    "disabled/h41.weird": "interruptor",
+    "disabled/h43.bold": "rectangle-hash",
+    "disabled/h43.classical": "disabled",
+    "disabled/h43.pebbles": "sunset-sea",
+    "disabled/h43.weird": "circle-half-quarter",
+    "edge/h41.classical": "edge",
+    "efficiency/h41.weird": "hourglass-empty",
+    "efficiency/h43.bold": "stone-scale-up",
+    "enabled/h41.bold": "instant-picture",
+    "enabled/h41.pebbles": "stone-shine-top",
+    "enabled/h43.classical": "enabled",
+    "enabled/h43.pebbles": "stone-checkmark",
+    "expand/h41.bold": "accordion-expanded",
+    "expand/h41.pebbles": "ripples-2",
+    "expand/h43.bold": "expand-square",
+    "expand/h43.classical": "circle-chevron-down",
+    "finding/h43.bold": "flag-underline",
+    "finding/h43.classical": "search-exclamation",
+    "fixed/h41.classical": "plaster",
+    "fixed/h43.bold": "square-x",
+    "flow/h41.bold": "edge-direction",
+    "flow/h41.pebbles": "flow-stone",
+    "flow/h42.pebbles": "flow-stones",
+    "flow/h43.classical": "node-direction-right",
+    "flow/h43.pebbles": "stones-wave",
+    "flow/h44.classical": "network-arc",
+    "flow/h44.weird": "infinite",
+    "fork/h43.classical": "git-fork-sm",
+    "git/h41.classical": "git-triangle",
+    "git/h41.weird": "ripples-line",
+    "git/h43.bold": "git-tree",
+    "git/h43.classical": "git-diamond",
+    "git/h43.pebbles": "path-stones",
+    "graph/h43.classical": "graph",
+    "history/h41.bold": "road-horizon",
+    "history/h41.classical": "clock-backward",
+    "history/h41.weird": "target-search",
+    "history/h42.weird": "stone-waves-left",
+    "integration/h41.classical": "chip-component",
+    "integration/h43.bold": "puzzle",
+    "inventory/h41.classical": "clipboard-checklist",
+    "inventory/h43.bold": "shelves",
+    "inventory/h43.weird": "pebble-bars-strike",
+    "inventory/h44.weird": "squared-square",
+    "journal/h41.weird": "book-sheets",
+    "journal/h43.weird": "sunshine-up",
+    "journey/h41.bold": "journey",
+    "journey/h43.bold": "stairs-stone",
+    "layout/h41.pebbles": "stones-messy",
+    "layout/h41.weird": "fibonacci",
+    "layout/h43.bold": "layout-3",
+    "layout/h43.pebbles": "stones-box",
+    "layout/h43.weird": "chart-shapes",
+    "ledger/h41.bold": "book-open-text",
+    "ledger/h42.pebbles": "stones-stack-comparison",
+    "ledger/h42.weird": "book-sheets-vertical",
+    "ledger/h43.weird": "scale-balance",
+    "ledger/h44.bold": "stop-circle-2",
+    "ledger/h44.pebbles": "stones-comparison",
+    "log/h43.classical": "receipt-3",
+    "log/h43.pebbles": "stones-stack-box-4",
+    "log/h44.pebbles": "circle-ring-bell",
+    "matrix/h41.weird": "hash",
+    "matrix/h43.bold": "matrix",
+    "merge/h41.bold": "git-merge",
+    "merge/h41.classical": "git-merge-down",
+    "merge/h41.weird": "stones-network",
+    "monitoring/h41.bold": "circle-gauge",
+    "monitoring/h41.classical": "monitor",
+    "node-add/h41.classical": "node-edge-x",
+    "node-add/h41.pebbles": "cairn-stone-add",
+    "node-add/h41.weird": "stone-node-plus",
+    "node-add/h43.classical": "node-plus",
+    "node-add/h43.weird": "node-node",
+    "node-new/h41.bold": "node-spark",
+    "node-new/h41.classical": "stone-shine-2",
+    "node-new/h43.bold": "node-seed",
+    "node-new/h43.pebbles": "alarm",
+    "node-new/h43.weird": "bubbles",
+    "node-remove/h41.bold": "node-x",
+    "node-remove/h41.classical": "node-edge-minus",
+    "node-remove/h43.classical": "node-minus",
+    "node-remove/h43.weird": "circle-stones-3",
+    "node/h41.classical": "node-lines-3",
+    "node/h41.pebbles": "stone-emmits-2",
+    "node/h41.weird": "node-lines-5",
+    "node/h43.bold": "node-lines-2",
+    "node/h43.pebbles": "stone-node",
+    "observability/h41.bold": "board-growth",
+    "observability/h43.classical": "eye-signal",
+    "observability/h43.weird": "target",
+    "overview/h43.classical": "chart-square",
+    "overview/h43.pebbles": "overview",
+    "page/h41.bold": "page-text",
+    "page/h41.pebbles": "pebble-text",
+    "page/h41.weird": "hanging-note",
+    "page/h43.bold": "window-text",
+    "page/h43.classical": "file-text",
+    "page/h43.pebbles": "stone-text",
+    "pane/h41.classical": "layout-pane-text",
+    "pane/h41.weird": "layout-overlap",
+    "pane/h43.bold": "folder-text",
+    "pane/h43.classical": "layout-sidebar-text",
+    "pane/h43.weird": "perspective",
+    "parity/h43.bold": "stone-scale",
+    "performance/h41.weird": "stone-speed-2",
+    "performance/h43.bold": "stopwatch-2",
+    "quality-assurance/h41.bold": "stamp-check",
+    "quality-assurance/h41.classical": "clipboard-check",
+    "quality-assurance/h43.classical": "shield-check",
+    "quality/h43.bold": "gemstone",
+    "record/h41.pebbles": "text-pebble",
+    "record/h42.pebbles": "text-circle",
+    "record/h43.pebbles": "stone-arch",
+    "record/h44.weird": "print-echoes",
+    "release/h41.bold": "label-tag-2",
+    "release/h43.bold": "label-tag",
+    "release/h43.pebbles": "cairn",
+    "reliability/h43.bold": "stone-shake",
+    "reliability/h43.classical": "pillar",
+    "screens/h41.classical": "triptych",
+    "screens/h41.pebbles": "squircles-4",
+    "screens/h41.weird": "walls",
+    "screens/h43.bold": "copy-text",
+    "screens/h43.classical": "screens",
+    "screens/h43.pebbles": "dolmens-3",
+    "server/h41.bold": "rectangle-exchange",
+    "server/h41.classical": "servers",
+    "server/h43.bold": "ipod-station",
+    "server/h43.pebbles": "stone-emmit-2",
+    "shipment/h41.bold": "shipment",
+    "shipment/h41.classical": "package",
+    "shipment/h41.weird": "stone-speed-3",
+    "shipment/h43.pebbles": "stone-speed-underline",
+    "solved/h41.classical": "puzzle-piece",
+    "solved/h43.bold": "lock-open",
+    "system/h41.bold": "circle-network",
+    "system/h41.classical": "system",
+    "system/h41.weird": "atoms",
+    "test/h41.bold": "flask-tube-check",
+    "test/h41.classical": "flask",
+    "test/h41.pebbles": "stones-balance",
+    "test/h41.weird": "signal-pin",
+    "test/h42.bold": "recipient-stick",
+    "test/h42.pebbles": "pin-waves",
+    "test/h43.bold": "square-check",
+    "test/h43.weird": "circle-broken-2",
+    "test/h44.classical": "flask-particles",
+    "test/h44.pebbles": "stone-arcs",
+    "tooltip/h41.bold": "cursor-menu",
+    "tooltip/h41.classical": "tooltip",
+    "tooltip/h43.bold": "node-tooltip",
+    "tooltip/h43.classical": "tooltip-bubble",
+    "tooltip/h43.pebbles": "pebble-chat-bubble",
+    "verification/h41.bold": "chermarks",
+    "verification/h43.bold": "eye-check",
+    "verification/h43.classical": "search-check",
+    "view/h41.bold": "search-chart"
+  },
+  "none": {
+    "acceptances": false,
+    "affordance": true,
+    "agentic": true,
+    "api": true,
+    "architecture": true,
+    "backlog": false,
+    "beta": false,
+    "branch": false,
+    "changelog": true,
+    "code-quality": false,
+    "collapse": false,
+    "commitment": true,
+    "criterion": false,
+    "data": true,
+    "database": true,
+    "decision": false,
+    "delivery": true,
+    "disabled": false,
+    "edge": false,
+    "enabled": false,
+    "expand": false,
+    "finding": false,
+    "fixed": false,
+    "flow": true,
+    "fork": false,
+    "git": false,
+    "graph": false,
+    "history": false,
+    "inform": true,
+    "integration": false,
+    "inventory": false,
+    "journal": true,
+    "journey": false,
+    "layout": false,
+    "ledger": true,
+    "log": true,
+    "matrix": false,
+    "merge": false,
+    "monitoring": false,
+    "node": false,
+    "node-add": false,
+    "node-new": false,
+    "node-remove": false,
+    "observability": false,
+    "overview": false,
+    "page": false,
+    "pane": false,
+    "parity": false,
+    "performance": false,
+    "quality": false,
+    "quality-assurance": false,
+    "record": true,
+    "release": false,
+    "resolved": true,
+    "screens": false,
+    "server": false,
+    "shipment": false,
+    "system": false,
+    "test": false,
+    "tooltip": false,
+    "verification": false,
+    "view": true
+  },
+  "note": {
+    "agentic/h41.bold": "overlapping negative subtraction issue on solid",
+    "agentic/h43.weird": "overlapping negative subtraction issue on solid",
+    "architecture/h41.classical": "overlapping negative subtraction issue on solid",
+    "architecture/h43.pebbles": "overlapping negative subtraction issue on solid",
+    "backlog/h41.weird": "solid is too sharp, falling bottom dot only on marked variant",
+    "backlog/h42.pebbles": "fill the top stone for the marked variant instead of the flying dot",
+    "backlog/h43.bold": "bigger dot mark",
+    "backlog/h43.classical": "too geometrical, we miss the hand drawn irregularity",
+    "backlog/h43.pebbles": "bigger dot in the pot on marked variant, solid is too small and sharp",
+    "beta/h41.weird": "give up the solid because it is not relevant, keep only the right dot on marked variant, not in the regular one",
+    "beta/h43.pebbles": "solid should fill all stones, marked should fill only the one in the center instead of adding a dot outside",
+    "branch/h41.bold": "overlapping negative subtraction issue on solid",
+    "branch/h41.classical": "overlapping negative subtraction issue on solid",
+    "branch/h41.weird": "overlapping negative subtraction issue on solid",
+    "branch/h43.bold": "overlapping negative subtraction issue on solid",
+    "changelog/h42.bold": "give up the solid, nonsense here; bigger dot mark",
+    "commitment/h42.classical": "solid too sharp",
+    "decision/h42.classical": "give up the marked",
+    "decision/h43.pebbles": "solid is too sharp, put the dot mark inside the top right circle instead of flying around",
+    "decision/h43.weird": "put the dot inside a half instead of flying around",
+    "decision/h44.pebbles": "put the dot mark inside the circle instead of flying around",
+    "decision/h44.weird": "put the dot mark inside the circle instead of flying around",
+    "delivery/h41.pebbles": "marked should put the dot in the circle stone",
+    "delivery/h43.classical": "solid is too sharp in comparison with the rounded regular, marked is useless",
+    "edge/h41.classical": "overlapping negative subtraction issue on solid",
+    "flow/h41.bold": "give up the solid and marked",
+    "flow/h42.pebbles": "marked: put the dot in the circles instead of flying around",
+    "flow/h43.classical": "give up the marked",
+    "flow/h43.pebbles": "put the dot inside the center circle for the marked variant",
+    "flow/h44.classical": "marked: put a dot in the top center circle instead of flying around",
+    "fork/h43.classical": "overlapping negative subtraction issue on solid",
+    "git/h41.classical": "overlapping negative subtraction issue on solid",
+    "git/h43.bold": "overlapping negative subtraction issue on solid",
+    "git/h43.classical": "overlapping negative subtraction issue on solid, to straight diamond outline",
+    "git/h43.pebbles": "all stones should be filled",
+    "graph/h43.classical": "overlapping negative subtraction issue on solid",
+    "history/h41.classical": "give up the solid, nonsense for this icon",
+    "history/h42.weird": "give up the marked, just fill the circle for the solid",
+    "integration/h41.classical": "overlapping negative subtraction issue on solid",
+    "inventory/h41.classical": "solid is too sharp",
+    "inventory/h43.bold": "bigger mark",
+    "inventory/h44.weird": "solid is too sharp",
+    "journal/h43.weird": "dot in the circle for the marked variant",
+    "ledger/h41.bold": "solid is too sharp",
+    "ledger/h42.pebbles": "bigger dot mark",
+    "ledger/h42.weird": "give up the marked",
+    "ledger/h43.weird": "bigger mark",
+    "ledger/h44.bold": "solid negative space is too sharp",
+    "ledger/h44.pebbles": "dot mark should be inside the right circle instead of flying around",
+    "log/h43.classical": "give up the marked",
+    "log/h43.pebbles": "just fill the bottom one for the marked variant",
+    "log/h44.pebbles": "bigger dot mark in marked variant",
+    "merge/h41.bold": "overlapping negative subtraction issue on solid",
+    "merge/h41.classical": "overlapping negative subtraction issue on solid",
+    "merge/h41.weird": "overlapping negative subtraction issue on solid",
+    "node-add/h41.classical": "overlapping negative subtraction issue on solid",
+    "node-new/h41.bold": "overlapping negative subtraction issue on solid",
+    "node-new/h43.bold": "overlapping negative subtraction issue on solid",
+    "node-remove/h41.bold": "overlapping negative subtraction issue on solid",
+    "node-remove/h41.classical": "overlapping negative subtraction issue on solid",
+    "node/h41.classical": "overlapping negative subtraction issue on solid",
+    "node/h41.pebbles": "mark is too big, can't distinguish from the stone",
+    "node/h41.weird": "overlapping negative subtraction issue on solid",
+    "node/h43.pebbles": "the main shape should be filled too",
+    "record/h41.pebbles": "bigger mark",
+    "record/h42.pebbles": "bigger mark",
+    "record/h43.pebbles": "no dot in the regular, dot inside the circle only on marked and give up the flying dot over the circle",
+    "record/h44.weird": "bigger mark on marked variant, and solid is too sharp",
+    "release/h43.bold": "solid is too sharp, marked should fill the circle instead of adding a dot outside",
+    "release/h43.pebbles": "solid should fill the bottom ellipse, marked should only fill the top circle instead of adding a dot oustide",
+    "shipment/h41.bold": "solid is too sharp, marked should put the dot inside the box",
+    "shipment/h41.classical": "too squared, not in the rounded hand drawn style of pebbles icons",
+    "shipment/h41.weird": "marked should put the dot in the circle",
+    "shipment/h43.pebbles": "marked should put the dot inside the circle, in solid, the circle should be completely filled.",
+    "system/h41.bold": "overlapping negative subtraction issue on solid",
+    "system/h41.classical": "overlapping negative subtraction issue on solid",
+    "system/h41.weird": "overlapping negative subtraction issue on solid",
+    "test/h41.classical": "too geometrical, not enough hand drawn to integrate with pebbles style",
+    "test/h41.pebbles": "put the dot in the top stone instead of outside",
+    "test/h42.bold": "put the mark as a round on the stick head instead of flying around",
+    "test/h42.pebbles": "put the dot inside the circle instead of outside",
+    "test/h43.bold": "solid is too sharp",
+    "test/h44.pebbles": "put the dot in the middle of the circle instead of flying around"
+  },
+  "ref": {
+    "award": {
+      "d": "accept",
+      "note": "solid is just a plain shape, where is my checkmark?"
+    },
+    "backlog-pebbles-h43": {
+      "d": "accept"
+    },
+    "book-open-text": {
+      "d": "accept",
+      "note": "where are the text lines on the solid variant? regular and marked are good"
+    },
+    "book-sheets-vertical": {
+      "d": "accept"
+    },
+    "cairn": {
+      "d": "again",
+      "note": "the circle should also be filled in the solid"
+    },
+    "cairn@2": {
+      "d": "accept"
+    },
+    "cell-dots": {
+      "d": "accept"
+    },
+    "circle-ring-bell": {
+      "d": "again",
+      "note": "missing the waves inside the circle in the solid variant, and the mark dot is too big and against the outline in the marked variant"
+    },
+    "circle-ring-bell@2": {
+      "d": "accept"
+    },
+    "circle-split": {
+      "d": "accept"
+    },
+    "clipboard-checklist": {
+      "d": "accept",
+      "note": "solid is just a plain shape, where are my lines and checkmarks?"
+    },
+    "clock-backward": {
+      "d": "accept"
+    },
+    "decision": {
+      "d": "accept"
+    },
+    "diff": {
+      "d": "accept"
+    },
+    "edge-direction": {
+      "d": "accept"
+    },
+    "filter-dots": {
+      "d": "again",
+      "note": "here, the dot below the filter on the marked variant, as it was done in the initial round, was correct and acceptable; meanwhile, the solid is missing the dots inside the filter"
+    },
+    "filter-dots@2": {
+      "d": "accept"
+    },
+    "flask": {
+      "d": "again",
+      "note": "the solid is completely filled while only the liquid should be filled inside the flask"
+    },
+    "flask@2": {
+      "d": "again",
+      "note": "the initial one with only the line was good.",
+      "v": {
+        "marked": "refine",
+        "regular": "refine",
+        "solid": ""
+      }
+    },
+    "flask@3": {
+      "d": "accept"
+    },
+    "flow-stones": {
+      "d": "accept"
+    },
+    "fork": {
+      "d": "accept"
+    },
+    "git-diamond@2": {
+      "d": "accept"
+    },
+    "inbox-full": {
+      "d": "accept"
+    },
+    "label-tag": {
+      "d": "accept",
+      "note": "we miss the hole and the line inside the label in the solid"
+    },
+    "logs-stack": {
+      "d": "again",
+      "note": "give up the marked"
+    },
+    "logs-stack@2": {
+      "d": "accept"
+    },
+    "network-arc": {
+      "d": "accept"
+    },
+    "node-decision": {
+      "d": "accept"
+    },
+    "node-direction-right": {
+      "d": "accept"
+    },
+    "package": {
+      "d": "accept"
+    },
+    "package-arc-bottom": {
+      "d": "accept",
+      "note": "we miss the sticker of the package in the solid"
+    },
+    "path-stones@2": {
+      "d": "accept"
+    },
+    "pin-waves": {
+      "d": "accept"
+    },
+    "print-echoes": {
+      "d": "accept",
+      "note": "solid is just a plain shape, where are my 2 lines?"
+    },
+    "receipt-3": {
+      "d": "accept"
+    },
+    "recipient-stick": {
+      "d": "accept"
+    },
+    "scale-balance": {
+      "d": "again",
+      "note": "the triangle base of the scale should be filled in the solid variant"
+    },
+    "scale-balance@2": {
+      "d": "again",
+      "note": "issue with the overlapping circles on the scale line",
+      "v": {
+        "solid": "refine"
+      }
+    },
+    "scale-balance@3": {
+      "d": "accept"
+    },
+    "shelves": {
+      "d": "accept"
+    },
+    "shipment": {
+      "d": "accept",
+      "note": "we miss the sticker of the package in the solid"
+    },
+    "square-check": {
+      "d": "again",
+      "note": "the checkmark is invisible inside the solid and not well positioned in the regular and marked; regular should be kept from the first round, and the dot should be after the tail of the tick, like we do on the checkmark-dot existing icon"
+    },
+    "square-check@2": {
+      "d": "accept"
+    },
+    "squared-square": {
+      "d": "accept"
+    },
+    "stone-arch": {
+      "d": "accept"
+    },
+    "stone-arcs": {
+      "d": "accept"
+    },
+    "stone-bowl-2": {
+      "d": "accept"
+    },
+    "stone-emmits-2@2": {
+      "d": "accept"
+    },
+    "stone-node@2": {
+      "d": "accept"
+    },
+    "stone-speed-3": {
+      "d": "accept"
+    },
+    "stone-speed-underline": {
+      "d": "accept"
+    },
+    "stone-waves-left": {
+      "d": "accept"
+    },
+    "stones-balance": {
+      "d": "accept"
+    },
+    "stones-comparison": {
+      "d": "accept"
+    },
+    "stones-group-5": {
+      "d": "accept"
+    },
+    "stones-stack-4": {
+      "d": "accept"
+    },
+    "stones-stack-box-4": {
+      "d": "accept"
+    },
+    "stones-stack-comparison": {
+      "d": "accept"
+    },
+    "stones-underline-jump": {
+      "d": "accept",
+      "note": "solid are just plain circles, where is my checkmark?"
+    },
+    "stones-wave": {
+      "d": "accept"
+    },
+    "stop-circle-2": {
+      "d": "again",
+      "note": "the square inside looks too small in comparison with the regular",
+      "v": {
+        "regular": "",
+        "solid": "refine"
+      }
+    },
+    "stop-circle-2@3": {
+      "d": "accept"
+    },
+    "sunshine-up": {
+      "d": "accept"
+    },
+    "text-circle": {
+      "d": "accept",
+      "note": "solid is just a plain circle, where are my 2 lines?"
+    },
+    "text-pebble": {
+      "d": "accept",
+      "note": "solid is just a plain circle, where are my 2 lines?"
+    }
+  },
+  "results": {
+    "app": "concept-icon-review",
+    "complete": true,
+    "concepts": [
+      {
+        "concept": "delivery",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "shipment",
+        "finalists": [
+          "h41.bold",
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "release",
+        "finalists": [
+          "h43.bold",
+          "h41.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "beta",
+        "finalists": [
+          "h42.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "test",
+        "finalists": [
+          "h41.bold",
+          "h44.classical",
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "changelog",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "backlog",
+        "finalists": [
+          "h43.classical",
+          "h41.bold",
+          "h43.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "flow",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "history",
+        "finalists": [
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "journal",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "log",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "ledger",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "record",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "inventory",
+        "finalists": [
+          "h43.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "commitment",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "decision",
+        "finalists": [
+          "h41.bold",
+          "h44.weird",
+          "h44.pebbles"
+        ],
+        "none": false
+      },
+      {
+        "concept": "data",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "database",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "server",
+        "finalists": [
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "api",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "system",
+        "finalists": [
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "architecture",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "integration",
+        "finalists": [
+          "h43.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "agentic",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "git",
+        "finalists": [
+          "h43.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "branch",
+        "finalists": [
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "fork",
+        "finalists": [
+          "h43.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "merge",
+        "finalists": [
+          "h41.bold",
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "node",
+        "finalists": [
+          "h43.bold",
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "graph",
+        "finalists": [
+          "h43.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "edge",
+        "finalists": [
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "node-add",
+        "finalists": [
+          "h43.classical",
+          "h41.weird"
+        ],
+        "none": false
+      },
+      {
+        "concept": "node-new",
+        "finalists": [
+          "h41.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "node-remove",
+        "finalists": [
+          "h41.bold",
+          "h43.classical",
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "journey",
+        "finalists": [
+          "h41.bold",
+          "h43.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "overview",
+        "finalists": [
+          "h43.pebbles"
+        ],
+        "none": false
+      },
+      {
+        "concept": "view",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "page",
+        "finalists": [
+          "h43.bold",
+          "h43.classical",
+          "h41.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "screens",
+        "finalists": [
+          "h41.weird"
+        ],
+        "none": false
+      },
+      {
+        "concept": "layout",
+        "finalists": [
+          "h43.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "pane",
+        "finalists": [
+          "h43.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "matrix",
+        "finalists": [
+          "h41.weird",
+          "h43.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "tooltip",
+        "finalists": [
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "enabled",
+        "finalists": [
+          "h43.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "disabled",
+        "finalists": [
+          "h43.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "expand",
+        "finalists": [
+          "h43.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "collapse",
+        "finalists": [
+          "h43.weird",
+          "h41.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "inform",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "affordance",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "quality",
+        "finalists": [
+          "h43.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "parity",
+        "finalists": [
+          "h43.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "code-quality",
+        "finalists": [
+          "h41.pebbles",
+          "h43.classical",
+          "h43.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "verification",
+        "finalists": [
+          "h43.classical",
+          "h43.bold",
+          "h41.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "quality-assurance",
+        "finalists": [
+          "h41.classical",
+          "h43.classical",
+          "h41.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "acceptances",
+        "finalists": [
+          "h41.bold",
+          "h43.bold",
+          "h43.pebbles"
+        ],
+        "none": false
+      },
+      {
+        "concept": "criterion",
+        "finalists": [
+          "h43.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "finding",
+        "finalists": [
+          "h43.bold",
+          "h43.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "resolved",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "solved",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "fixed",
+        "finalists": [
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "performance",
+        "finalists": [
+          "h41.weird"
+        ],
+        "none": false
+      },
+      {
+        "concept": "efficiency",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "reliability",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "observability",
+        "finalists": [
+          "h43.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "monitoring",
+        "finalists": [
+          "h41.classical"
+        ],
+        "none": false
+      }
+    ],
+    "drawings": [
+      {
+        "candidate": "h41.weird",
+        "concept": "delivery",
+        "decision": "keep",
+        "finalist": false,
+        "id": "delivery/h41.weird",
+        "name": "stone-jump",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "delivery",
+        "decision": "refine",
+        "finalist": false,
+        "id": "delivery/h41.pebbles",
+        "name": "stone-bowl-2",
+        "nameOk": true,
+        "refine": "marked should put the dot in the circle stone",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "delivery",
+        "decision": "refine",
+        "finalist": false,
+        "id": "delivery/h43.classical",
+        "name": "package-arc-bottom",
+        "nameOk": true,
+        "refine": "solid is too sharp in comparison with the rounded regular, marked is useless",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "shipment",
+        "decision": "refine",
+        "finalist": true,
+        "id": "shipment/h41.bold",
+        "name": "shipment",
+        "nameOk": true,
+        "refine": "solid is too sharp, marked should put the dot inside the box",
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "shipment",
+        "decision": "refine",
+        "finalist": true,
+        "id": "shipment/h41.classical",
+        "name": "package",
+        "nameOk": true,
+        "refine": "too squared, not in the rounded hand drawn style of pebbles icons",
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "shipment",
+        "decision": "refine",
+        "finalist": false,
+        "id": "shipment/h41.weird",
+        "name": "stone-speed-3",
+        "nameOk": true,
+        "refine": "marked should put the dot in the circle",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "shipment",
+        "decision": "refine",
+        "finalist": false,
+        "id": "shipment/h43.pebbles",
+        "name": "stone-speed-underline",
+        "nameOk": true,
+        "refine": "marked should put the dot inside the circle, in solid, the circle should be completely filled.",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "release",
+        "decision": "refine",
+        "finalist": true,
+        "id": "release/h43.bold",
+        "name": "label-tag",
+        "nameOk": true,
+        "refine": "solid is too sharp, marked should fill the circle instead of adding a dot outside",
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "release",
+        "decision": "keep",
+        "finalist": true,
+        "id": "release/h41.bold",
+        "name": "label-tag-2",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "release",
+        "decision": "refine",
+        "finalist": false,
+        "id": "release/h43.pebbles",
+        "name": "cairn",
+        "nameOk": true,
+        "refine": "solid should fill the bottom ellipse, marked should only fill the top circle instead of adding a dot oustide",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.classical",
+        "concept": "beta",
+        "decision": "keep",
+        "finalist": true,
+        "id": "beta/h42.classical",
+        "name": "flask-lab",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "beta",
+        "decision": "refine",
+        "finalist": false,
+        "id": "beta/h41.weird",
+        "name": "cell-dots",
+        "nameOk": true,
+        "refine": "give up the solid because it is not relevant, keep only the right dot on marked variant, not in the regular one",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "beta",
+        "decision": "refine",
+        "finalist": false,
+        "id": "beta/h43.pebbles",
+        "name": "stones-group-5",
+        "nameOk": true,
+        "refine": "solid should fill all stones, marked should fill only the one in the center instead of adding a dot outside",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.pebbles",
+        "concept": "beta",
+        "decision": "keep",
+        "finalist": false,
+        "id": "beta/h42.pebbles",
+        "name": "stones-group-3",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "beta",
+        "decision": "keep",
+        "finalist": false,
+        "id": "beta/h43.classical",
+        "name": "community",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "beta",
+        "decision": "keep",
+        "finalist": false,
+        "id": "beta/h41.pebbles",
+        "name": "pebble-sprout",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "beta",
+        "decision": "keep",
+        "finalist": false,
+        "id": "beta/h43.bold",
+        "name": "door-open",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h44.weird",
+        "concept": "beta",
+        "decision": "keep",
+        "finalist": false,
+        "id": "beta/h44.weird",
+        "name": "circle-shaded",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "test",
+        "decision": "keep",
+        "finalist": true,
+        "id": "test/h41.bold",
+        "name": "flask-tube-check",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h44.classical",
+        "concept": "test",
+        "decision": "keep",
+        "finalist": true,
+        "id": "test/h44.classical",
+        "name": "flask-particles",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "test",
+        "decision": "refine",
+        "finalist": true,
+        "id": "test/h41.classical",
+        "name": "flask",
+        "nameOk": true,
+        "refine": "too geometrical, not enough hand drawn to integrate with pebbles style",
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.pebbles",
+        "concept": "test",
+        "decision": "refine",
+        "finalist": false,
+        "id": "test/h42.pebbles",
+        "name": "pin-waves",
+        "nameOk": true,
+        "refine": "put the dot inside the circle instead of outside",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.bold",
+        "concept": "test",
+        "decision": "refine",
+        "finalist": false,
+        "id": "test/h42.bold",
+        "name": "recipient-stick",
+        "nameOk": true,
+        "refine": "put the mark as a round on the stick head instead of flying around",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h44.pebbles",
+        "concept": "test",
+        "decision": "refine",
+        "finalist": false,
+        "id": "test/h44.pebbles",
+        "name": "stone-arcs",
+        "nameOk": true,
+        "refine": "put the dot in the middle of the circle instead of flying around",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "test",
+        "decision": "keep",
+        "finalist": false,
+        "id": "test/h41.weird",
+        "name": "signal-pin",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "test",
+        "decision": "keep",
+        "finalist": false,
+        "id": "test/h43.weird",
+        "name": "circle-broken-2",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "test",
+        "decision": "refine",
+        "finalist": false,
+        "id": "test/h41.pebbles",
+        "name": "stones-balance",
+        "nameOk": true,
+        "refine": "put the dot in the top stone instead of outside",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "test",
+        "decision": "refine",
+        "finalist": false,
+        "id": "test/h43.bold",
+        "name": "square-check",
+        "nameOk": true,
+        "refine": "solid is too sharp",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "changelog",
+        "decision": "keep",
+        "finalist": false,
+        "id": "changelog/h41.bold",
+        "name": "list-timeline",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.pebbles",
+        "concept": "changelog",
+        "decision": "abandon",
+        "finalist": false,
+        "id": "changelog/h42.pebbles",
+        "name": null,
+        "nameOk": null,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.weird",
+        "concept": "changelog",
+        "decision": "keep",
+        "finalist": false,
+        "id": "changelog/h42.weird",
+        "name": "axis-bounce",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "changelog",
+        "decision": "keep",
+        "finalist": false,
+        "id": "changelog/h41.weird",
+        "name": "maze-tunnel",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.bold",
+        "concept": "changelog",
+        "decision": "refine",
+        "finalist": false,
+        "id": "changelog/h42.bold",
+        "name": "diff",
+        "nameOk": true,
+        "refine": "give up the solid, nonsense here; bigger dot mark",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "backlog",
+        "decision": "refine",
+        "finalist": true,
+        "id": "backlog/h43.classical",
+        "name": "inbox-full",
+        "nameOk": true,
+        "refine": "too geometrical, we miss the hand drawn irregularity",
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "backlog",
+        "decision": "keep",
+        "finalist": true,
+        "id": "backlog/h41.bold",
+        "name": "stack-fall",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "backlog",
+        "decision": "refine",
+        "finalist": true,
+        "id": "backlog/h43.bold",
+        "name": "logs-stack",
+        "nameOk": true,
+        "refine": "bigger dot mark",
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "backlog",
+        "decision": "keep",
+        "finalist": false,
+        "id": "backlog/h41.pebbles",
+        "name": "stones-underline-shrink-arrow",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "backlog",
+        "decision": "refine",
+        "finalist": false,
+        "id": "backlog/h41.weird",
+        "name": "filter-dots",
+        "nameOk": true,
+        "refine": "solid is too sharp, falling bottom dot only on marked variant",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "backlog",
+        "decision": "refine",
+        "finalist": false,
+        "id": "backlog/h43.pebbles",
+        "name": "stones-pot",
+        "nameOk": true,
+        "refine": "bigger dot in the pot on marked variant, solid is too small and sharp",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.pebbles",
+        "concept": "backlog",
+        "decision": "refine",
+        "finalist": false,
+        "id": "backlog/h42.pebbles",
+        "name": "stones-stack-4",
+        "nameOk": true,
+        "refine": "fill the top stone for the marked variant instead of the flying dot",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h44.weird",
+        "concept": "flow",
+        "decision": "keep",
+        "finalist": false,
+        "id": "flow/h44.weird",
+        "name": "infinite",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "flow",
+        "decision": "refine",
+        "finalist": false,
+        "id": "flow/h43.pebbles",
+        "name": "stones-wave",
+        "nameOk": true,
+        "refine": "put the dot inside the center circle for the marked variant",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "flow",
+        "decision": "keep",
+        "finalist": false,
+        "id": "flow/h41.pebbles",
+        "name": "flow-stone",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.pebbles",
+        "concept": "flow",
+        "decision": "refine",
+        "finalist": false,
+        "id": "flow/h42.pebbles",
+        "name": "flow-stones",
+        "nameOk": true,
+        "refine": "marked: put the dot in the circles instead of flying around",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h44.classical",
+        "concept": "flow",
+        "decision": "refine",
+        "finalist": false,
+        "id": "flow/h44.classical",
+        "name": "network-arc",
+        "nameOk": true,
+        "refine": "marked: put a dot in the top center circle instead of flying around",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "flow",
+        "decision": "refine",
+        "finalist": false,
+        "id": "flow/h41.bold",
+        "name": "edge-direction",
+        "nameOk": true,
+        "refine": "give up the solid and marked",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "flow",
+        "decision": "refine",
+        "finalist": false,
+        "id": "flow/h43.classical",
+        "name": "node-direction-right",
+        "nameOk": true,
+        "refine": "give up the marked",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h44.pebbles",
+        "concept": "flow",
+        "decision": "abandon",
+        "finalist": false,
+        "id": "flow/h44.pebbles",
+        "name": null,
+        "nameOk": null,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "history",
+        "decision": "refine",
+        "finalist": true,
+        "id": "history/h41.classical",
+        "name": "clock-backward",
+        "nameOk": true,
+        "refine": "give up the solid, nonsense for this icon",
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "history",
+        "decision": "keep",
+        "finalist": false,
+        "id": "history/h41.weird",
+        "name": "target-search",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "history",
+        "decision": "keep",
+        "finalist": false,
+        "id": "history/h41.bold",
+        "name": "road-horizon",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.weird",
+        "concept": "history",
+        "decision": "refine",
+        "finalist": false,
+        "id": "history/h42.weird",
+        "name": "stone-waves-left",
+        "nameOk": true,
+        "refine": "give up the marked, just fill the circle for the solid",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "journal",
+        "decision": "refine",
+        "finalist": false,
+        "id": "journal/h43.weird",
+        "name": "sunshine-up",
+        "nameOk": true,
+        "refine": "dot in the circle for the marked variant",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "journal",
+        "decision": "keep",
+        "finalist": false,
+        "id": "journal/h41.weird",
+        "name": "book-sheets",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "log",
+        "decision": "refine",
+        "finalist": false,
+        "id": "log/h43.pebbles",
+        "name": "stones-stack-box-4",
+        "nameOk": true,
+        "refine": "just fill the bottom one for the marked variant",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "log",
+        "decision": "refine",
+        "finalist": false,
+        "id": "log/h43.classical",
+        "name": "receipt-3",
+        "nameOk": true,
+        "refine": "give up the marked",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h44.pebbles",
+        "concept": "log",
+        "decision": "refine",
+        "finalist": false,
+        "id": "log/h44.pebbles",
+        "name": "circle-ring-bell",
+        "nameOk": true,
+        "refine": "bigger dot mark in marked variant",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.pebbles",
+        "concept": "ledger",
+        "decision": "refine",
+        "finalist": false,
+        "id": "ledger/h42.pebbles",
+        "name": "stones-stack-comparison",
+        "nameOk": true,
+        "refine": "bigger dot mark",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h44.bold",
+        "concept": "ledger",
+        "decision": "refine",
+        "finalist": false,
+        "id": "ledger/h44.bold",
+        "name": "stop-circle-2",
+        "nameOk": true,
+        "refine": "solid negative space is too sharp",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "ledger",
+        "decision": "refine",
+        "finalist": false,
+        "id": "ledger/h41.bold",
+        "name": "book-open-text",
+        "nameOk": true,
+        "refine": "solid is too sharp",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h44.pebbles",
+        "concept": "ledger",
+        "decision": "refine",
+        "finalist": false,
+        "id": "ledger/h44.pebbles",
+        "name": "stones-comparison",
+        "nameOk": true,
+        "refine": "dot mark should be inside the right circle instead of flying around",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "ledger",
+        "decision": "refine",
+        "finalist": false,
+        "id": "ledger/h43.weird",
+        "name": "scale-balance",
+        "nameOk": true,
+        "refine": "bigger mark",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.weird",
+        "concept": "ledger",
+        "decision": "refine",
+        "finalist": false,
+        "id": "ledger/h42.weird",
+        "name": "book-sheets-vertical",
+        "nameOk": true,
+        "refine": "give up the marked",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.pebbles",
+        "concept": "record",
+        "decision": "refine",
+        "finalist": false,
+        "id": "record/h42.pebbles",
+        "name": "text-circle",
+        "nameOk": true,
+        "refine": "bigger mark",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "record",
+        "decision": "refine",
+        "finalist": false,
+        "id": "record/h43.pebbles",
+        "name": "stone-arch",
+        "nameOk": true,
+        "refine": "no dot in the regular, dot inside the circle only on marked and give up the flying dot over the circle",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "record",
+        "decision": "refine",
+        "finalist": false,
+        "id": "record/h41.pebbles",
+        "name": "text-pebble",
+        "nameOk": true,
+        "refine": "bigger mark",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h44.weird",
+        "concept": "record",
+        "decision": "refine",
+        "finalist": false,
+        "id": "record/h44.weird",
+        "name": "print-echoes",
+        "nameOk": true,
+        "refine": "bigger mark on marked variant, and solid is too sharp",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "inventory",
+        "decision": "refine",
+        "finalist": true,
+        "id": "inventory/h43.bold",
+        "name": "shelves",
+        "nameOk": true,
+        "refine": "bigger mark",
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h44.weird",
+        "concept": "inventory",
+        "decision": "refine",
+        "finalist": false,
+        "id": "inventory/h44.weird",
+        "name": "squared-square",
+        "nameOk": true,
+        "refine": "solid is too sharp",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "inventory",
+        "decision": "keep",
+        "finalist": false,
+        "id": "inventory/h43.weird",
+        "name": "pebble-bars-strike",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "inventory",
+        "decision": "refine",
+        "finalist": false,
+        "id": "inventory/h41.classical",
+        "name": "clipboard-checklist",
+        "nameOk": true,
+        "refine": "solid is too sharp",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "commitment",
+        "decision": "keep",
+        "finalist": false,
+        "id": "commitment/h41.classical",
+        "name": "certificate",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.classical",
+        "concept": "commitment",
+        "decision": "refine",
+        "finalist": false,
+        "id": "commitment/h42.classical",
+        "name": "award",
+        "nameOk": true,
+        "refine": "solid too sharp",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "decision",
+        "decision": "keep",
+        "finalist": true,
+        "id": "decision/h41.bold",
+        "name": "judge-hammer",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h44.weird",
+        "concept": "decision",
+        "decision": "refine",
+        "finalist": true,
+        "id": "decision/h44.weird",
+        "name": "fork",
+        "nameOk": true,
+        "refine": "put the dot mark inside the circle instead of flying around",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h44.pebbles",
+        "concept": "decision",
+        "decision": "refine",
+        "finalist": true,
+        "id": "decision/h44.pebbles",
+        "name": "node-decision",
+        "nameOk": true,
+        "refine": "put the dot mark inside the circle instead of flying around",
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "decision",
+        "decision": "refine",
+        "finalist": false,
+        "id": "decision/h43.weird",
+        "name": "circle-split",
+        "nameOk": true,
+        "refine": "put the dot inside a half instead of flying around",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h42.classical",
+        "concept": "decision",
+        "decision": "refine",
+        "finalist": false,
+        "id": "decision/h42.classical",
+        "name": "decision",
+        "nameOk": true,
+        "refine": "give up the marked",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "decision",
+        "decision": "refine",
+        "finalist": false,
+        "id": "decision/h43.pebbles",
+        "name": "stones-underline-jump",
+        "nameOk": true,
+        "refine": "solid is too sharp, put the dot mark inside the top right circle instead of flying around",
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "data",
+        "decision": "keep",
+        "finalist": false,
+        "id": "data/h41.bold",
+        "name": "stones-8",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "server",
+        "decision": "keep",
+        "finalist": true,
+        "id": "server/h41.classical",
+        "name": "servers",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "server",
+        "decision": "keep",
+        "finalist": false,
+        "id": "server/h41.bold",
+        "name": "rectangle-exchange",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "server",
+        "decision": "keep",
+        "finalist": false,
+        "id": "server/h43.bold",
+        "name": "ipod-station",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "server",
+        "decision": "keep",
+        "finalist": false,
+        "id": "server/h43.pebbles",
+        "name": "stone-emmit-2",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "api",
+        "decision": "keep",
+        "finalist": false,
+        "id": "api/h43.weird",
+        "name": "stone-accolade",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "api",
+        "decision": "keep",
+        "finalist": false,
+        "id": "api/h41.classical",
+        "name": "code-square",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "system",
+        "decision": "keep",
+        "finalist": true,
+        "id": "system/h41.classical",
+        "name": "system",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "system",
+        "decision": "keep",
+        "finalist": false,
+        "id": "system/h41.weird",
+        "name": "atoms",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "system",
+        "decision": "keep",
+        "finalist": false,
+        "id": "system/h41.bold",
+        "name": "circle-network",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "architecture",
+        "decision": "keep",
+        "finalist": false,
+        "id": "architecture/h43.classical",
+        "name": "building-flat",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "architecture",
+        "decision": "keep",
+        "finalist": false,
+        "id": "architecture/h43.pebbles",
+        "name": "stone-bridge",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "architecture",
+        "decision": "keep",
+        "finalist": false,
+        "id": "architecture/h41.classical",
+        "name": "building-columns",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "architecture",
+        "decision": "keep",
+        "finalist": false,
+        "id": "architecture/h43.weird",
+        "name": "triangles",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "integration",
+        "decision": "keep",
+        "finalist": true,
+        "id": "integration/h43.bold",
+        "name": "puzzle",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "integration",
+        "decision": "keep",
+        "finalist": false,
+        "id": "integration/h41.classical",
+        "name": "chip-component",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "agentic",
+        "decision": "keep",
+        "finalist": false,
+        "id": "agentic/h41.classical",
+        "name": "spark-to-stone",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "agentic",
+        "decision": "keep",
+        "finalist": false,
+        "id": "agentic/h43.weird",
+        "name": "circle-spark",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "agentic",
+        "decision": "keep",
+        "finalist": false,
+        "id": "agentic/h41.bold",
+        "name": "destination-flag",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "git",
+        "decision": "refine",
+        "finalist": true,
+        "id": "git/h43.classical",
+        "name": "git-diamond",
+        "nameOk": true,
+        "refine": "overlapping negative subtraction issue on solid, to straight diamond outline",
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "git",
+        "decision": "keep",
+        "finalist": false,
+        "id": "git/h41.weird",
+        "name": "ripples-line",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "git",
+        "decision": "keep",
+        "finalist": false,
+        "id": "git/h43.bold",
+        "name": "git-tree",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "git",
+        "decision": "refine",
+        "finalist": false,
+        "id": "git/h43.pebbles",
+        "name": "path-stones",
+        "nameOk": true,
+        "refine": "all stones should be filled",
+        "starred": true,
+        "variants": {
+          "solid": "refine"
+        }
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "git",
+        "decision": "keep",
+        "finalist": false,
+        "id": "git/h41.classical",
+        "name": "git-triangle",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "branch",
+        "decision": "keep",
+        "finalist": true,
+        "id": "branch/h41.classical",
+        "name": "git-branch",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "branch",
+        "decision": "keep",
+        "finalist": false,
+        "id": "branch/h41.bold",
+        "name": "branch-bud",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "branch",
+        "decision": "keep",
+        "finalist": false,
+        "id": "branch/h43.bold",
+        "name": "branch-buds",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "branch",
+        "decision": "keep",
+        "finalist": false,
+        "id": "branch/h41.weird",
+        "name": "git-branch-create",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "fork",
+        "decision": "keep",
+        "finalist": true,
+        "id": "fork/h43.classical",
+        "name": "git-fork-sm",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "merge",
+        "decision": "keep",
+        "finalist": true,
+        "id": "merge/h41.bold",
+        "name": "git-merge",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "merge",
+        "decision": "keep",
+        "finalist": true,
+        "id": "merge/h41.classical",
+        "name": "git-merge-down",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "merge",
+        "decision": "keep",
+        "finalist": false,
+        "id": "merge/h41.weird",
+        "name": "stones-network",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "node",
+        "decision": "keep",
+        "finalist": true,
+        "id": "node/h43.bold",
+        "name": "node-lines-2",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "node",
+        "decision": "keep",
+        "finalist": true,
+        "id": "node/h41.classical",
+        "name": "node-lines-3",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "node",
+        "decision": "keep",
+        "finalist": false,
+        "id": "node/h41.weird",
+        "name": "node-lines-5",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "node",
+        "decision": "refine",
+        "finalist": false,
+        "id": "node/h41.pebbles",
+        "name": "stone-emmits-2",
+        "nameOk": true,
+        "refine": "mark is too big, can't distinguish from the stone",
+        "starred": true,
+        "variants": {
+          "marked": "refine"
+        }
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "node",
+        "decision": "refine",
+        "finalist": false,
+        "id": "node/h43.pebbles",
+        "name": "stone-node",
+        "nameOk": true,
+        "refine": "the main shape should be filled too",
+        "starred": true,
+        "variants": {
+          "solid": "refine"
+        }
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "graph",
+        "decision": "keep",
+        "finalist": true,
+        "id": "graph/h43.classical",
+        "name": "graph",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "edge",
+        "decision": "keep",
+        "finalist": true,
+        "id": "edge/h41.classical",
+        "name": "edge",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "node-add",
+        "decision": "keep",
+        "finalist": true,
+        "id": "node-add/h43.classical",
+        "name": "node-plus",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "node-add",
+        "decision": "keep",
+        "finalist": true,
+        "id": "node-add/h41.weird",
+        "name": "stone-node-plus",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "node-add",
+        "decision": "keep",
+        "finalist": false,
+        "id": "node-add/h41.classical",
+        "name": "node-edge-x",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "node-add",
+        "decision": "keep",
+        "finalist": false,
+        "id": "node-add/h43.weird",
+        "name": "node-node",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "node-add",
+        "decision": "keep",
+        "finalist": false,
+        "id": "node-add/h41.pebbles",
+        "name": "cairn-stone-add",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "node-new",
+        "decision": "keep",
+        "finalist": true,
+        "id": "node-new/h41.bold",
+        "name": "node-spark",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "node-new",
+        "decision": "keep",
+        "finalist": false,
+        "id": "node-new/h43.pebbles",
+        "name": "alarm",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "node-new",
+        "decision": "keep",
+        "finalist": false,
+        "id": "node-new/h43.bold",
+        "name": "node-seed",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "node-new",
+        "decision": "keep",
+        "finalist": false,
+        "id": "node-new/h43.weird",
+        "name": "bubbles",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "node-new",
+        "decision": "keep",
+        "finalist": false,
+        "id": "node-new/h41.classical",
+        "name": "stone-shine-2",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "node-remove",
+        "decision": "keep",
+        "finalist": true,
+        "id": "node-remove/h41.bold",
+        "name": "node-x",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "node-remove",
+        "decision": "keep",
+        "finalist": true,
+        "id": "node-remove/h43.classical",
+        "name": "node-minus",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "node-remove",
+        "decision": "keep",
+        "finalist": true,
+        "id": "node-remove/h41.classical",
+        "name": "node-edge-minus",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "node-remove",
+        "decision": "keep",
+        "finalist": false,
+        "id": "node-remove/h43.weird",
+        "name": "circle-stones-3",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "journey",
+        "decision": "keep",
+        "finalist": true,
+        "id": "journey/h41.bold",
+        "name": "journey",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "journey",
+        "decision": "keep",
+        "finalist": true,
+        "id": "journey/h43.bold",
+        "name": "stairs-stone",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "overview",
+        "decision": "keep",
+        "finalist": true,
+        "id": "overview/h43.pebbles",
+        "name": "overview",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "overview",
+        "decision": "keep",
+        "finalist": false,
+        "id": "overview/h43.classical",
+        "name": "chart-square",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "view",
+        "decision": "keep",
+        "finalist": false,
+        "id": "view/h41.bold",
+        "name": "search-chart",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "page",
+        "decision": "keep",
+        "finalist": true,
+        "id": "page/h43.bold",
+        "name": "window-text",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "page",
+        "decision": "keep",
+        "finalist": true,
+        "id": "page/h43.classical",
+        "name": "file-text",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "page",
+        "decision": "keep",
+        "finalist": true,
+        "id": "page/h41.bold",
+        "name": "page-text",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "page",
+        "decision": "keep",
+        "finalist": false,
+        "id": "page/h41.pebbles",
+        "name": "pebble-text",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "page",
+        "decision": "keep",
+        "finalist": false,
+        "id": "page/h43.pebbles",
+        "name": "stone-text",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "page",
+        "decision": "abandon",
+        "finalist": false,
+        "id": "page/h41.classical",
+        "name": null,
+        "nameOk": null,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "page",
+        "decision": "keep",
+        "finalist": false,
+        "id": "page/h41.weird",
+        "name": "hanging-note",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "screens",
+        "decision": "keep",
+        "finalist": true,
+        "id": "screens/h41.weird",
+        "name": "walls",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "screens",
+        "decision": "keep",
+        "finalist": false,
+        "id": "screens/h43.classical",
+        "name": "screens",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "screens",
+        "decision": "keep",
+        "finalist": false,
+        "id": "screens/h41.classical",
+        "name": "triptych",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "screens",
+        "decision": "keep",
+        "finalist": false,
+        "id": "screens/h41.pebbles",
+        "name": "squircles-4",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "screens",
+        "decision": "keep",
+        "finalist": false,
+        "id": "screens/h43.bold",
+        "name": "copy-text",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "screens",
+        "decision": "keep",
+        "finalist": false,
+        "id": "screens/h43.pebbles",
+        "name": "dolmens-3",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "layout",
+        "decision": "keep",
+        "finalist": true,
+        "id": "layout/h43.bold",
+        "name": "layout-3",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "layout",
+        "decision": "keep",
+        "finalist": false,
+        "id": "layout/h43.weird",
+        "name": "chart-shapes",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "layout",
+        "decision": "keep",
+        "finalist": false,
+        "id": "layout/h41.pebbles",
+        "name": "stones-messy",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "layout",
+        "decision": "keep",
+        "finalist": false,
+        "id": "layout/h43.pebbles",
+        "name": "stones-box",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "layout",
+        "decision": "keep",
+        "finalist": false,
+        "id": "layout/h41.weird",
+        "name": "fibonacci",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "pane",
+        "decision": "keep",
+        "finalist": true,
+        "id": "pane/h43.classical",
+        "name": "layout-sidebar-text",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "pane",
+        "decision": "keep",
+        "finalist": false,
+        "id": "pane/h43.weird",
+        "name": "perspective",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "pane",
+        "decision": "keep",
+        "finalist": false,
+        "id": "pane/h43.bold",
+        "name": "folder-text",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "pane",
+        "decision": "keep",
+        "finalist": false,
+        "id": "pane/h41.classical",
+        "name": "layout-pane-text",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "pane",
+        "decision": "keep",
+        "finalist": false,
+        "id": "pane/h41.weird",
+        "name": "layout-overlap",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "matrix",
+        "decision": "keep",
+        "finalist": true,
+        "id": "matrix/h41.weird",
+        "name": "hash",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "matrix",
+        "decision": "keep",
+        "finalist": true,
+        "id": "matrix/h43.bold",
+        "name": "matrix",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "tooltip",
+        "decision": "keep",
+        "finalist": true,
+        "id": "tooltip/h41.classical",
+        "name": "tooltip",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "tooltip",
+        "decision": "keep",
+        "finalist": false,
+        "id": "tooltip/h43.pebbles",
+        "name": "pebble-chat-bubble",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "tooltip",
+        "decision": "keep",
+        "finalist": false,
+        "id": "tooltip/h43.bold",
+        "name": "node-tooltip",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "tooltip",
+        "decision": "keep",
+        "finalist": false,
+        "id": "tooltip/h43.classical",
+        "name": "tooltip-bubble",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "tooltip",
+        "decision": "keep",
+        "finalist": false,
+        "id": "tooltip/h41.bold",
+        "name": "cursor-menu",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "enabled",
+        "decision": "keep",
+        "finalist": true,
+        "id": "enabled/h43.classical",
+        "name": "enabled",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "enabled",
+        "decision": "keep",
+        "finalist": false,
+        "id": "enabled/h43.pebbles",
+        "name": "stone-checkmark",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "enabled",
+        "decision": "keep",
+        "finalist": false,
+        "id": "enabled/h41.bold",
+        "name": "instant-picture",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "enabled",
+        "decision": "keep",
+        "finalist": false,
+        "id": "enabled/h41.pebbles",
+        "name": "stone-shine-top",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "disabled",
+        "decision": "keep",
+        "finalist": true,
+        "id": "disabled/h43.classical",
+        "name": "disabled",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "disabled",
+        "decision": "keep",
+        "finalist": false,
+        "id": "disabled/h43.pebbles",
+        "name": "sunset-sea",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "disabled",
+        "decision": "keep",
+        "finalist": false,
+        "id": "disabled/h43.weird",
+        "name": "circle-half-quarter",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "disabled",
+        "decision": "keep",
+        "finalist": false,
+        "id": "disabled/h41.weird",
+        "name": "interruptor",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "disabled",
+        "decision": "keep",
+        "finalist": false,
+        "id": "disabled/h41.classical",
+        "name": "toggle-disabled",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "disabled",
+        "decision": "keep",
+        "finalist": false,
+        "id": "disabled/h43.bold",
+        "name": "rectangle-hash",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "expand",
+        "decision": "keep",
+        "finalist": true,
+        "id": "expand/h43.classical",
+        "name": "circle-chevron-down",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "expand",
+        "decision": "keep",
+        "finalist": false,
+        "id": "expand/h43.bold",
+        "name": "expand-square",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "expand",
+        "decision": "keep",
+        "finalist": false,
+        "id": "expand/h41.pebbles",
+        "name": "ripples-2",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "expand",
+        "decision": "keep",
+        "finalist": false,
+        "id": "expand/h41.bold",
+        "name": "accordion-expanded",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "collapse",
+        "decision": "keep",
+        "finalist": true,
+        "id": "collapse/h43.weird",
+        "name": "pebble-shrink",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "collapse",
+        "decision": "keep",
+        "finalist": true,
+        "id": "collapse/h41.bold",
+        "name": "accordion-collapsed",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "collapse",
+        "decision": "keep",
+        "finalist": false,
+        "id": "collapse/h43.pebbles",
+        "name": "cairn-stack",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "collapse",
+        "decision": "keep",
+        "finalist": false,
+        "id": "collapse/h43.bold",
+        "name": "collapse-square",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "collapse",
+        "decision": "keep",
+        "finalist": false,
+        "id": "collapse/h41.classical",
+        "name": "collapse",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "collapse",
+        "decision": "keep",
+        "finalist": false,
+        "id": "collapse/h43.classical",
+        "name": "circle-chevron-up",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "affordance",
+        "decision": "keep",
+        "finalist": false,
+        "id": "affordance/h43.weird",
+        "name": "sunset-chevron-down",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "affordance",
+        "decision": "keep",
+        "finalist": false,
+        "id": "affordance/h43.bold",
+        "name": "stone-pin",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "affordance",
+        "decision": "keep",
+        "finalist": false,
+        "id": "affordance/h41.bold",
+        "name": "door-handle",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "affordance",
+        "decision": "keep",
+        "finalist": false,
+        "id": "affordance/h43.classical",
+        "name": "letter-underline",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "quality",
+        "decision": "keep",
+        "finalist": true,
+        "id": "quality/h43.bold",
+        "name": "gemstone",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "parity",
+        "decision": "keep",
+        "finalist": true,
+        "id": "parity/h43.bold",
+        "name": "stone-scale",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "code-quality",
+        "decision": "keep",
+        "finalist": true,
+        "id": "code-quality/h41.pebbles",
+        "name": "stone-code",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "code-quality",
+        "decision": "keep",
+        "finalist": true,
+        "id": "code-quality/h43.classical",
+        "name": "terminal",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "code-quality",
+        "decision": "keep",
+        "finalist": true,
+        "id": "code-quality/h43.bold",
+        "name": "accolades-check",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "verification",
+        "decision": "keep",
+        "finalist": true,
+        "id": "verification/h43.classical",
+        "name": "search-check",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "verification",
+        "decision": "keep",
+        "finalist": true,
+        "id": "verification/h43.bold",
+        "name": "eye-check",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "verification",
+        "decision": "keep",
+        "finalist": true,
+        "id": "verification/h41.bold",
+        "name": "chermarks",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "quality-assurance",
+        "decision": "keep",
+        "finalist": true,
+        "id": "quality-assurance/h41.classical",
+        "name": "clipboard-check",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "quality-assurance",
+        "decision": "keep",
+        "finalist": true,
+        "id": "quality-assurance/h43.classical",
+        "name": "shield-check",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "quality-assurance",
+        "decision": "keep",
+        "finalist": true,
+        "id": "quality-assurance/h41.bold",
+        "name": "stamp-check",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "acceptances",
+        "decision": "keep",
+        "finalist": true,
+        "id": "acceptances/h41.bold",
+        "name": "receipt-checks",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "acceptances",
+        "decision": "keep",
+        "finalist": true,
+        "id": "acceptances/h43.bold",
+        "name": "file-check",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "acceptances",
+        "decision": "keep",
+        "finalist": true,
+        "id": "acceptances/h43.pebbles",
+        "name": "pouch-check",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "criterion",
+        "decision": "keep",
+        "finalist": true,
+        "id": "criterion/h43.bold",
+        "name": "gauge-sm",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "criterion",
+        "decision": "keep",
+        "finalist": false,
+        "id": "criterion/h43.classical",
+        "name": "rule",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "finding",
+        "decision": "keep",
+        "finalist": true,
+        "id": "finding/h43.bold",
+        "name": "flag-underline",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "finding",
+        "decision": "keep",
+        "finalist": true,
+        "id": "finding/h43.classical",
+        "name": "search-exclamation",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "solved",
+        "decision": "keep",
+        "finalist": false,
+        "id": "solved/h43.bold",
+        "name": "lock-open",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "solved",
+        "decision": "keep",
+        "finalist": false,
+        "id": "solved/h41.classical",
+        "name": "puzzle-piece",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "fixed",
+        "decision": "keep",
+        "finalist": true,
+        "id": "fixed/h41.classical",
+        "name": "plaster",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "fixed",
+        "decision": "keep",
+        "finalist": false,
+        "id": "fixed/h43.bold",
+        "name": "square-x",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "performance",
+        "decision": "keep",
+        "finalist": true,
+        "id": "performance/h41.weird",
+        "name": "stone-speed-2",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "performance",
+        "decision": "keep",
+        "finalist": false,
+        "id": "performance/h43.bold",
+        "name": "stopwatch-2",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "efficiency",
+        "decision": "keep",
+        "finalist": false,
+        "id": "efficiency/h41.weird",
+        "name": "hourglass-empty",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "efficiency",
+        "decision": "keep",
+        "finalist": false,
+        "id": "efficiency/h43.bold",
+        "name": "stone-scale-up",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "reliability",
+        "decision": "keep",
+        "finalist": false,
+        "id": "reliability/h43.bold",
+        "name": "stone-shake",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "reliability",
+        "decision": "keep",
+        "finalist": false,
+        "id": "reliability/h43.classical",
+        "name": "pillar",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "observability",
+        "decision": "keep",
+        "finalist": true,
+        "id": "observability/h43.classical",
+        "name": "eye-signal",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "observability",
+        "decision": "keep",
+        "finalist": false,
+        "id": "observability/h43.weird",
+        "name": "target",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "observability",
+        "decision": "keep",
+        "finalist": false,
+        "id": "observability/h41.bold",
+        "name": "board-growth",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "monitoring",
+        "decision": "keep",
+        "finalist": true,
+        "id": "monitoring/h41.classical",
+        "name": "monitor",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "monitoring",
+        "decision": "keep",
+        "finalist": false,
+        "id": "monitoring/h41.bold",
+        "name": "circle-gauge",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      }
+    ],
+    "exportedAt": "2026-11-15T00:12:54.214Z",
+    "refinements": [
+      {
+        "concept": "delivery",
+        "decision": "accept",
+        "name": "stone-bowl-2",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "delivery",
+        "decision": "accept",
+        "name": "package-arc-bottom",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "shipment",
+        "decision": "accept",
+        "name": "shipment",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "shipment",
+        "decision": "accept",
+        "name": "package",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "shipment",
+        "decision": "accept",
+        "name": "stone-speed-3",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "shipment",
+        "decision": "accept",
+        "name": "stone-speed-underline",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "release",
+        "decision": "accept",
+        "name": "label-tag",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "release",
+        "decision": "accept",
+        "name": "cairn",
+        "note": null,
+        "round": 2,
+        "variants": {}
+      },
+      {
+        "concept": "beta",
+        "decision": "accept",
+        "name": "cell-dots",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "beta",
+        "decision": "accept",
+        "name": "stones-group-5",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "test",
+        "decision": "accept",
+        "name": "flask",
+        "note": null,
+        "round": 3,
+        "variants": {}
+      },
+      {
+        "concept": "test",
+        "decision": "accept",
+        "name": "pin-waves",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "test",
+        "decision": "accept",
+        "name": "recipient-stick",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "test",
+        "decision": "accept",
+        "name": "stone-arcs",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "test",
+        "decision": "accept",
+        "name": "stones-balance",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "test",
+        "decision": "accept",
+        "name": "square-check",
+        "note": null,
+        "round": 2,
+        "variants": {}
+      },
+      {
+        "concept": "changelog",
+        "decision": "accept",
+        "name": "diff",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "backlog",
+        "decision": "accept",
+        "name": "inbox-full",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "backlog",
+        "decision": "accept",
+        "name": "logs-stack",
+        "note": null,
+        "round": 2,
+        "variants": {}
+      },
+      {
+        "concept": "backlog",
+        "decision": "accept",
+        "name": "filter-dots",
+        "note": null,
+        "round": 2,
+        "variants": {}
+      },
+      {
+        "concept": "backlog",
+        "decision": "accept",
+        "name": "backlog-pebbles-h43",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "backlog",
+        "decision": "accept",
+        "name": "stones-stack-4",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "flow",
+        "decision": "accept",
+        "name": "stones-wave",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "flow",
+        "decision": "accept",
+        "name": "flow-stones",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "flow",
+        "decision": "accept",
+        "name": "network-arc",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "flow",
+        "decision": "accept",
+        "name": "edge-direction",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "flow",
+        "decision": "accept",
+        "name": "node-direction-right",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "history",
+        "decision": "accept",
+        "name": "clock-backward",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "history",
+        "decision": "accept",
+        "name": "stone-waves-left",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "journal",
+        "decision": "accept",
+        "name": "sunshine-up",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "log",
+        "decision": "accept",
+        "name": "stones-stack-box-4",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "log",
+        "decision": "accept",
+        "name": "receipt-3",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "log",
+        "decision": "accept",
+        "name": "circle-ring-bell",
+        "note": null,
+        "round": 2,
+        "variants": {}
+      },
+      {
+        "concept": "ledger",
+        "decision": "accept",
+        "name": "stones-stack-comparison",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "ledger",
+        "decision": "accept",
+        "name": "stop-circle-2",
+        "note": null,
+        "round": 3,
+        "variants": {}
+      },
+      {
+        "concept": "ledger",
+        "decision": "accept",
+        "name": "book-open-text",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "ledger",
+        "decision": "accept",
+        "name": "stones-comparison",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "ledger",
+        "decision": "accept",
+        "name": "scale-balance",
+        "note": null,
+        "round": 3,
+        "variants": {}
+      },
+      {
+        "concept": "ledger",
+        "decision": "accept",
+        "name": "book-sheets-vertical",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "record",
+        "decision": "accept",
+        "name": "text-circle",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "record",
+        "decision": "accept",
+        "name": "stone-arch",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "record",
+        "decision": "accept",
+        "name": "text-pebble",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "record",
+        "decision": "accept",
+        "name": "print-echoes",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "inventory",
+        "decision": "accept",
+        "name": "shelves",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "inventory",
+        "decision": "accept",
+        "name": "squared-square",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "inventory",
+        "decision": "accept",
+        "name": "clipboard-checklist",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "commitment",
+        "decision": "accept",
+        "name": "award",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "decision",
+        "decision": "accept",
+        "name": "fork",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "decision",
+        "decision": "accept",
+        "name": "node-decision",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "decision",
+        "decision": "accept",
+        "name": "circle-split",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "decision",
+        "decision": "accept",
+        "name": "decision",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "decision",
+        "decision": "accept",
+        "name": "stones-underline-jump",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "git",
+        "decision": "accept",
+        "name": "path-stones",
+        "note": null,
+        "round": 2,
+        "variants": {}
+      },
+      {
+        "concept": "node",
+        "decision": "accept",
+        "name": "stone-node",
+        "note": null,
+        "round": 2,
+        "variants": {}
+      },
+      {
+        "concept": "git",
+        "decision": "accept",
+        "name": "git-diamond",
+        "note": null,
+        "round": 2,
+        "variants": {}
+      },
+      {
+        "concept": "node",
+        "decision": "accept",
+        "name": "stone-emmits-2",
+        "note": null,
+        "round": 2,
+        "variants": {}
+      }
+    ],
+    "stars": [
+      "delivery/h41.weird",
+      "delivery/h41.pebbles",
+      "delivery/h43.classical",
+      "shipment/h41.weird",
+      "shipment/h43.pebbles",
+      "release/h43.pebbles",
+      "beta/h41.weird",
+      "beta/h43.pebbles",
+      "beta/h42.pebbles",
+      "beta/h43.classical",
+      "beta/h41.pebbles",
+      "beta/h43.bold",
+      "beta/h44.weird",
+      "test/h42.pebbles",
+      "test/h42.bold",
+      "test/h44.pebbles",
+      "test/h41.weird",
+      "test/h43.weird",
+      "test/h41.pebbles",
+      "test/h43.bold",
+      "changelog/h41.bold",
+      "changelog/h42.pebbles",
+      "changelog/h42.weird",
+      "changelog/h41.weird",
+      "changelog/h42.bold",
+      "backlog/h41.pebbles",
+      "backlog/h41.weird",
+      "backlog/h43.pebbles",
+      "backlog/h42.pebbles",
+      "flow/h44.weird",
+      "flow/h43.pebbles",
+      "flow/h41.pebbles",
+      "flow/h42.pebbles",
+      "flow/h44.classical",
+      "flow/h41.bold",
+      "flow/h43.classical",
+      "flow/h44.pebbles",
+      "history/h41.weird",
+      "history/h41.bold",
+      "history/h42.weird",
+      "journal/h43.weird",
+      "journal/h41.weird",
+      "log/h43.pebbles",
+      "log/h43.classical",
+      "log/h44.pebbles",
+      "ledger/h42.pebbles",
+      "ledger/h44.bold",
+      "ledger/h41.bold",
+      "ledger/h44.pebbles",
+      "ledger/h43.weird",
+      "ledger/h42.weird",
+      "record/h42.pebbles",
+      "record/h43.pebbles",
+      "record/h41.pebbles",
+      "record/h44.weird",
+      "inventory/h44.weird",
+      "inventory/h43.weird",
+      "inventory/h41.classical",
+      "commitment/h41.classical",
+      "commitment/h42.classical",
+      "decision/h43.weird",
+      "decision/h42.classical",
+      "decision/h44.weird",
+      "decision/h43.pebbles",
+      "data/h41.bold",
+      "server/h41.bold",
+      "server/h43.bold",
+      "server/h43.pebbles",
+      "api/h43.weird",
+      "api/h41.classical",
+      "system/h41.weird",
+      "system/h41.bold",
+      "architecture/h43.classical",
+      "architecture/h43.pebbles",
+      "architecture/h41.classical",
+      "architecture/h43.weird",
+      "integration/h41.classical",
+      "agentic/h41.classical",
+      "agentic/h43.weird",
+      "agentic/h41.bold",
+      "git/h41.weird",
+      "git/h43.bold",
+      "git/h43.pebbles",
+      "git/h41.classical",
+      "branch/h41.bold",
+      "branch/h43.bold",
+      "branch/h41.weird",
+      "merge/h41.weird",
+      "node/h41.weird",
+      "node/h41.pebbles",
+      "node/h43.pebbles",
+      "node-add/h41.classical",
+      "node-add/h43.weird",
+      "node-add/h41.pebbles",
+      "node-new/h43.pebbles",
+      "node-new/h43.bold",
+      "node-new/h43.weird",
+      "node-new/h41.classical",
+      "node-remove/h43.weird",
+      "overview/h43.classical",
+      "view/h41.bold",
+      "page/h41.pebbles",
+      "page/h43.pebbles",
+      "page/h41.classical",
+      "page/h41.weird",
+      "screens/h43.classical",
+      "screens/h41.classical",
+      "screens/h41.pebbles",
+      "screens/h43.bold",
+      "screens/h43.pebbles",
+      "layout/h43.weird",
+      "layout/h41.pebbles",
+      "layout/h43.pebbles",
+      "layout/h41.weird",
+      "pane/h43.weird",
+      "pane/h43.bold",
+      "pane/h41.classical",
+      "pane/h41.weird",
+      "tooltip/h43.pebbles",
+      "tooltip/h43.bold",
+      "tooltip/h43.classical",
+      "tooltip/h41.bold",
+      "enabled/h43.pebbles",
+      "enabled/h41.bold",
+      "enabled/h41.pebbles",
+      "disabled/h43.pebbles",
+      "disabled/h43.weird",
+      "disabled/h41.weird",
+      "disabled/h41.classical",
+      "disabled/h43.bold",
+      "expand/h43.bold",
+      "expand/h41.pebbles",
+      "expand/h41.bold",
+      "collapse/h43.pebbles",
+      "collapse/h43.bold",
+      "collapse/h41.classical",
+      "collapse/h43.classical",
+      "affordance/h43.weird",
+      "affordance/h43.bold",
+      "affordance/h41.bold",
+      "affordance/h43.classical",
+      "criterion/h43.classical",
+      "solved/h43.bold",
+      "solved/h41.classical",
+      "fixed/h43.bold",
+      "performance/h43.bold",
+      "efficiency/h41.weird",
+      "efficiency/h43.bold",
+      "reliability/h43.bold",
+      "reliability/h43.classical",
+      "observability/h43.weird",
+      "observability/h41.bold",
+      "monitoring/h41.bold"
+    ],
+    "version": 1
+  },
+  "rev": 8889,
+  "seed": 2287967410,
+  "stars": [
+    "delivery/h41.weird",
+    "delivery/h41.pebbles",
+    "delivery/h43.classical",
+    "shipment/h41.weird",
+    "shipment/h43.pebbles",
+    "release/h43.pebbles",
+    "beta/h41.weird",
+    "beta/h43.pebbles",
+    "beta/h42.pebbles",
+    "beta/h43.classical",
+    "beta/h41.pebbles",
+    "beta/h43.bold",
+    "beta/h44.weird",
+    "test/h42.pebbles",
+    "test/h42.bold",
+    "test/h44.pebbles",
+    "test/h41.weird",
+    "test/h43.weird",
+    "test/h41.pebbles",
+    "test/h43.bold",
+    "changelog/h41.bold",
+    "changelog/h42.pebbles",
+    "changelog/h42.weird",
+    "changelog/h41.weird",
+    "changelog/h42.bold",
+    "backlog/h41.pebbles",
+    "backlog/h41.weird",
+    "backlog/h43.pebbles",
+    "backlog/h42.pebbles",
+    "flow/h44.weird",
+    "flow/h43.pebbles",
+    "flow/h41.pebbles",
+    "flow/h42.pebbles",
+    "flow/h44.classical",
+    "flow/h41.bold",
+    "flow/h43.classical",
+    "flow/h44.pebbles",
+    "history/h41.weird",
+    "history/h41.bold",
+    "history/h42.weird",
+    "journal/h43.weird",
+    "journal/h41.weird",
+    "log/h43.pebbles",
+    "log/h43.classical",
+    "log/h44.pebbles",
+    "ledger/h42.pebbles",
+    "ledger/h44.bold",
+    "ledger/h41.bold",
+    "ledger/h44.pebbles",
+    "ledger/h43.weird",
+    "ledger/h42.weird",
+    "record/h42.pebbles",
+    "record/h43.pebbles",
+    "record/h41.pebbles",
+    "record/h44.weird",
+    "inventory/h44.weird",
+    "inventory/h43.weird",
+    "inventory/h41.classical",
+    "commitment/h41.classical",
+    "commitment/h42.classical",
+    "decision/h43.weird",
+    "decision/h42.classical",
+    "decision/h44.weird",
+    "decision/h43.pebbles",
+    "data/h41.bold",
+    "server/h41.bold",
+    "server/h43.bold",
+    "server/h43.pebbles",
+    "api/h43.weird",
+    "api/h41.classical",
+    "system/h41.weird",
+    "system/h41.bold",
+    "architecture/h43.classical",
+    "architecture/h43.pebbles",
+    "architecture/h41.classical",
+    "architecture/h43.weird",
+    "integration/h41.classical",
+    "agentic/h41.classical",
+    "agentic/h43.weird",
+    "agentic/h41.bold",
+    "git/h41.weird",
+    "git/h43.bold",
+    "git/h43.pebbles",
+    "git/h41.classical",
+    "branch/h41.bold",
+    "branch/h43.bold",
+    "branch/h41.weird",
+    "merge/h41.weird",
+    "node/h41.weird",
+    "node/h41.pebbles",
+    "node/h43.pebbles",
+    "node-add/h41.classical",
+    "node-add/h43.weird",
+    "node-add/h41.pebbles",
+    "node-new/h43.pebbles",
+    "node-new/h43.bold",
+    "node-new/h43.weird",
+    "node-new/h41.classical",
+    "node-remove/h43.weird",
+    "overview/h43.classical",
+    "view/h41.bold",
+    "page/h41.pebbles",
+    "page/h43.pebbles",
+    "page/h41.classical",
+    "page/h41.weird",
+    "screens/h43.classical",
+    "screens/h41.classical",
+    "screens/h41.pebbles",
+    "screens/h43.bold",
+    "screens/h43.pebbles",
+    "layout/h43.weird",
+    "layout/h41.pebbles",
+    "layout/h43.pebbles",
+    "layout/h41.weird",
+    "pane/h43.weird",
+    "pane/h43.bold",
+    "pane/h41.classical",
+    "pane/h41.weird",
+    "tooltip/h43.pebbles",
+    "tooltip/h43.bold",
+    "tooltip/h43.classical",
+    "tooltip/h41.bold",
+    "enabled/h43.pebbles",
+    "enabled/h41.bold",
+    "enabled/h41.pebbles",
+    "disabled/h43.pebbles",
+    "disabled/h43.weird",
+    "disabled/h41.weird",
+    "disabled/h41.classical",
+    "disabled/h43.bold",
+    "expand/h43.bold",
+    "expand/h41.pebbles",
+    "expand/h41.bold",
+    "collapse/h43.pebbles",
+    "collapse/h43.bold",
+    "collapse/h41.classical",
+    "collapse/h43.classical",
+    "affordance/h43.weird",
+    "affordance/h43.bold",
+    "affordance/h41.bold",
+    "affordance/h43.classical",
+    "criterion/h43.classical",
+    "solved/h43.bold",
+    "solved/h41.classical",
+    "fixed/h43.bold",
+    "performance/h43.bold",
+    "efficiency/h41.weird",
+    "efficiency/h43.bold",
+    "reliability/h43.bold",
+    "reliability/h43.classical",
+    "observability/h43.weird",
+    "observability/h41.bold",
+    "monitoring/h41.bold"
+  ],
+  "updatedAt": "2026-11-15T00:12:54.212Z",
+  "v": 1,
+  "vf": {
+    "agentic/h41.bold": {},
+    "agentic/h43.weird": {},
+    "architecture/h41.classical": {},
+    "architecture/h43.pebbles": {},
+    "branch/h41.bold": {},
+    "branch/h41.classical": {},
+    "branch/h41.weird": {},
+    "branch/h43.bold": {},
+    "edge/h41.classical": {},
+    "fork/h43.classical": {},
+    "git/h41.classical": {},
+    "git/h43.bold": {},
+    "git/h43.pebbles": {
+      "solid": "refine"
+    },
+    "graph/h43.classical": {},
+    "integration/h41.classical": {},
+    "merge/h41.bold": {},
+    "merge/h41.classical": {},
+    "merge/h41.weird": {},
+    "node-add/h41.classical": {},
+    "node-add/h43.classical": {
+      "solid": ""
+    },
+    "node-new/h41.bold": {},
+    "node-new/h43.bold": {},
+    "node-new/h43.pebbles": {
+      "solid": ""
+    },
+    "node-remove/h41.bold": {},
+    "node-remove/h41.classical": {},
+    "node/h41.classical": {},
+    "node/h41.pebbles": {
+      "marked": "refine"
+    },
+    "node/h41.weird": {},
+    "node/h43.pebbles": {
+      "solid": "refine"
+    },
+    "system/h41.bold": {},
+    "system/h41.classical": {},
+    "system/h41.weird": {}
+  }
+}

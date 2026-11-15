@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M6 4.6 C6.9 4.6 7.5 5.2 7.5 6 C7.5 6.8 6.9 7.4 6 7.4 C5.1 7.4 4.5 6.8 4.5 6 C4.5 5.2 5.1 4.6 6.6 4.7" data-role="body"/>
+  <path d="M6.1 10.6 C7 10.6 7.6 11.2 7.6 12 C7.6 12.8 7 13.4 6.1 13.4 C5.2 13.4 4.6 12.8 4.6 12 C4.6 11.2 5.2 10.6 6.7 10.7" data-role="body"/>
+  <path d="M6 16.6 C6.9 16.6 7.5 17.2 7.5 18 C7.5 18.8 6.9 19.4 6 19.4 C5.1 19.4 4.5 18.8 4.5 18 C4.5 17.2 5.1 16.6 6.6 16.7" data-role="body"/>
+  <path d="M6 7.4 L6.1 10.6 M6.1 13.4 L6 16.6"/>
+  <path d="M10 6 L18.4 5.8 M10 12 L16 11.9 M10 18 L19 17.8"/>
+  <path d="M18 11.9 A1 1 0 1 0 20 11.9 A1 1 0 1 0 18 11.9 Z" data-role="mark" data-rest="hidden"/>
+</svg>

@@ -89,9 +89,12 @@ function paintedRegion(d: string): IntPath[] {
  * their stroke band (a line offset by half the stroke), minus every other path
  * inside the fill or standing on its edge (a door on the ground line, not a
  * rim traced along the outline), outlined at the stroke width with round caps, and minus every hole
- * there (the mark of a marked solid) as it is painted, fill and stroke.
+ * there (the mark of a marked solid) as it is painted, fill and stroke. A carved line is cut only
+ * inside the fill and inked outside it, as the wave preview draws it, so a detail meeting the edge
+ * leaves no halo in the outline. A lit mark or step passes `inkOutside: false`: the lines on its
+ * edge are dividers between steps, so they are cut through its stroke band too.
  */
-export function carveSolid(body: readonly string[], others: readonly string[], holes: readonly string[] = []): Carved {
+export function carveSolid(body: readonly string[], others: readonly string[], holes: readonly string[] = [], { inkOutside = true }: { inkOutside?: boolean } = {}): Carved {
   const bodySubs = body.map((d) => flattenPath(d).filter((s) => s.points.length >= 3))
   const subs = bodySubs.flat()
   // SVG fills each path on its own (non-zero over that path's subpaths), so two paths
@@ -105,14 +108,15 @@ export function carveSolid(body: readonly string[], others: readonly string[], h
     return offset([toInt(s.points)], ClipperLib.JoinType.jtRound, end, HALF_STROKE)
   })
   const base = boolean(ClipperLib.ClipType.ctUnion, fill, band)
-  // A line inside the fill is cut. So is one standing on its edge (a door on the ground line):
-  // within half a stroke of the fill, with at least half of it deeper than half a stroke inside.
-  // A line traced along the outline (a bowl's rim) is mostly on the edge, so it stays stroked.
+  // A line inside the fill is cut. So is one with at least half of it deeper than half a stroke inside,
+  // whether it stands on the edge (a door on the ground line) or reaches out (a tick leaving its box): it is
+  // cut inside and inked outside. A line traced along the outline (a bowl's rim) is mostly on the edge, and
+  // a connector into a node is mostly outside, so they stay stroked.
   const reach = offset(fill, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon, HALF_STROKE)
   const core = offset(fill, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon, -HALF_STROKE)
-  const carves = (d: string) => inside(d, fill) || (inside(d, reach) && shareInside(d, core) >= 0.5)
+  const carves = (d: string) => inside(d, fill) || shareInside(d, core) >= 0.5
   const keep: number[] = []
-  const cutters: IntPath[] = []
+  const lines: IntPath[] = []
   others.forEach((d, i) => {
     if (!carves(d)) {
       keep.push(i)
@@ -120,15 +124,28 @@ export function carveSolid(body: readonly string[], others: readonly string[], h
     }
     for (const sub of flattenPath(d)) {
       const end = isClosed(sub) ? ClipperLib.EndType.etClosedLine : ClipperLib.EndType.etOpenRound
-      cutters.push(...offset([toInt(sub.points)], ClipperLib.JoinType.jtRound, end, HALF_STROKE))
+      lines.push(...offset([toInt(sub.points)], ClipperLib.JoinType.jtRound, end, HALF_STROKE))
     }
   })
   const outside: number[] = []
+  const cutters: IntPath[] = []
   holes.forEach((d, i) => {
     if (!inside(d, reach)) outside.push(i)
-    else cutters.push(...paintedRegion(d))
+    else if (body.includes(d)) {
+      // A mark repeating a body path (one stone of a filled row, lit) is cut out as its inside only:
+      // the stone keeps its outline, so the marked solid shows it hollow among the filled ones.
+      const own = boolean(ClipperLib.ClipType.ctUnion, flattenPath(d).filter((s) => s.points.length >= 3).map((s) => toInt(s.points)), [])
+      cutters.push(...offset(own, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon, -HALF_STROKE))
+    } else cutters.push(...paintedRegion(d))
   })
-  const result = cutters.length > 0 ? boolean(ClipperLib.ClipType.ctDifference, base, boolean(ClipperLib.ClipType.ctUnion, cutters, [])) : base
+  // A carved line knocks out its stroke only inside the fill and stays inked outside it: where it meets
+  // the edge (a door on the ground line) the outline is not notched, and a tail past the edge is drawn.
+  let carved = base
+  if (lines.length > 0 && inkOutside) {
+    const ink = boolean(ClipperLib.ClipType.ctDifference, boolean(ClipperLib.ClipType.ctUnion, lines, []), fill)
+    carved = boolean(ClipperLib.ClipType.ctUnion, boolean(ClipperLib.ClipType.ctDifference, base, boolean(ClipperLib.ClipType.ctIntersection, lines, fill)), ink)
+  } else if (lines.length > 0) carved = boolean(ClipperLib.ClipType.ctDifference, base, boolean(ClipperLib.ClipType.ctUnion, lines, []))
+  const result = cutters.length > 0 ? boolean(ClipperLib.ClipType.ctDifference, carved, boolean(ClipperLib.ClipType.ctUnion, cutters, [])) : carved
   const area = result.reduce((sum, ring) => sum + ClipperLib.Clipper.Area(ring), 0) / (SCALE * SCALE)
   const d = result
     .filter((ring) => ring.length > 2)

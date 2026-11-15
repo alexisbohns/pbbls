@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { carveSolid } from "./carve"
+import { flattenPath } from "./geometry"
 import { GENERATED_NOTICE, type Emitter } from "./emit"
 import { formKey, formsOf, parseFormKey, renderForm, type CarvedFill, type Fill, type GlyphData, type GlyphPath, type RenderedPath } from "./forms"
 import { SRC_DIR, splitSourceName } from "./lint"
@@ -11,6 +12,13 @@ import { partCombinations, readRoles } from "./roles"
 import { loadStates, resolveState, type StateTable } from "./states"
 
 export const GLYPHS_FILE = "packages/icons/glyphs/glyphs.json"
+
+/** A path drawn as the pen's dot: every point within a tenth of a unit of the first. */
+function isPenDot(d: string): boolean {
+  const pts = flattenPath(d).flatMap((s) => s.points)
+  const [first] = pts
+  return first !== undefined && pts.every(([x, y]) => Math.abs(x - first[0]) < 0.1 && Math.abs(y - first[1]) < 0.1)
+}
 
 /** `list[n]` for each n, skipping any out of range. */
 const at = (list: readonly number[], ns: readonly number[]): number[] =>
@@ -60,9 +68,11 @@ export function buildGlyph(row: IconRow, source: string, overrides: Record<strin
   paths.forEach((p, i) => {
     if (p.role !== "mark" && p.role !== "step") return
     // Paths of the same role fill together, so they never carve each other (a mark's dot inside its lit blob).
-    const together = (q: GlyphPath) => q.role === p.role && (p.role === "mark" || q.step === p.step)
-    const inner = paths.flatMap((q, j) => (j !== i && !q.hidden && !together(q) ? [j] : []))
-    const carved = carveSolid([p.d], inner.map((j) => paths[j]?.d ?? ""))
+    // A hidden mark that repeats a body path (one stone of a filled row, lit) is not carved by that path either.
+    const together = (q: GlyphPath) => q.d === p.d || (q.role === p.role && (p.role === "mark" || q.step === p.step))
+    // The pen's dot under a lit mark is where the mark grows from (a drop lit as a bigger dot): it does not carve it.
+    const inner = paths.flatMap((q, j) => (j !== i && !q.hidden && !together(q) && !isPenDot(q.d) ? [j] : []))
+    const carved = carveSolid([p.d], inner.map((j) => paths[j]?.d ?? ""), [], { inkOutside: false })
     if (carved.keep.length === inner.length) return
     p.fill = carved.d
     p.cuts = inner.filter((_, n) => !carved.keep.includes(n))

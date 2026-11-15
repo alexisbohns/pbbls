@@ -1,0 +1,26 @@
+[
+ {
+  "name": "flask",
+  "concept": "test",
+  "idea": "x",
+  "note": "the initial one with only the line was good (regular and marked)",
+  "agent": "opus",
+  "batch": "01"
+ },
+ {
+  "name": "stop-circle-2",
+  "concept": "ledger",
+  "idea": "x",
+  "note": "the square inside looks too small in comparison with the regular (solid)",
+  "agent": "opus",
+  "batch": "01"
+ },
+ {
+  "name": "scale-balance",
+  "concept": "ledger",
+  "idea": "x",
+  "note": "issue with the overlapping circles on the scale line (solid)",
+  "agent": "opus",
+  "batch": "01"
+ }
+]

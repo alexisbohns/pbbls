@@ -1,0 +1,812 @@
+[
+ {
+  "name": "stone-bowl-2",
+  "concept": "delivery",
+  "meaning": "work handed over and arrived in users' hands",
+  "hand": "h41",
+  "idea": "pebbles",
+  "note": "marked should put the dot in the circle stone",
+  "original": {
+   "regular": "<path d=\"M12 4.2 C14.4 4.2 15.8 5.6 15.8 7.4 C15.8 9.4 14.2 10.6 12 10.6 C9.8 10.6 8.2 9.4 8.2 7.4 C8.2 5.6 9.6 4.2 13 4.3\"/><path d=\"M3.4 12.6 C4.4 17.4 8 20.2 12 20.2 C16 20.2 19.6 17.4 20.6 12.6 C19.6 11.2 18.2 10.8 17 11.4\"/><path d=\"M3.4 12.6 C7.4 13.6 12.4 13.8 16.6 13.2\"/>",
+   "solid": "<path fill=\"currentColor\" d=\"M12 4.2 C14.4 4.2 15.8 5.6 15.8 7.4 C15.8 9.4 14.2 10.6 12 10.6 C9.8 10.6 8.2 9.4 8.2 7.4 C8.2 5.6 9.6 4.2 13 4.3\"/><path d=\"M3.4 12.6 C4.4 17.4 8 20.2 12 20.2 C16 20.2 19.6 17.4 20.6 12.6 C19.6 11.2 18.2 10.8 17 11.4\"/><path d=\"M3.4 12.6 C7.4 13.6 12.4 13.8 16.6 13.2\"/>",
+   "marked": "<path d=\"M12 4.2 C14.4 4.2 15.8 5.6 15.8 7.4 C15.8 9.4 14.2 10.6 12 10.6 C9.8 10.6 8.2 9.4 8.2 7.4 C8.2 5.6 9.6 4.2 13 4.3\"/><path d=\"M3.4 12.6 C4.4 17.4 8 20.2 12 20.2 C16 20.2 19.6 17.4 20.6 12.6 C19.6 11.2 18.2 10.8 17 11.4\"/><path d=\"M3.4 12.6 C7.4 13.6 12.4 13.8 16.6 13.2\"/><path d=\"M18.4 5 L18.41 5\"/>"
+  },
+  "agent": "opus",
+  "batch": "01"
+ },
+ {
+  "name": "package-arc-bottom",
+  "concept": "delivery",
+  "meaning": "work handed over and arrived in users' hands",
+  "hand": "h43",
+  "idea": "classical",
+  "note": "solid is too sharp in comparison with the rounded regular, marked is useless",
+  "original": {
+   "regular": "<path d=\"M7 5.4 L16.8 5.2 L17 12.4 L6.9 12.6 L7.1 6.2\"/><path d=\"M10.2 5.4 L10.2 8.8 L13.8 8.8 L13.8 5.3\"/><path d=\"M3 14.6 C4.6 17.6 8 19.2 12 19 C16 18.8 19.2 17 21 14.2\"/>",
+   "solid": "<path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M7 5.4 L16.8 5.2 L17 12.4 L6.9 12.6 Z M10.4 7 L13.6 7 L13.6 9.6 L10.4 9.6 Z\"/><path d=\"M3 14.6 C4.6 17.6 8 19.2 12 19 C16 18.8 19.2 17 21 14.2\"/>",
+   "marked": "<path d=\"M7 5.4 L16.8 5.2 L17 12.4 L6.9 12.6 L7.1 6.2\"/><path d=\"M10.2 5.4 L10.2 8.8 L13.8 8.8 L13.8 5.3\"/><path d=\"M3 14.6 C4.6 17.6 8 19.2 12 19 C16 18.8 19.2 17 21 14.2\"/><path d=\"M20 7.4 L20.01 7.4\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "01"
+ },
+ {
+  "name": "shipment",
+  "concept": "shipment",
+  "meaning": "a parcel on its way: something packed and sent out",
+  "hand": "h41",
+  "idea": "bold",
+  "note": "solid is too sharp, marked should put the dot inside the box",
+  "original": {
+   "regular": "<path d=\"M9.4 7.4 L20 7.2 L20.2 17.2 L9.6 17.4 L9.4 8\"/><path d=\"M14.6 7.4 L14.8 10.6\"/><path d=\"M2.6 10.4 L6.6 10.2 M3.8 14.2 L7 14.1\"/>",
+   "solid": "<path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M8.6 6.6 L20.8 6.4 L21 18 L8.8 18.2 Z M14.1 6.8 L15.4 6.8 L15.5 11 L14.2 11 Z\"/><path d=\"M2.6 10.4 L6.6 10.2 M3.8 14.2 L7 14.1\"/>",
+   "marked": "<path d=\"M9.4 7.4 L20 7.2 L20.2 17.2 L9.6 17.4 L9.4 8\"/><path d=\"M14.6 7.4 L14.8 10.6\"/><path d=\"M2.6 10.4 L6.6 10.2 M3.8 14.2 L7 14.1\"/><path d=\"M3.2 18 L3.21 18\"/>"
+  },
+  "agent": "opus",
+  "batch": "01"
+ },
+ {
+  "name": "package",
+  "concept": "shipment",
+  "meaning": "a parcel on its way: something packed and sent out",
+  "hand": "h41",
+  "idea": "classical",
+  "note": "too squared, not in the rounded hand drawn style of pebbles icons",
+  "original": {
+   "regular": "<path d=\"M4 8 L12 4.2 L20 8 L20 16.4 L12 20.2 L4 16.4 L4 8.6\"/><path d=\"M4.2 8.2 L12 12 L19.8 8.2 M12 12 L12 19.8\"/><path d=\"M8 6.2 L16 10\"/>",
+   "solid": "<path fill=\"currentColor\" stroke=\"none\" d=\"M3.4 8.9 L11.3 12.7 L11.3 20.6 L3.4 16.8 Z\"/><path fill=\"currentColor\" stroke=\"none\" d=\"M12.7 12.7 L20.6 8.9 L20.6 16.8 L12.7 20.6 Z\"/><path fill=\"currentColor\" stroke=\"none\" d=\"M4.8 7.6 L12 4.1 L19.2 7.6 L12 11.1 Z\"/>",
+   "marked": "<path d=\"M4 8 L12 4.2 L20 8 L20 16.4 L12 20.2 L4 16.4 L4 8.6\"/><path d=\"M4.2 8.2 L12 12 L19.8 8.2 M12 12 L12 19.8\"/><path d=\"M8 6.2 L16 10\"/><path fill=\"currentColor\" d=\"M19.2 3.6 A1 1 0 1 0 21.2 3.6 A1 1 0 1 0 19.2 3.6 Z\"/>"
+  },
+  "agent": "opus",
+  "batch": "01"
+ },
+ {
+  "name": "stone-speed-3",
+  "concept": "shipment",
+  "meaning": "a parcel on its way: something packed and sent out",
+  "hand": "h41",
+  "idea": "weird",
+  "note": "marked should put the dot in the circle",
+  "original": {
+   "regular": "<path d=\"M16.6 8.2 C19 8.2 20.6 9.8 20.6 12 C20.6 14.2 19 15.8 16.6 15.8 C14.2 15.8 12.6 14.2 12.6 12 C12.6 9.8 14.2 8.2 17.6 8.3\"/><path d=\"M9.8 9 C8.8 9.8 8.4 10.8 8.4 12 C8.4 13.2 8.8 14.2 9.8 15\"/><path d=\"M5.6 10 C5 10.6 4.8 11.2 4.8 12 C4.8 12.8 5 13.4 5.6 14\"/><path d=\"M2.4 11.2 L2.4 12.8\"/>",
+   "solid": "<path fill=\"currentColor\" d=\"M16.6 8.2 C19 8.2 20.6 9.8 20.6 12 C20.6 14.2 19 15.8 16.6 15.8 C14.2 15.8 12.6 14.2 12.6 12 C12.6 9.8 14.2 8.2 17.6 8.3\"/><path d=\"M9.8 9 C8.8 9.8 8.4 10.8 8.4 12 C8.4 13.2 8.8 14.2 9.8 15\"/><path d=\"M5.6 10 C5 10.6 4.8 11.2 4.8 12 C4.8 12.8 5 13.4 5.6 14\"/><path d=\"M2.4 11.2 L2.4 12.8\"/>",
+   "marked": "<path d=\"M16.6 8.2 C19 8.2 20.6 9.8 20.6 12 C20.6 14.2 19 15.8 16.6 15.8 C14.2 15.8 12.6 14.2 12.6 12 C12.6 9.8 14.2 8.2 17.6 8.3\"/><path d=\"M9.8 9 C8.8 9.8 8.4 10.8 8.4 12 C8.4 13.2 8.8 14.2 9.8 15\"/><path d=\"M5.6 10 C5 10.6 4.8 11.2 4.8 12 C4.8 12.8 5 13.4 5.6 14\"/><path fill=\"currentColor\" d=\"M1.6 12 A1 1 0 1 0 3.6 12 A1 1 0 1 0 1.6 12 Z\"/>"
+  },
+  "agent": "opus",
+  "batch": "01"
+ },
+ {
+  "name": "stone-speed-underline",
+  "concept": "shipment",
+  "meaning": "a parcel on its way: something packed and sent out",
+  "hand": "h43",
+  "idea": "pebbles",
+  "note": "marked should put the dot inside the circle, in solid, the circle should be completely filled.",
+  "original": {
+   "regular": "<path d=\"M14.6 7.4 C16.8 7.2 18.4 8.8 18.2 10.8 C18 12.8 16.4 14 14.4 13.9 C12.4 13.8 11.2 12.2 11.5 10.4 C11.8 8.6 13 7.5 16 7.5\"/><path d=\"M3.6 8.6 L8 8.8\"/><path d=\"M4.6 12.2 L8 12\"/><path d=\"M3.6 15.6 L8.4 15.4\"/><path d=\"M10.2 17.6 L20.8 17.4\"/>",
+   "solid": "<path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M14.6 7.4 C16.8 7.2 18.4 8.8 18.2 10.8 C18 12.8 16.4 14 14.4 13.9 C12.4 13.8 11.2 12.2 11.5 10.4 C11.8 8.6 13 7.5 14.6 7.4 Z M13.4 9.6 L15.8 9.6 L15.8 11.4 L13.4 11.4 Z\"/><path d=\"M3.6 8.6 L8 8.8\"/><path d=\"M4.6 12.2 L8 12\"/><path d=\"M3.6 15.6 L8.4 15.4\"/><path d=\"M10.2 17.6 L20.8 17.4\"/>",
+   "marked": "<path d=\"M14.6 7.4 C16.8 7.2 18.4 8.8 18.2 10.8 C18 12.8 16.4 14 14.4 13.9 C12.4 13.8 11.2 12.2 11.5 10.4 C11.8 8.6 13 7.5 16 7.5\"/><path d=\"M3.6 8.6 L8 8.8\"/><path d=\"M4.6 12.2 L8 12\"/><path d=\"M3.6 15.6 L8.4 15.4\"/><path d=\"M10.2 17.6 L20.8 17.4\"/><path d=\"M20.6 11.2 L20.61 11.2\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "01"
+ },
+ {
+  "name": "label-tag",
+  "concept": "release",
+  "meaning": "a numbered version going out to users (not the status chip, the act and the version)",
+  "hand": "h43",
+  "idea": "bold",
+  "note": "solid is too sharp, marked should fill the circle instead of adding a dot outside",
+  "original": {
+   "regular": "<path d=\"M3.6 12 L11.4 4.4 L19.4 4.6 L19.6 12.6 L12 20 L3.8 12.4\"/><path d=\"M15.6 7.2 C16.6 7.2 17.2 7.9 17.1 8.7 C17 9.5 16.3 10 15.5 9.9 C14.7 9.8 14.2 9.2 14.3 8.4 C14.4 7.7 14.9 7.2 16.2 7.3\"/><path d=\"M8.6 12.6 L11.8 15.6\"/>",
+   "solid": "<path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M3.6 12 L11.4 4.4 L19.4 4.6 L19.6 12.6 L12 20 Z M15.6 7 C16.6 7 17.2 7.8 17.1 8.6 C17 9.5 16.3 10 15.5 9.9 C14.7 9.8 14.2 9.2 14.3 8.4 C14.4 7.6 15 7 15.6 7 Z M8.8 11.8 L10 10.8 L13.2 13.8 L12 14.8 Z\"/>",
+   "marked": "<path d=\"M3.6 12 L11.4 4.4 L19.4 4.6 L19.6 12.6 L12 20 L3.8 12.4\"/><path d=\"M15.6 7.2 C16.6 7.2 17.2 7.9 17.1 8.7 C17 9.5 16.3 10 15.5 9.9 C14.7 9.8 14.2 9.2 14.3 8.4 C14.4 7.7 14.9 7.2 16.2 7.3\"/><path d=\"M8.6 12.6 L11.8 15.6\"/><path d=\"M19.6 18.6 L19.61 18.6\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "01"
+ },
+ {
+  "name": "cairn",
+  "concept": "release",
+  "meaning": "a numbered version going out to users (not the status chip, the act and the version)",
+  "hand": "h43",
+  "idea": "pebbles",
+  "note": "solid should fill the bottom ellipse, marked should only fill the top circle instead of adding a dot oustide",
+  "original": {
+   "regular": "<path d=\"M5.4 18.4 C5.2 15.6 8 14.2 12 14.2 C16 14.2 18.8 15.6 18.6 18.4 C18.4 20.2 15 20.6 12 20.6 C8.6 20.6 5.6 20.2 5.4 18.2\"/><path d=\"M8.4 13 C8.2 10.8 10 9.6 12.2 9.6 C14.4 9.6 15.8 10.8 15.6 12.8\"/><path d=\"M10.4 5 C10.6 3.8 11.6 3.2 12.6 3.4 C13.8 3.6 14.4 4.6 14.2 5.6 C14 6.6 12.8 7.2 11.8 7 C10.8 6.8 10.2 6 10.4 4.8\"/>",
+   "solid": "<path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M5.4 18.4 C5.2 15.6 8 14.2 12 14.2 C16 14.2 18.8 15.6 18.6 18.4 C18.4 20.2 15 20.6 12 20.6 C8.6 20.6 5.6 20.2 5.4 18.4 Z M9.4 17 L14.6 17 L14.6 18.4 L9.4 18.4 Z\"/><path d=\"M8.4 13 C8.2 10.8 10 9.6 12.2 9.6 C14.4 9.6 15.8 10.8 15.6 12.8\"/><path fill=\"currentColor\" d=\"M10.4 5 C10.6 3.8 11.6 3.2 12.6 3.4 C13.8 3.6 14.4 4.6 14.2 5.6 C14 6.6 12.8 7.2 11.8 7 C10.8 6.8 10.2 6 10.4 5 Z\"/>",
+   "marked": "<path d=\"M5.4 18.4 C5.2 15.6 8 14.2 12 14.2 C16 14.2 18.8 15.6 18.6 18.4 C18.4 20.2 15 20.6 12 20.6 C8.6 20.6 5.6 20.2 5.4 18.2\"/><path d=\"M8.4 13 C8.2 10.8 10 9.6 12.2 9.6 C14.4 9.6 15.8 10.8 15.6 12.8\"/><path d=\"M10.4 5 C10.6 3.8 11.6 3.2 12.6 3.4 C13.8 3.6 14.4 4.6 14.2 5.6 C14 6.6 12.8 7.2 11.8 7 C10.8 6.8 10.2 6 10.4 4.8\"/><path d=\"M18.8 6.2 L18.81 6.2\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "01"
+ },
+ {
+  "name": "cell-dots",
+  "concept": "beta",
+  "meaning": "pre-release testing with a first circle of early users",
+  "hand": "h41",
+  "idea": "weird",
+  "note": "give up the solid because it is not relevant, keep only the right dot on marked variant, not in the regular one",
+  "original": {
+   "regular": "<path d=\"M18.6 7 C17 5.2 14.6 4.2 12 4.2 C7.6 4.2 4.2 7.6 4.2 12 C4.2 16.4 7.6 19.8 12 19.8 C14.4 19.8 16.4 18.8 17.8 17.4\"/><path d=\"M9.2 10 L9.21 10 M8.8 14.6 L8.81 14.6 M12.4 16 L12.41 16\"/><path d=\"M20.2 12 L20.21 12\"/>",
+   "solid": "<path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M18.9 6.4 C17.2 4.4 14.7 3.3 12 3.3 C7 3.3 3.3 7 3.3 12 C3.3 17 7 20.7 12 20.7 C14.6 20.7 16.8 19.6 18.4 18 L12 12 Z M9.2 9.1 L10.1 10 L9.2 10.9 L8.3 10 Z M8.8 13.7 L9.7 14.6 L8.8 15.5 L7.9 14.6 Z M12.4 15.1 L13.3 16 L12.4 16.9 L11.5 16 Z\"/><path d=\"M20.2 12 L20.21 12\"/>",
+   "marked": "<path d=\"M18.6 7 C17 5.2 14.6 4.2 12 4.2 C7.6 4.2 4.2 7.6 4.2 12 C4.2 16.4 7.6 19.8 12 19.8 C14.4 19.8 16.4 18.8 17.8 17.4\"/><path d=\"M9.2 10 L9.21 10 M8.8 14.6 L8.81 14.6 M12.4 16 L12.41 16\"/><path fill=\"currentColor\" d=\"M19.1 12 A1.1 1.1 0 1 0 21.3 12 A1.1 1.1 0 1 0 19.1 12 Z\"/>"
+  },
+  "agent": "opus",
+  "batch": "01"
+ },
+ {
+  "name": "stones-group-5",
+  "concept": "beta",
+  "meaning": "pre-release testing with a first circle of early users",
+  "hand": "h43",
+  "idea": "pebbles",
+  "note": "solid should fill all stones, marked should fill only the one in the center instead of adding a dot outside",
+  "original": {
+   "regular": "<path d=\"M11.2 3.6 C12.4 3.4 13.5 4.1 13.5 5.2 C13.5 6.3 12.6 6.8 11.7 6.7 C10.7 6.6 10.2 5.8 10.4 4.9 C10.6 4.1 11.1 3.7 12.6 3.8\"/><path d=\"M18 8.2 C19.2 8 20.3 8.7 20.3 9.8 C20.3 10.9 19.4 11.4 18.5 11.3 C17.5 11.2 17 10.4 17.2 9.5 C17.4 8.7 17.9 8.3 19.4 8.4\"/><path d=\"M15.4 16.8 C16.6 16.6 17.7 17.3 17.7 18.4 C17.7 19.5 16.8 20 15.9 19.9 C14.9 19.8 14.4 19 14.6 18.1 C14.8 17.3 15.3 16.9 16.8 17\"/><path d=\"M7 16.8 C8.2 16.6 9.3 17.3 9.3 18.4 C9.3 19.5 8.4 20 7.5 19.9 C6.5 19.8 6 19 6.2 18.1 C6.4 17.3 6.9 16.9 8.4 17\"/><path d=\"M4.4 8.2 C5.6 8 6.7 8.7 6.7 9.8 C6.7 10.9 5.8 11.4 4.9 11.3 C3.9 11.2 3.4 10.4 3.6 9.5 C3.8 8.7 4.3 8.3 5.8 8.4\"/><path d=\"M11 9.6 C12.8 9.2 14.6 10.4 14.6 12.2 C14.6 14 13.4 14.8 12 14.8 C10.2 14.8 9.4 13.6 9.4 12.2 C9.4 10.6 10.2 9.8 12.4 9.6\"/>",
+   "solid": "<path d=\"M11.2 3.6 C12.4 3.4 13.5 4.1 13.5 5.2 C13.5 6.3 12.6 6.8 11.7 6.7 C10.7 6.6 10.2 5.8 10.4 4.9 C10.6 4.1 11.1 3.7 12.6 3.8\"/><path d=\"M18 8.2 C19.2 8 20.3 8.7 20.3 9.8 C20.3 10.9 19.4 11.4 18.5 11.3 C17.5 11.2 17 10.4 17.2 9.5 C17.4 8.7 17.9 8.3 19.4 8.4\"/><path d=\"M15.4 16.8 C16.6 16.6 17.7 17.3 17.7 18.4 C17.7 19.5 16.8 20 15.9 19.9 C14.9 19.8 14.4 19 14.6 18.1 C14.8 17.3 15.3 16.9 16.8 17\"/><path d=\"M7 16.8 C8.2 16.6 9.3 17.3 9.3 18.4 C9.3 19.5 8.4 20 7.5 19.9 C6.5 19.8 6 19 6.2 18.1 C6.4 17.3 6.9 16.9 8.4 17\"/><path d=\"M4.4 8.2 C5.6 8 6.7 8.7 6.7 9.8 C6.7 10.9 5.8 11.4 4.9 11.3 C3.9 11.2 3.4 10.4 3.6 9.5 C3.8 8.7 4.3 8.3 5.8 8.4\"/><path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M11 9.6 C12.8 9.2 14.6 10.4 14.6 12.2 C14.6 14 13.4 14.8 12 14.8 C10.2 14.8 9.4 13.6 9.4 12.2 C9.4 10.6 10.2 9.8 11 9.6 Z M11.4 11.6 L12.8 11.6 L12.8 12.8 L11.4 12.8 Z\"/>",
+   "marked": "<path d=\"M11.2 3.6 C12.4 3.4 13.5 4.1 13.5 5.2 C13.5 6.3 12.6 6.8 11.7 6.7 C10.7 6.6 10.2 5.8 10.4 4.9 C10.6 4.1 11.1 3.7 12.6 3.8\"/><path d=\"M18 8.2 C19.2 8 20.3 8.7 20.3 9.8 C20.3 10.9 19.4 11.4 18.5 11.3 C17.5 11.2 17 10.4 17.2 9.5 C17.4 8.7 17.9 8.3 19.4 8.4\"/><path d=\"M15.4 16.8 C16.6 16.6 17.7 17.3 17.7 18.4 C17.7 19.5 16.8 20 15.9 19.9 C14.9 19.8 14.4 19 14.6 18.1 C14.8 17.3 15.3 16.9 16.8 17\"/><path d=\"M7 16.8 C8.2 16.6 9.3 17.3 9.3 18.4 C9.3 19.5 8.4 20 7.5 19.9 C6.5 19.8 6 19 6.2 18.1 C6.4 17.3 6.9 16.9 8.4 17\"/><path d=\"M4.4 8.2 C5.6 8 6.7 8.7 6.7 9.8 C6.7 10.9 5.8 11.4 4.9 11.3 C3.9 11.2 3.4 10.4 3.6 9.5 C3.8 8.7 4.3 8.3 5.8 8.4\"/><path d=\"M11 9.6 C12.8 9.2 14.6 10.4 14.6 12.2 C14.6 14 13.4 14.8 12 14.8 C10.2 14.8 9.4 13.6 9.4 12.2 C9.4 10.6 10.2 9.8 12.4 9.6\"/><path d=\"M20 4.4 L20.01 4.4\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "01"
+ },
+ {
+  "name": "flask",
+  "concept": "test",
+  "meaning": "trying something to see if it works: a check, an experiment",
+  "hand": "h41",
+  "idea": "classical",
+  "note": "too geometrical, not enough hand drawn to integrate with pebbles style",
+  "original": {
+   "regular": "<path d=\"M9.4 3.6 L9.6 9 L4.6 18.6 C4.2 19.6 4.8 20.4 5.8 20.4 L18.2 20.4 C19.2 20.4 19.8 19.6 19.4 18.6 L14.4 9 L14.6 3.6\"/><path d=\"M8.2 3.6 L15.8 3.4\"/><path d=\"M7.2 14.6 C9.4 15.4 14.4 13.8 16.8 14.6\"/>",
+   "solid": "<path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M8.6 3 L8.8 8.8 L3.8 18.4 C3.2 19.8 4.2 21.2 5.8 21.2 L18.2 21.2 C19.8 21.2 20.8 19.8 20.2 18.4 L15.2 8.8 L15.4 3 Z M10.4 3.8 L10.5 9.2 L8 13.8 C10 14.4 14 13 16 13.7 L13.5 9.2 L13.6 3.8 Z\"/><path d=\"M8.2 3.4 L15.8 3.2\"/>",
+   "marked": "<path d=\"M9.4 3.6 L9.6 9 L4.6 18.6 C4.2 19.6 4.8 20.4 5.8 20.4 L18.2 20.4 C19.2 20.4 19.8 19.6 19.4 18.6 L14.4 9 L14.6 3.6\"/><path d=\"M8.2 3.6 L15.8 3.4\"/><path d=\"M7.2 14.6 C9.4 15.4 14.4 13.8 16.8 14.6\"/><path fill=\"currentColor\" d=\"M17.4 6 A1 1 0 1 0 19.4 6 A1 1 0 1 0 17.4 6 Z\"/>"
+  },
+  "agent": "opus",
+  "batch": "01"
+ },
+ {
+  "name": "pin-waves",
+  "concept": "test",
+  "meaning": "trying something to see if it works: a check, an experiment",
+  "hand": "h42",
+  "idea": "pebbles",
+  "note": "put the dot inside the circle instead of outside",
+  "original": {
+   "regular": "<path d=\"M9.4 6.2 C9.4 4.6 10.6 3.4 12.2 3.4 C13.7 3.4 14.7 4.6 14.6 6.1 C14.5 7.6 13.4 8.6 11.9 8.6 C10.4 8.6 9.4 7.6 9.5 5.9\"/><path d=\"M12 10.3 L12 12.4\"/><path d=\"M3.5 16 C6 14 9 14.5 12 15.5 C15 16.5 18 17 20.5 15.2\"/><path d=\"M6 19.8 C8.5 18.8 10 19 12 19.6 C14 20.2 15.5 20.4 18 19.4\"/>",
+   "solid": "<path fill=\"currentColor\" d=\"M9.4 6.2 C9.4 4.6 10.6 3.4 12.2 3.4 C13.7 3.4 14.7 4.6 14.6 6.1 C14.5 7.6 13.4 8.6 11.9 8.6 C10.4 8.6 9.4 7.6 9.4 6.2 Z\"/><path d=\"M12 10.3 L12 12.4\"/><path d=\"M3.5 16 C6 14 9 14.5 12 15.5 C15 16.5 18 17 20.5 15.2\"/><path d=\"M6 19.8 C8.5 18.8 10 19 12 19.6 C14 20.2 15.5 20.4 18 19.4\"/>",
+   "marked": "<path d=\"M9.4 6.2 C9.4 4.6 10.6 3.4 12.2 3.4 C13.7 3.4 14.7 4.6 14.6 6.1 C14.5 7.6 13.4 8.6 11.9 8.6 C10.4 8.6 9.4 7.6 9.5 5.9\"/><path d=\"M12 10.3 L12 12.4\"/><path d=\"M3.5 16 C6 14 9 14.5 12 15.5 C15 16.5 18 17 20.5 15.2\"/><path d=\"M6 19.8 C8.5 18.8 10 19 12 19.6 C14 20.2 15.5 20.4 18 19.4\"/><path d=\"M18 7 L18.01 7\"/>"
+  },
+  "agent": "opus",
+  "batch": "01"
+ },
+ {
+  "name": "recipient-stick",
+  "concept": "test",
+  "meaning": "trying something to see if it works: a check, an experiment",
+  "hand": "h42",
+  "idea": "bold",
+  "note": "put the mark as a round on the stick head instead of flying around",
+  "original": {
+   "regular": "<path d=\"M5 11 L6 20.5 L18 20.4 L19 11.2\"/><path d=\"M6.4 14.5 L17.6 14.3\"/><path d=\"M15 3 L11.2 16\"/>",
+   "solid": "<path d=\"M5 11 L6 20.5 L18 20.4 L19 11.2\"/><path fill=\"currentColor\" d=\"M6.4 14.5 L17.6 14.3 L18 20.4 L6 20.5 Z\"/><path d=\"M15 3 L11.2 16\"/>",
+   "marked": "<path d=\"M5 11 L6 20.5 L18 20.4 L19 11.2\"/><path d=\"M6.4 14.5 L17.6 14.3\"/><path d=\"M15 3 L11.2 16\"/><path d=\"M19.5 5 L19.51 5\"/>"
+  },
+  "agent": "opus",
+  "batch": "01"
+ },
+ {
+  "name": "stone-arcs",
+  "concept": "test",
+  "meaning": "trying something to see if it works: a check, an experiment",
+  "hand": "h44",
+  "idea": "pebbles",
+  "note": "put the dot in the middle of the circle instead of flying around",
+  "original": {
+   "regular": "<path d=\"M12 3.8 C14.4 3.6 16 5.4 15.8 7.4 C15.6 9.4 13.8 10.6 11.8 10.4 C9.8 10.2 8.4 8.6 8.6 6.8 C8.8 5.2 10.2 3.9 12.2 3.7\"/><path d=\"M5 15.4 C8 13.8 16 13.8 19 15.4\"/><path d=\"M3.4 19.4 C8 16.6 16 16.6 20.6 19.4\"/>",
+   "solid": "<path fill=\"currentColor\" d=\"M12 3.8 C14.4 3.6 16 5.4 15.8 7.4 C15.6 9.4 13.8 10.6 11.8 10.4 C9.8 10.2 8.4 8.6 8.6 6.8 C8.8 5.2 10.2 3.9 12.2 3.7 Z\"/><path d=\"M5 15.4 C8 13.8 16 13.8 19 15.4\"/><path d=\"M3.4 19.4 C8 16.6 16 16.6 20.6 19.4\"/>",
+   "marked": "<path d=\"M12 3.8 C14.4 3.6 16 5.4 15.8 7.4 C15.6 9.4 13.8 10.6 11.8 10.4 C9.8 10.2 8.4 8.6 8.6 6.8 C8.8 5.2 10.2 3.9 12.2 3.7\"/><path d=\"M5 15.4 C8 13.8 16 13.8 19 15.4\"/><path d=\"M3.4 19.4 C8 16.6 16 16.6 20.6 19.4\"/><path d=\"M20 7 L20.01 7\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "01"
+ },
+ {
+  "name": "stones-balance",
+  "concept": "test",
+  "meaning": "trying something to see if it works: a check, an experiment",
+  "hand": "h41",
+  "idea": "pebbles",
+  "note": "put the dot in the top stone instead of outside",
+  "original": {
+   "regular": "<path d=\"M12 15.2 C15 15.2 17.6 16.6 17.6 18.4 C17.6 20 15.4 20.8 12 20.8 C8.6 20.8 6.4 20 6.4 18.4 C6.4 16.6 9 15.2 13 15.3\"/><path d=\"M7.4 9.6 C8.6 6.8 12.6 5 15.6 6 C18 6.8 18.4 9.4 16.6 11.4 C14.6 13.4 10.4 14 8.4 12.8 C7 12 6.8 10.8 7.8 9\"/><path d=\"M4.4 7.6 L3.2 8.6 M19.8 4.4 L20.8 3.4\"/>",
+   "solid": "<path fill=\"currentColor\" d=\"M12 15.2 C15 15.2 17.6 16.6 17.6 18.4 C17.6 20 15.4 20.8 12 20.8 C8.6 20.8 6.4 20 6.4 18.4 C6.4 16.6 9 15.2 13 15.3\"/><path fill=\"currentColor\" d=\"M7.4 9.6 C8.6 6.8 12.6 5 15.6 6 C18 6.8 18.4 9.4 16.6 11.4 C14.6 13.4 10.4 14 8.4 12.8 C7 12 6.8 10.8 7.8 9\"/><path d=\"M4.4 7.6 L3.2 8.6 M19.8 4.4 L20.8 3.4\"/>",
+   "marked": "<path d=\"M12 15.2 C15 15.2 17.6 16.6 17.6 18.4 C17.6 20 15.4 20.8 12 20.8 C8.6 20.8 6.4 20 6.4 18.4 C6.4 16.6 9 15.2 13 15.3\"/><path d=\"M7.4 9.6 C8.6 6.8 12.6 5 15.6 6 C18 6.8 18.4 9.4 16.6 11.4 C14.6 13.4 10.4 14 8.4 12.8 C7 12 6.8 10.8 7.8 9\"/><path d=\"M4.4 7.6 L3.2 8.6\"/><path fill=\"currentColor\" d=\"M19.4 3.8 A1 1 0 1 0 21.4 3.8 A1 1 0 1 0 19.4 3.8 Z\"/>"
+  },
+  "agent": "opus",
+  "batch": "02"
+ },
+ {
+  "name": "square-check",
+  "concept": "test",
+  "meaning": "trying something to see if it works: a check, an experiment",
+  "hand": "h43",
+  "idea": "bold",
+  "note": "solid is too sharp",
+  "original": {
+   "regular": "<path d=\"M4.8 7 L15.4 6.6 L15.8 17.6 L5 17.8 L4.8 7.8\"/><path d=\"M8.4 12.2 L11.2 15 L20 5.4\"/>",
+   "solid": "<path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M4.4 6.6 L15.8 6.2 L16.2 18 L4.6 18.2 Z M6.8 12.2 L8.2 10.8 L9.8 12.4 L13.4 8.4 L14.8 9.8 L9.8 15.4 Z\"/>",
+   "marked": "<path d=\"M4.8 7 L15.4 6.6 L15.8 17.6 L5 17.8 L4.8 7.8\"/><path d=\"M8.4 12.2 L11.2 15 L20 5.4\"/><path d=\"M19.4 16.4 L19.41 16.4\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "01"
+ },
+ {
+  "name": "diff",
+  "concept": "changelog",
+  "meaning": "the written list of what changed between versions",
+  "hand": "h42",
+  "idea": "bold",
+  "note": "give up the solid, nonsense here; bigger dot mark",
+  "original": {
+   "regular": "<path d=\"M4 6 L8 6 M6 4 L6 8\"/><path d=\"M4 12 L8 12\"/><path d=\"M4 18 L8 18 M6 16 L6 20\"/><path d=\"M11 6 L20 5.9 M11 12 L18 11.9 M11 18 L19.5 17.9\"/>",
+   "solid": "<path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M3.5 3.5 L8.5 3.4 L8.6 8.5 L3.5 8.6 Z M5.4 4.6 L6.6 4.6 L6.6 5.4 L7.4 5.4 L7.4 6.6 L6.6 6.6 L6.6 7.4 L5.4 7.4 L5.4 6.6 L4.6 6.6 L4.6 5.4 L5.4 5.4 Z\"/><path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M3.5 9.5 L8.5 9.4 L8.6 14.5 L3.5 14.6 Z M4.6 11.4 L7.4 11.4 L7.4 12.6 L4.6 12.6 Z\"/><path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M3.5 15.5 L8.5 15.4 L8.6 20.5 L3.5 20.6 Z M5.4 16.6 L6.6 16.6 L6.6 17.4 L7.4 17.4 L7.4 18.6 L6.6 18.6 L6.6 19.4 L5.4 19.4 L5.4 18.6 L4.6 18.6 L4.6 17.4 L5.4 17.4 Z\"/><path d=\"M11 6 L20 5.9 M11 12 L18 11.9 M11 18 L19.5 17.9\"/>",
+   "marked": "<path d=\"M4 6 L8 6 M6 4 L6 8\"/><path d=\"M4 12 L8 12\"/><path d=\"M4 18 L8 18 M6 16 L6 20\"/><path d=\"M11 6 L20 5.9 M11 12 L18 11.9 M11 18 L19.5 17.9\"/><path d=\"M21 12 L21.01 12\"/>"
+  },
+  "agent": "opus",
+  "batch": "02"
+ },
+ {
+  "name": "inbox-full",
+  "concept": "backlog",
+  "meaning": "the queue of work waiting to be picked up",
+  "hand": "h43",
+  "idea": "classical",
+  "note": "too geometrical, we miss the hand drawn irregularity",
+  "original": {
+   "regular": "<path d=\"M7 6.2 L17 6\"/><path d=\"M6 9.8 L18 9.6\"/><path d=\"M3.6 13 L8 13.2 L9 15.8 L15 15.8 L16 13.2 L20.4 13 L20.4 19.8 L3.6 19.8 L3.6 13.4\"/>",
+   "solid": "<path d=\"M7 6.2 L17 6\"/><path d=\"M6 9.8 L18 9.6\"/><path fill=\"currentColor\" d=\"M3.6 13 L8 13.2 L9 15.8 L15 15.8 L16 13.2 L20.4 13 L20.4 19.8 L3.6 19.8 Z\"/>",
+   "marked": "<path d=\"M7 6.2 L17 6\"/><path d=\"M6 9.8 L18 9.6\"/><path d=\"M3.6 13 L8 13.2 L9 15.8 L15 15.8 L16 13.2 L20.4 13 L20.4 19.8 L3.6 19.8 L3.6 13.4\"/><path d=\"M20.2 7.8 L20.21 7.8\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "02"
+ },
+ {
+  "name": "logs-stack",
+  "concept": "backlog",
+  "meaning": "the queue of work waiting to be picked up",
+  "hand": "h43",
+  "idea": "bold",
+  "note": "bigger dot mark",
+  "original": {
+   "regular": "<path d=\"M4.6 19.2 L19.4 19 L19.6 21.4 L4.8 21.6 L4.6 19.6\"/><path d=\"M4.6 14.4 L19.4 14.2 L19.6 16.6 L4.8 16.8 L4.6 14.8\"/><path d=\"M6.2 7.8 L17.4 5.4 L18 8 L6.8 10.4 L6.2 8.2\"/>",
+   "solid": "<path fill=\"currentColor\" d=\"M4.6 19.2 L19.4 19 L19.6 21.4 L4.8 21.6 Z\"/><path fill=\"currentColor\" d=\"M4.6 14.4 L19.4 14.2 L19.6 16.6 L4.8 16.8 Z\"/><path fill=\"currentColor\" d=\"M6.2 7.8 L17.4 5.4 L18 8 L6.8 10.4 Z\"/>",
+   "marked": "<path d=\"M4.6 19.2 L19.4 19 L19.6 21.4 L4.8 21.6 L4.6 19.6\"/><path d=\"M4.6 14.4 L19.4 14.2 L19.6 16.6 L4.8 16.8 L4.6 14.8\"/><path d=\"M6.2 7.8 L17.4 5.4 L18 8 L6.8 10.4 L6.2 8.2\"/><path d=\"M20.6 10.6 L20.61 10.6\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "02"
+ },
+ {
+  "name": "filter-dots",
+  "concept": "backlog",
+  "meaning": "the queue of work waiting to be picked up",
+  "hand": "h41",
+  "idea": "weird",
+  "note": "solid is too sharp, falling bottom dot only on marked variant",
+  "original": {
+   "regular": "<path d=\"M10.4 16.4 L10.4 12.8 L3.4 4.6 C8.6 5.2 15.4 5.2 20.6 4.6 L13.6 12.8 L13.6 16.4\"/><path d=\"M8.6 7.4 L8.61 7.4 M12 8 L12.01 8 M15.4 7.4 L15.41 7.4 M10.6 10.2 L10.61 10.2 M13.4 10.2 L13.41 10.2\"/><path d=\"M12 20.4 L12.01 20.4\"/>",
+   "solid": "<path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M2.4 4 C8.6 4.6 15.4 4.6 21.6 4 L14.5 13 L14.5 17.2 L9.5 17.2 L9.5 13 Z M8.6 6.6 L9.4 7.4 L8.6 8.2 L7.8 7.4 Z M12 7.2 L12.8 8 L12 8.8 L11.2 8 Z M15.4 6.6 L16.2 7.4 L15.4 8.2 L14.6 7.4 Z M10.6 9.4 L11.4 10.2 L10.6 11 L9.8 10.2 Z M13.4 9.4 L14.2 10.2 L13.4 11 L12.6 10.2 Z\"/><path d=\"M12 20.4 L12.01 20.4\"/>",
+   "marked": "<path d=\"M10.4 16.4 L10.4 12.8 L3.4 4.6 C8.6 5.2 15.4 5.2 20.6 4.6 L13.6 12.8 L13.6 16.4\"/><path d=\"M8.6 7.4 L8.61 7.4 M12 8 L12.01 8 M15.4 7.4 L15.41 7.4 M10.6 10.2 L10.61 10.2 M13.4 10.2 L13.41 10.2\"/><path fill=\"currentColor\" d=\"M11 20.2 A1 1 0 1 0 13 20.2 A1 1 0 1 0 11 20.2 Z\"/>"
+  },
+  "agent": "opus",
+  "batch": "02"
+ },
+ {
+  "name": "backlog-pebbles-h43",
+  "concept": "backlog",
+  "meaning": "the queue of work waiting to be picked up",
+  "hand": "h43",
+  "idea": "pebbles",
+  "note": "bigger dot in the pot on marked variant, solid is too small and sharp",
+  "original": {
+   "regular": "<path d=\"M7.4 11 C5 13.6 4.8 18 7.6 19.8 C10 21 15 21 17 19.6 C19.4 17.6 19.2 13.4 16.6 11\"/><path d=\"M7.4 11 C9.6 12 14.4 12 16.6 11\"/><path d=\"M8.6 7 C9.8 6.8 11 7.6 11 8.8 C11 10 10.2 10.4 9.3 10.4 C8.2 10.3 7.6 9.5 7.8 8.5 C8 7.7 8.4 7.1 10 7.2\"/><path d=\"M13.8 6.8 C15 6.6 16.2 7.4 16.2 8.6 C16.2 9.8 15.4 10.2 14.5 10.2 C13.4 10.1 12.8 9.3 13 8.3 C13.2 7.5 13.6 6.9 15.2 7\"/><path d=\"M11.2 3.2 C12.4 3 13.6 3.8 13.6 5 C13.6 6.2 12.8 6.6 11.9 6.6 C10.8 6.5 10.2 5.7 10.4 4.7 C10.6 3.9 11 3.3 12.6 3.4\"/>",
+   "solid": "<path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M7.4 11 C9.6 12 14.4 12 16.6 11 C19.2 13.4 19.4 17.6 17 19.6 C15 21 10 21 7.6 19.8 C4.8 18 5 13.6 7.4 11 Z M12 14.8 C13 14.8 13.8 15.5 13.7 16.4 C13.6 17.3 12.8 17.8 12 17.7 C11.1 17.6 10.5 16.9 10.6 16.1 C10.7 15.3 11.3 14.8 12 14.8 Z\"/><path d=\"M8.6 7 C9.8 6.8 11 7.6 11 8.8 C11 10 10.2 10.4 9.3 10.4 C8.2 10.3 7.6 9.5 7.8 8.5 C8 7.7 8.4 7.1 10 7.2\"/><path d=\"M13.8 6.8 C15 6.6 16.2 7.4 16.2 8.6 C16.2 9.8 15.4 10.2 14.5 10.2 C13.4 10.1 12.8 9.3 13 8.3 C13.2 7.5 13.6 6.9 15.2 7\"/><path d=\"M11.2 3.2 C12.4 3 13.6 3.8 13.6 5 C13.6 6.2 12.8 6.6 11.9 6.6 C10.8 6.5 10.2 5.7 10.4 4.7 C10.6 3.9 11 3.3 12.6 3.4\"/>",
+   "marked": "<path d=\"M7.4 11 C5 13.6 4.8 18 7.6 19.8 C10 21 15 21 17 19.6 C19.4 17.6 19.2 13.4 16.6 11\"/><path d=\"M7.4 11 C9.6 12 14.4 12 16.6 11\"/><path d=\"M8.6 7 C9.8 6.8 11 7.6 11 8.8 C11 10 10.2 10.4 9.3 10.4 C8.2 10.3 7.6 9.5 7.8 8.5 C8 7.7 8.4 7.1 10 7.2\"/><path d=\"M13.8 6.8 C15 6.6 16.2 7.4 16.2 8.6 C16.2 9.8 15.4 10.2 14.5 10.2 C13.4 10.1 12.8 9.3 13 8.3 C13.2 7.5 13.6 6.9 15.2 7\"/><path d=\"M11.2 3.2 C12.4 3 13.6 3.8 13.6 5 C13.6 6.2 12.8 6.6 11.9 6.6 C10.8 6.5 10.2 5.7 10.4 4.7 C10.6 3.9 11 3.3 12.6 3.4\"/><path d=\"M19.8 5.4 L19.81 5.4\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "02"
+ },
+ {
+  "name": "stones-stack-4",
+  "concept": "backlog",
+  "meaning": "the queue of work waiting to be picked up",
+  "hand": "h42",
+  "idea": "pebbles",
+  "note": "fill the top stone for the marked variant instead of the flying dot",
+  "original": {
+   "regular": "<path d=\"M4 17.6 C4 15.8 5.3 14.5 7.1 14.5 C8.9 14.5 10 15.8 10 17.5 C10 19.2 8.8 20.4 7 20.4 C5.3 20.4 4 19.3 4.1 17.3\"/><path d=\"M10.7 17.9 C10.7 16.2 12 15 13.6 15 C15.3 15 16.3 16.2 16.3 17.8 C16.3 19.4 15.2 20.5 13.5 20.5 C11.9 20.5 10.7 19.5 10.8 17.6\"/><path d=\"M17 18.6 C17 17.4 17.9 16.5 19.1 16.5 C20.2 16.5 21 17.4 21 18.5 C21 19.6 20.1 20.4 19 20.4 C17.9 20.4 17 19.6 17.1 18.3\"/><path d=\"M7.7 11.7 C7.7 10.1 8.9 9 10.4 9 C11.9 9 12.9 10.1 12.9 11.6 C12.9 13.1 11.8 13.9 10.3 13.9 C8.8 13.9 7.7 13.1 7.8 11.4\"/>",
+   "solid": "<path fill=\"currentColor\" d=\"M4 17.6 C4 15.8 5.3 14.5 7.1 14.5 C8.9 14.5 10 15.8 10 17.5 C10 19.2 8.8 20.4 7 20.4 C5.3 20.4 4 19.3 4 17.6 Z\"/><path fill=\"currentColor\" d=\"M10.7 17.9 C10.7 16.2 12 15 13.6 15 C15.3 15 16.3 16.2 16.3 17.8 C16.3 19.4 15.2 20.5 13.5 20.5 C11.9 20.5 10.7 19.5 10.7 17.9 Z\"/><path fill=\"currentColor\" d=\"M17 18.6 C17 17.4 17.9 16.5 19.1 16.5 C20.2 16.5 21 17.4 21 18.5 C21 19.6 20.1 20.4 19 20.4 C17.9 20.4 17 19.6 17 18.6 Z\"/><path fill=\"currentColor\" d=\"M7.7 11.7 C7.7 10.1 8.9 9 10.4 9 C11.9 9 12.9 10.1 12.9 11.6 C12.9 13.1 11.8 13.9 10.3 13.9 C8.8 13.9 7.7 13.1 7.7 11.7 Z\"/>",
+   "marked": "<path d=\"M4 17.6 C4 15.8 5.3 14.5 7.1 14.5 C8.9 14.5 10 15.8 10 17.5 C10 19.2 8.8 20.4 7 20.4 C5.3 20.4 4 19.3 4.1 17.3\"/><path d=\"M10.7 17.9 C10.7 16.2 12 15 13.6 15 C15.3 15 16.3 16.2 16.3 17.8 C16.3 19.4 15.2 20.5 13.5 20.5 C11.9 20.5 10.7 19.5 10.8 17.6\"/><path d=\"M17 18.6 C17 17.4 17.9 16.5 19.1 16.5 C20.2 16.5 21 17.4 21 18.5 C21 19.6 20.1 20.4 19 20.4 C17.9 20.4 17 19.6 17.1 18.3\"/><path d=\"M7.7 11.7 C7.7 10.1 8.9 9 10.4 9 C11.9 9 12.9 10.1 12.9 11.6 C12.9 13.1 11.8 13.9 10.3 13.9 C8.8 13.9 7.7 13.1 7.8 11.4\"/><path d=\"M18 9 L18.01 9\"/>"
+  },
+  "agent": "opus",
+  "batch": "02"
+ },
+ {
+  "name": "stones-wave",
+  "concept": "flow",
+  "meaning": "something moving smoothly through steps without blockage",
+  "hand": "h43",
+  "idea": "pebbles",
+  "note": "put the dot inside the center circle for the marked variant",
+  "original": {
+   "regular": "<path d=\"M3 18 C6 16 8.4 20 11.6 18 C14.6 16.2 17.4 19.8 21 17.8\"/><path d=\"M5.2 10.6 C6.8 10.2 8.4 11.2 8.4 12.8 C8.4 14.4 7.4 14.9 6.2 14.8 C4.8 14.7 4.1 13.7 4.3 12.4 C4.5 11.4 5 10.9 7.2 10.7\"/><path d=\"M11.2 8.8 C13.2 8.4 15 9.6 14.9 11.6 C14.8 13.4 13.6 14 12.2 13.9 C10.6 13.8 9.8 12.8 9.9 11.4 C10 10 10.6 9.2 13 8.9\"/><path d=\"M17 10.6 C18.6 10.2 20.2 11.2 20.2 12.8 C20.2 14.4 19.2 14.9 18 14.8 C16.6 14.7 15.9 13.7 16.1 12.4 C16.3 11.4 16.8 10.9 19 10.7\"/>",
+   "solid": "<path d=\"M3 18 C6 16 8.4 20 11.6 18 C14.6 16.2 17.4 19.8 21 17.8\"/><path fill=\"currentColor\" d=\"M5.2 10.6 C6.8 10.2 8.4 11.2 8.4 12.8 C8.4 14.4 7.4 14.9 6.2 14.8 C4.8 14.7 4.1 13.7 4.3 12.4 C4.5 11.4 5 10.9 5.2 10.6 Z\"/><path fill=\"currentColor\" d=\"M11.2 8.8 C13.2 8.4 15 9.6 14.9 11.6 C14.8 13.4 13.6 14 12.2 13.9 C10.6 13.8 9.8 12.8 9.9 11.4 C10 10 10.6 9.2 11.2 8.8 Z\"/><path fill=\"currentColor\" d=\"M17 10.6 C18.6 10.2 20.2 11.2 20.2 12.8 C20.2 14.4 19.2 14.9 18 14.8 C16.6 14.7 15.9 13.7 16.1 12.4 C16.3 11.4 16.8 10.9 17 10.6 Z\"/>",
+   "marked": "<path d=\"M3 18 C6 16 8.4 20 11.6 18 C14.6 16.2 17.4 19.8 21 17.8\"/><path d=\"M5.2 10.6 C6.8 10.2 8.4 11.2 8.4 12.8 C8.4 14.4 7.4 14.9 6.2 14.8 C4.8 14.7 4.1 13.7 4.3 12.4 C4.5 11.4 5 10.9 7.2 10.7\"/><path d=\"M11.2 8.8 C13.2 8.4 15 9.6 14.9 11.6 C14.8 13.4 13.6 14 12.2 13.9 C10.6 13.8 9.8 12.8 9.9 11.4 C10 10 10.6 9.2 13 8.9\"/><path d=\"M17 10.6 C18.6 10.2 20.2 11.2 20.2 12.8 C20.2 14.4 19.2 14.9 18 14.8 C16.6 14.7 15.9 13.7 16.1 12.4 C16.3 11.4 16.8 10.9 19 10.7\"/><path d=\"M12 4.8 L12.01 4.8\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "02"
+ },
+ {
+  "name": "flow-stones",
+  "concept": "flow",
+  "meaning": "something moving smoothly through steps without blockage",
+  "hand": "h42",
+  "idea": "pebbles",
+  "note": "marked: put the dot in the circles instead of flying around",
+  "original": {
+   "regular": "<path d=\"M5.5 8.9 C5.5 7.4 6.6 6.3 8.1 6.3 C9.5 6.3 10.5 7.4 10.4 8.8 C10.3 10.2 9.3 11.1 7.9 11.1 C6.5 11.1 5.5 10.2 5.6 8.6\"/><path d=\"M13.5 14.3 C13.5 12.8 14.6 11.7 16.1 11.7 C17.5 11.7 18.5 12.8 18.4 14.2 C18.3 15.6 17.3 16.5 15.9 16.5 C14.5 16.5 13.5 15.6 13.6 14\"/><path d=\"M3 4.5 C8 3.5 12 5.5 14 4.4 C16 3.4 19 3.6 21 4.2\"/><path d=\"M2.5 13.6 C6 13.8 9 13.4 11 12.2 C13 11 14 9.3 17 9.2 C19 9.1 20.5 9.6 21.5 10\"/><path d=\"M2.5 17.5 C7 17 10 20 14 19.5 C17 19.2 19 17.5 21.5 17.6\"/>",
+   "solid": "<path fill=\"currentColor\" d=\"M5.5 8.9 C5.5 7.4 6.6 6.3 8.1 6.3 C9.5 6.3 10.5 7.4 10.4 8.8 C10.3 10.2 9.3 11.1 7.9 11.1 C6.5 11.1 5.5 10.2 5.5 8.9 Z\"/><path fill=\"currentColor\" d=\"M13.5 14.3 C13.5 12.8 14.6 11.7 16.1 11.7 C17.5 11.7 18.5 12.8 18.4 14.2 C18.3 15.6 17.3 16.5 15.9 16.5 C14.5 16.5 13.5 15.6 13.5 14.3 Z\"/><path d=\"M3 4.5 C8 3.5 12 5.5 14 4.4 C16 3.4 19 3.6 21 4.2\"/><path d=\"M2.5 13.6 C6 13.8 9 13.4 11 12.2 C13 11 14 9.3 17 9.2 C19 9.1 20.5 9.6 21.5 10\"/><path d=\"M2.5 17.5 C7 17 10 20 14 19.5 C17 19.2 19 17.5 21.5 17.6\"/>",
+   "marked": "<path d=\"M5.5 8.9 C5.5 7.4 6.6 6.3 8.1 6.3 C9.5 6.3 10.5 7.4 10.4 8.8 C10.3 10.2 9.3 11.1 7.9 11.1 C6.5 11.1 5.5 10.2 5.6 8.6\"/><path d=\"M13.5 14.3 C13.5 12.8 14.6 11.7 16.1 11.7 C17.5 11.7 18.5 12.8 18.4 14.2 C18.3 15.6 17.3 16.5 15.9 16.5 C14.5 16.5 13.5 15.6 13.6 14\"/><path d=\"M3 4.5 C8 3.5 12 5.5 14 4.4 C16 3.4 19 3.6 21 4.2\"/><path d=\"M2.5 13.6 C6 13.8 9 13.4 11 12.2 C13 11 14 9.3 17 9.2 C19 9.1 20.5 9.6 21.5 10\"/><path d=\"M2.5 17.5 C7 17 10 20 14 19.5 C17 19.2 19 17.5 21.5 17.6\"/><path d=\"M20 13.6 L20.01 13.6\"/>"
+  },
+  "agent": "opus",
+  "batch": "02"
+ },
+ {
+  "name": "network-arc",
+  "concept": "flow",
+  "meaning": "something moving smoothly through steps without blockage",
+  "hand": "h44",
+  "idea": "classical",
+  "note": "marked: put a dot in the top center circle instead of flying around",
+  "original": {
+   "regular": "<path d=\"M5.4 14.6 C6.8 14.4 7.8 15.6 7.6 16.8 C7.4 18.2 6.2 19 5 18.8 C3.8 18.6 3 17.4 3.3 16.2 C3.5 15.2 4.4 14.7 5.6 14.5\"/><path d=\"M12 5 C13.4 4.8 14.4 6 14.2 7.2 C14 8.6 12.8 9.4 11.6 9.2 C10.4 9 9.6 7.8 9.9 6.6 C10.1 5.6 11 5.1 12.2 4.9\"/><path d=\"M18.6 14.6 C20 14.4 21 15.6 20.8 16.8 C20.6 18.2 19.4 19 18.2 18.8 C17 18.6 16.2 17.4 16.5 16.2 C16.7 15.2 17.6 14.7 18.8 14.5\"/><path d=\"M6.8 14.8 C8 11.6 9 9.8 10.4 8.8\"/><path d=\"M13.6 8.8 C15 9.8 16.2 11.6 17.2 14.8\"/>",
+   "solid": "<path fill=\"currentColor\" d=\"M5.4 14.6 C6.8 14.4 7.8 15.6 7.6 16.8 C7.4 18.2 6.2 19 5 18.8 C3.8 18.6 3 17.4 3.3 16.2 C3.5 15.2 4.4 14.7 5.6 14.5 Z\"/><path fill=\"currentColor\" d=\"M12 5 C13.4 4.8 14.4 6 14.2 7.2 C14 8.6 12.8 9.4 11.6 9.2 C10.4 9 9.6 7.8 9.9 6.6 C10.1 5.6 11 5.1 12.2 4.9 Z\"/><path fill=\"currentColor\" d=\"M18.6 14.6 C20 14.4 21 15.6 20.8 16.8 C20.6 18.2 19.4 19 18.2 18.8 C17 18.6 16.2 17.4 16.5 16.2 C16.7 15.2 17.6 14.7 18.8 14.5 Z\"/><path d=\"M6.8 14.8 C8 11.6 9 9.8 10.4 8.8\"/><path d=\"M13.6 8.8 C15 9.8 16.2 11.6 17.2 14.8\"/>",
+   "marked": "<path d=\"M5.4 14.6 C6.8 14.4 7.8 15.6 7.6 16.8 C7.4 18.2 6.2 19 5 18.8 C3.8 18.6 3 17.4 3.3 16.2 C3.5 15.2 4.4 14.7 5.6 14.5\"/><path d=\"M12 5 C13.4 4.8 14.4 6 14.2 7.2 C14 8.6 12.8 9.4 11.6 9.2 C10.4 9 9.6 7.8 9.9 6.6 C10.1 5.6 11 5.1 12.2 4.9\"/><path d=\"M18.6 14.6 C20 14.4 21 15.6 20.8 16.8 C20.6 18.2 19.4 19 18.2 18.8 C17 18.6 16.2 17.4 16.5 16.2 C16.7 15.2 17.6 14.7 18.8 14.5\"/><path d=\"M6.8 14.8 C8 11.6 9 9.8 10.4 8.8\"/><path d=\"M13.6 8.8 C15 9.8 16.2 11.6 17.2 14.8\"/><path d=\"M12 20 L12.01 20\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "02"
+ },
+ {
+  "name": "edge-direction",
+  "concept": "flow",
+  "meaning": "something moving smoothly through steps without blockage",
+  "hand": "h41",
+  "idea": "bold",
+  "note": "give up the solid and marked",
+  "original": {
+   "regular": "<path d=\"M3 6 L9.4 6.1 C11.2 6.1 12 6.8 12 8.6 L12 15.4 C12 17.2 12.8 18 14.6 18 L21 17.9\"/><path d=\"M5.6 4.2 L7.2 6 L5.6 7.8\"/><path d=\"M10.2 11.6 L12 13.2 L13.8 11.6\"/><path d=\"M16.6 16.2 L18.2 18 L16.6 19.8\"/>",
+   "solid": "<path d=\"M3 6 L9.4 6.1 C11.2 6.1 12 6.8 12 8.6 L12 15.4 C12 17.2 12.8 18 14.6 18 L21 17.9\"/><path fill=\"currentColor\" d=\"M5.6 4.2 L7.4 6 L5.6 7.8 Z\"/><path fill=\"currentColor\" d=\"M10.2 11.6 L12 13.4 L13.8 11.6 Z\"/><path fill=\"currentColor\" d=\"M16.6 16.2 L18.4 18 L16.6 19.8 Z\"/>",
+   "marked": "<path d=\"M4.4 6 L9.4 6.1 C11.2 6.1 12 6.8 12 8.6 L12 15.4 C12 17.2 12.8 18 14.6 18 L21 17.9\"/><path d=\"M5.6 4.2 L7.2 6 L5.6 7.8\"/><path d=\"M10.2 11.6 L12 13.2 L13.8 11.6\"/><path d=\"M16.6 16.2 L18.2 18 L16.6 19.8\"/><path fill=\"currentColor\" d=\"M1.8 6 A1 1 0 1 0 3.8 6 A1 1 0 1 0 1.8 6 Z\"/>"
+  },
+  "agent": "opus",
+  "batch": "02"
+ },
+ {
+  "name": "node-direction-right",
+  "concept": "flow",
+  "meaning": "something moving smoothly through steps without blockage",
+  "hand": "h43",
+  "idea": "classical",
+  "note": "give up the marked",
+  "original": {
+   "regular": "<path d=\"M4.4 14.6 C5.6 14.2 7 15 7.1 16.4 C7.2 17.8 6.2 18.5 5.2 18.4 C4 18.3 3.2 17.4 3.4 16.2 C3.5 15.2 4 14.7 5.8 14.6\"/><path d=\"M7.4 15.6 C10.6 14.6 10.6 8.8 14.2 8.8 C16.2 8.8 18.4 9 20 9\"/><path d=\"M17.4 6.2 L20.4 9 L17.2 11.8\"/>",
+   "solid": "<path fill=\"currentColor\" d=\"M4.4 14.6 C5.6 14.2 7 15 7.1 16.4 C7.2 17.8 6.2 18.5 5.2 18.4 C4 18.3 3.2 17.4 3.4 16.2 C3.5 15.2 4 14.7 4.4 14.6 Z\"/><path d=\"M7.4 15.6 C10.6 14.6 10.6 8.8 14.2 8.8 C16.2 8.8 18.4 9 20 9\"/><path d=\"M17.4 6.2 L20.4 9 L17.2 11.8\"/>",
+   "marked": "<path d=\"M4.4 14.6 C5.6 14.2 7 15 7.1 16.4 C7.2 17.8 6.2 18.5 5.2 18.4 C4 18.3 3.2 17.4 3.4 16.2 C3.5 15.2 4 14.7 5.8 14.6\"/><path d=\"M7.4 15.6 C10.6 14.6 10.6 8.8 14.2 8.8 C16.2 8.8 18.4 9 20 9\"/><path d=\"M17.4 6.2 L20.4 9 L17.2 11.8\"/><path d=\"M15.6 18.2 L15.61 18.2\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "02"
+ },
+ {
+  "name": "clock-backward",
+  "concept": "history",
+  "meaning": "past events in order: looking back through time",
+  "hand": "h41",
+  "idea": "classical",
+  "note": "give up the solid, nonsense for this icon",
+  "original": {
+   "regular": "<path d=\"M5.2 8.6 C6.6 5.8 9.2 4.2 12.2 4.2 C16.6 4.2 20 7.6 20 12 C20 16.4 16.6 19.8 12.2 19.8 C8.6 19.8 5.6 17.4 4.6 14.2\"/><path d=\"M4.6 4.8 L5.2 8.6 L8.8 8\"/><path d=\"M12 8 L12 12.2 L14.8 14\"/>",
+   "solid": "<path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M5.8 7.4 C7.4 4.9 9.6 3.3 12.2 3.3 C17.1 3.3 20.9 7.1 20.9 12 C20.9 16.9 17.1 20.7 12.2 20.7 C8.2 20.7 4.9 18 3.8 14.4 L6.4 9 Z M11.4 7.6 L12.6 7.6 L12.6 11.8 L15.4 13.4 L14.7 14.5 L11.4 12.6 Z\"/><path d=\"M4.6 4.8 L5.2 8.6 L8.8 8\"/>",
+   "marked": "<path d=\"M5.2 8.6 C6.6 5.8 9.2 4.2 12.2 4.2 C16.6 4.2 20 7.6 20 12 C20 16.4 16.6 19.8 12.2 19.8 C8.6 19.8 5.6 17.4 4.6 14.2\"/><path d=\"M4.6 4.8 L5.2 8.6 L8.8 8\"/><path d=\"M12 8 L12 12.2 L14.8 14\"/><path fill=\"currentColor\" d=\"M19.6 3.6 A1 1 0 1 0 21.6 3.6 A1 1 0 1 0 19.6 3.6 Z\"/>"
+  },
+  "agent": "opus",
+  "batch": "02"
+ },
+ {
+  "name": "stone-waves-left",
+  "concept": "history",
+  "meaning": "past events in order: looking back through time",
+  "hand": "h42",
+  "idea": "weird",
+  "note": "give up the marked, just fill the circle for the solid",
+  "original": {
+   "regular": "<path d=\"M15 3 C10 6 10 18 15 21\"/><path d=\"M10.5 6 C7 8.5 7 15.5 10.5 18\"/><path d=\"M6.2 9 C4.5 10.5 4.5 13.5 6.2 15\"/><path d=\"M16.7 12.1 C16.7 11 17.5 10.2 18.6 10.2 C19.6 10.2 20.3 11 20.3 12 C20.3 13 19.5 13.8 18.5 13.8 C17.5 13.8 16.7 13 16.8 11.8\"/>",
+   "solid": "<path fill=\"currentColor\" d=\"M15 3 C10 6 10 18 15 21 C12.8 16 12.8 8 15 3 Z\"/><path d=\"M10.5 6 C7 8.5 7 15.5 10.5 18\"/><path d=\"M6.2 9 C4.5 10.5 4.5 13.5 6.2 15\"/><path fill=\"currentColor\" d=\"M16.7 12.1 C16.7 11 17.5 10.2 18.6 10.2 C19.6 10.2 20.3 11 20.3 12 C20.3 13 19.5 13.8 18.5 13.8 C17.5 13.8 16.7 13 16.7 12.1 Z\"/>",
+   "marked": "<path d=\"M15 3 C10 6 10 18 15 21\"/><path d=\"M10.5 6 C7 8.5 7 15.5 10.5 18\"/><path d=\"M6.2 9 C4.5 10.5 4.5 13.5 6.2 15\"/><path d=\"M16.7 12.1 C16.7 11 17.5 10.2 18.6 10.2 C19.6 10.2 20.3 11 20.3 12 C20.3 13 19.5 13.8 18.5 13.8 C17.5 13.8 16.7 13 16.8 11.8\"/><path d=\"M2.8 12 L2.81 12\"/>"
+  },
+  "agent": "opus",
+  "batch": "02"
+ },
+ {
+  "name": "sunshine-up",
+  "concept": "journal",
+  "meaning": "a personal diary kept day after day",
+  "hand": "h43",
+  "idea": "weird",
+  "note": "dot in the circle for the marked variant",
+  "original": {
+   "regular": "<path d=\"M12 6.6 L12.2 2.8\"/><path d=\"M16.2 8.7 L18.2 7\"/><path d=\"M17.3 13.2 L19.8 13.8\"/><path d=\"M14.3 16.9 L15.5 19.2\"/><path d=\"M9.7 16.9 L8.5 19.2\"/><path d=\"M6.7 13.2 L4.2 13.8\"/><path d=\"M7.8 8.7 L5.8 7\"/><path d=\"M11 9.8 C12.4 9.5 14 10.4 14 12 C14 13.6 12.8 14.2 11.8 14.1 C10.5 14 9.9 13 10 12 C10.1 11 10.5 10.2 12.6 10\"/>",
+   "solid": "<path d=\"M12 6.6 L12.2 2.8\"/><path d=\"M16.2 8.7 L18.2 7\"/><path d=\"M17.3 13.2 L19.8 13.8\"/><path d=\"M14.3 16.9 L15.5 19.2\"/><path d=\"M9.7 16.9 L8.5 19.2\"/><path d=\"M6.7 13.2 L4.2 13.8\"/><path d=\"M7.8 8.7 L5.8 7\"/><path fill=\"currentColor\" d=\"M11 9.8 C12.4 9.5 14 10.4 14 12 C14 13.6 12.8 14.2 11.8 14.1 C10.5 14 9.9 13 10 12 C10.1 11 10.5 10.2 11 9.8 Z\"/>",
+   "marked": "<path d=\"M12 6.6 L12.2 2.8\"/><path d=\"M16.2 8.7 L18.2 7\"/><path d=\"M17.3 13.2 L19.8 13.8\"/><path d=\"M14.3 16.9 L15.5 19.2\"/><path d=\"M9.7 16.9 L8.5 19.2\"/><path d=\"M6.7 13.2 L4.2 13.8\"/><path d=\"M7.8 8.7 L5.8 7\"/><path d=\"M11 9.8 C12.4 9.5 14 10.4 14 12 C14 13.6 12.8 14.2 11.8 14.1 C10.5 14 9.9 13 10 12 C10.1 11 10.5 10.2 12.6 10\"/><path d=\"M20.4 20 L20.41 20\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "02"
+ },
+ {
+  "name": "stones-stack-box-4",
+  "concept": "log",
+  "meaning": "an append-only, chronological record of events",
+  "hand": "h43",
+  "idea": "pebbles",
+  "note": "just fill the bottom one for the marked variant",
+  "original": {
+   "regular": "<path d=\"M7 3.8 L7.2 19 C7.2 20.6 8.4 21 12 21 C15.6 21 16.8 20.6 16.8 19 L17 3.8\"/><path d=\"M9.6 3.4 C10 2.6 14 2.6 14.4 3.4 C14.6 4.4 13.4 5 12 5 C10.6 5 9.4 4.4 9.6 3.3\"/><path d=\"M9.4 8.2 C9.8 7.4 14.2 7.4 14.6 8.2 C14.8 9.2 13.4 9.8 12 9.8 C10.6 9.8 9.2 9.2 9.4 8.1\"/><path d=\"M9.2 12.6 C9.6 11.8 14.4 11.8 14.8 12.6 C15 13.6 13.6 14.2 12 14.2 C10.4 14.2 9 13.6 9.2 12.5\"/><path d=\"M9 16.8 C9.4 16 14.6 16 15 16.8 C15.2 17.8 13.8 18.4 12 18.4 C10.2 18.4 8.8 17.8 9 16.7\"/>",
+   "solid": "<path d=\"M7 3.8 L7.2 19 C7.2 20.6 8.4 21 12 21 C15.6 21 16.8 20.6 16.8 19 L17 3.8\"/><path fill=\"currentColor\" d=\"M9.8 3.4 C10.2 2.8 13.8 2.8 14.2 3.4 C14.4 4.2 13.2 4.6 12 4.6 C10.8 4.6 9.6 4.2 9.8 3.4 Z\"/><path fill=\"currentColor\" d=\"M9.8 8.2 C10.2 7.6 13.8 7.6 14.2 8.2 C14.4 9 13.2 9.4 12 9.4 C10.8 9.4 9.6 9 9.8 8.2 Z\"/><path fill=\"currentColor\" d=\"M9.8 12.6 C10.2 12 13.8 12 14.2 12.6 C14.4 13.4 13.2 13.8 12 13.8 C10.8 13.8 9.6 13.4 9.8 12.6 Z\"/><path fill=\"currentColor\" d=\"M9.8 16.8 C10.2 16.2 13.8 16.2 14.2 16.8 C14.4 17.6 13.2 18 12 18 C10.8 18 9.6 17.6 9.8 16.8 Z\"/>",
+   "marked": "<path d=\"M7 3.8 L7.2 19 C7.2 20.6 8.4 21 12 21 C15.6 21 16.8 20.6 16.8 19 L17 3.8\"/><path d=\"M9.6 3.4 C10 2.6 14 2.6 14.4 3.4 C14.6 4.4 13.4 5 12 5 C10.6 5 9.4 4.4 9.6 3.3\"/><path d=\"M9.4 8.2 C9.8 7.4 14.2 7.4 14.6 8.2 C14.8 9.2 13.4 9.8 12 9.8 C10.6 9.8 9.2 9.2 9.4 8.1\"/><path d=\"M9.2 12.6 C9.6 11.8 14.4 11.8 14.8 12.6 C15 13.6 13.6 14.2 12 14.2 C10.4 14.2 9 13.6 9.2 12.5\"/><path d=\"M9 16.8 C9.4 16 14.6 16 15 16.8 C15.2 17.8 13.8 18.4 12 18.4 C10.2 18.4 8.8 17.8 9 16.7\"/><path d=\"M20.4 12 L20.41 12\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "03"
+ },
+ {
+  "name": "receipt-3",
+  "concept": "log",
+  "meaning": "an append-only, chronological record of events",
+  "hand": "h43",
+  "idea": "classical",
+  "note": "give up the marked",
+  "original": {
+   "regular": "<path d=\"M6.4 3.4 L17.6 3.2 L17.8 19.2 L16 20.6 L14 19 L12 20.8 L10 19 L8 20.6 L6.4 19.2 L6.4 3.8\"/><path d=\"M9.4 7.4 L14.8 7.2\"/><path d=\"M9.4 11 L14.8 10.8\"/><path d=\"M9.4 14.6 L12.6 14.4\"/>",
+   "solid": "<path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M6.4 3.4 L17.6 3.2 L17.8 19.2 L16 20.6 L14 19 L12 20.8 L10 19 L8 20.6 L6.4 19.2 Z M9.2 6.6 L14.8 6.4 L14.8 8 L9.2 8.2 Z M9.2 10.2 L14.8 10 L14.8 11.6 L9.2 11.8 Z M9.2 13.8 L12.6 13.6 L12.6 15.2 L9.2 15.4 Z\"/>",
+   "marked": "<path d=\"M6.4 3.4 L17.6 3.2 L17.8 19.2 L16 20.6 L14 19 L12 20.8 L10 19 L8 20.6 L6.4 19.2 L6.4 3.8\"/><path d=\"M9.4 7.4 L14.8 7.2\"/><path d=\"M9.4 11 L14.8 10.8\"/><path d=\"M9.4 14.6 L12.6 14.4\"/><path d=\"M20.6 6.4 L20.61 6.4\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "03"
+ },
+ {
+  "name": "circle-ring-bell",
+  "concept": "log",
+  "meaning": "an append-only, chronological record of events",
+  "hand": "h44",
+  "idea": "pebbles",
+  "note": "bigger dot mark in marked variant",
+  "original": {
+   "regular": "<path d=\"M12 3.6 C16.8 3.4 20.6 7 20.4 12 C20.2 17 16.4 20.6 11.8 20.4 C7 20.2 3.6 16.6 3.8 11.8 C4 7 7.4 3.8 12.2 3.5\"/><path d=\"M7.2 12.6 C7 9.2 9.6 6.8 12.8 7\"/><path d=\"M10.2 12.8 C10 11.2 11.2 10 12.8 10.2\"/>",
+   "solid": "<path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M12 3.6 C16.8 3.4 20.6 7 20.4 12 C20.2 17 16.4 20.6 11.8 20.4 C7 20.2 3.6 16.6 3.8 11.8 C4 7 7.4 3.8 12.2 3.5 Z M7.4 12.6 C7.2 9.2 9.6 6.6 12.8 6.6 L12.8 8.2 C10.6 8.4 9.2 10 9 12.6 Z M10.4 12.8 C10.2 11 11.4 9.6 12.8 9.6 L12.8 11.2 C12.2 11.2 11.8 11.8 12 12.8 Z\"/>",
+   "marked": "<path d=\"M12 3.6 C16.8 3.4 20.6 7 20.4 12 C20.2 17 16.4 20.6 11.8 20.4 C7 20.2 3.6 16.6 3.8 11.8 C4 7 7.4 3.8 12.2 3.5\"/><path d=\"M7.2 12.6 C7 9.2 9.6 6.8 12.8 7\"/><path d=\"M10.2 12.8 C10 11.2 11.2 10 12.8 10.2\"/><path d=\"M15.6 15.4 L15.61 15.4\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "03"
+ },
+ {
+  "name": "stones-stack-comparison",
+  "concept": "ledger",
+  "meaning": "a book of accounts: entries kept in ruled columns",
+  "hand": "h42",
+  "idea": "pebbles",
+  "note": "bigger dot mark",
+  "original": {
+   "regular": "<path d=\"M12 3.5 L12.1 20.5 M3.5 20.5 L20.5 20.3\"/><path d=\"M5 5.6 C5 4.4 5.9 3.5 7.1 3.5 C8.2 3.5 9 4.4 9 5.5 C9 6.6 8.1 7.5 7 7.5 C5.9 7.5 5 6.6 5.1 5.3\"/><path d=\"M5 11.1 C5 9.9 5.9 9 7.1 9 C8.2 9 9 9.9 9 11 C9 12.1 8.1 13 7 13 C5.9 13 5 12.1 5.1 10.8\"/><path d=\"M5 16.6 C5 15.4 5.9 14.5 7.1 14.5 C8.2 14.5 9 15.4 9 16.5 C9 17.6 8.1 18.5 7 18.5 C5.9 18.5 5 17.6 5.1 16.3\"/><path d=\"M15 11.1 C15 9.9 15.9 9 17.1 9 C18.2 9 19 9.9 19 11 C19 12.1 18.1 13 17 13 C15.9 13 15 12.1 15.1 10.8\"/><path d=\"M15 16.6 C15 15.4 15.9 14.5 17.1 14.5 C18.2 14.5 19 15.4 19 16.5 C19 17.6 18.1 18.5 17 18.5 C15.9 18.5 15 17.6 15.1 16.3\"/>",
+   "solid": "<path d=\"M12 3.5 L12.1 20.5 M3.5 20.5 L20.5 20.3\"/><path fill=\"currentColor\" d=\"M5 5.6 C5 4.4 5.9 3.5 7.1 3.5 C8.2 3.5 9 4.4 9 5.5 C9 6.6 8.1 7.5 7 7.5 C5.9 7.5 5 6.6 5 5.6 Z M5 11.1 C5 9.9 5.9 9 7.1 9 C8.2 9 9 9.9 9 11 C9 12.1 8.1 13 7 13 C5.9 13 5 12.1 5 11.1 Z M5 16.6 C5 15.4 5.9 14.5 7.1 14.5 C8.2 14.5 9 15.4 9 16.5 C9 17.6 8.1 18.5 7 18.5 C5.9 18.5 5 17.6 5 16.6 Z\"/><path fill=\"currentColor\" d=\"M15 11.1 C15 9.9 15.9 9 17.1 9 C18.2 9 19 9.9 19 11 C19 12.1 18.1 13 17 13 C15.9 13 15 12.1 15 11.1 Z M15 16.6 C15 15.4 15.9 14.5 17.1 14.5 C18.2 14.5 19 15.4 19 16.5 C19 17.6 18.1 18.5 17 18.5 C15.9 18.5 15 17.6 15 16.6 Z\"/>",
+   "marked": "<path d=\"M12 3.5 L12.1 20.5 M3.5 20.5 L20.5 20.3\"/><path d=\"M5 5.6 C5 4.4 5.9 3.5 7.1 3.5 C8.2 3.5 9 4.4 9 5.5 C9 6.6 8.1 7.5 7 7.5 C5.9 7.5 5 6.6 5.1 5.3\"/><path d=\"M5 11.1 C5 9.9 5.9 9 7.1 9 C8.2 9 9 9.9 9 11 C9 12.1 8.1 13 7 13 C5.9 13 5 12.1 5.1 10.8\"/><path d=\"M5 16.6 C5 15.4 5.9 14.5 7.1 14.5 C8.2 14.5 9 15.4 9 16.5 C9 17.6 8.1 18.5 7 18.5 C5.9 18.5 5 17.6 5.1 16.3\"/><path d=\"M15 11.1 C15 9.9 15.9 9 17.1 9 C18.2 9 19 9.9 19 11 C19 12.1 18.1 13 17 13 C15.9 13 15 12.1 15.1 10.8\"/><path d=\"M15 16.6 C15 15.4 15.9 14.5 17.1 14.5 C18.2 14.5 19 15.4 19 16.5 C19 17.6 18.1 18.5 17 18.5 C15.9 18.5 15 17.6 15.1 16.3\"/><path d=\"M17 5.5 L17.01 5.5\"/>"
+  },
+  "agent": "opus",
+  "batch": "03"
+ },
+ {
+  "name": "stop-circle-2",
+  "concept": "ledger",
+  "meaning": "a book of accounts: entries kept in ruled columns",
+  "hand": "h44",
+  "idea": "bold",
+  "note": "solid negative space is too sharp",
+  "original": {
+   "regular": "<path d=\"M12 3.4 C16.8 3.2 20.8 7 20.6 11.8 C20.4 16.8 16.6 20.8 11.8 20.6 C7 20.4 3.2 16.6 3.4 11.8 C3.6 7 7.2 3.4 12.2 3.3\"/><path d=\"M9.4 9.4 L14.6 9.2 L14.8 14.6 L9.2 14.8 L9.4 9.6\"/>",
+   "solid": "<path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M12 3.4 C16.8 3.2 20.8 7 20.6 11.8 C20.4 16.8 16.6 20.8 11.8 20.6 C7 20.4 3.2 16.6 3.4 11.8 C3.6 7 7.2 3.4 12.2 3.3 Z M9.4 9.4 L14.6 9.2 L14.8 14.6 L9.2 14.8 Z\"/>",
+   "marked": "<path d=\"M12 3.4 C16.8 3.2 20.8 7 20.6 11.8 C20.4 16.8 16.6 20.8 11.8 20.6 C7 20.4 3.2 16.6 3.4 11.8 C3.6 7 7.2 3.4 12.2 3.3\"/><path d=\"M9.4 9.4 L14.6 9.2 L14.8 14.6 L9.2 14.8 L9.4 9.6\"/><path d=\"M12 12 L12.01 12\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "03"
+ },
+ {
+  "name": "book-open-text",
+  "concept": "ledger",
+  "meaning": "a book of accounts: entries kept in ruled columns",
+  "hand": "h41",
+  "idea": "bold",
+  "note": "solid is too sharp",
+  "original": {
+   "regular": "<path d=\"M12 6 C9.6 4.4 6.6 4 3.4 4.6 L3.4 18.6 C6.6 18 9.6 18.4 12 20 C14.4 18.4 17.4 18 20.6 18.6 L20.6 4.6 C17.4 4 14.4 4.4 12 6 L12 19.4\"/><path d=\"M5.6 8.4 L9.8 8.8 M5.6 11.6 L9.8 12 M5.6 14.8 L9.8 15.2\"/><path d=\"M14.2 8.8 L18.4 8.4 M14.2 12 L18.4 11.6 M14.2 15.2 L18.4 14.8\"/>",
+   "solid": "<path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M11.3 5.4 C9 3.8 6.2 3.4 2.6 4 L2.6 19.4 C6.2 18.8 9 19.2 11.3 20.6 Z M5.4 7.9 L10 8.3 L10 9.4 L5.4 9 Z M5.4 11.1 L10 11.5 L10 12.6 L5.4 12.2 Z M5.4 14.3 L10 14.7 L10 15.8 L5.4 15.4 Z\"/><path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M12.7 5.4 C15 3.8 17.8 3.4 21.4 4 L21.4 19.4 C17.8 18.8 15 19.2 12.7 20.6 Z M14 8.3 L18.6 7.9 L18.6 9 L14 9.4 Z M14 11.5 L18.6 11.1 L18.6 12.2 L14 12.6 Z M14 14.7 L18.6 14.3 L18.6 15.4 L14 15.8 Z\"/>",
+   "marked": "<path d=\"M12 6 C9.6 4.4 6.6 4 3.4 4.6 L3.4 18.6 C6.6 18 9.6 18.4 12 20 C14.4 18.4 17.4 18 20.6 18.6 L20.6 4.6 C17.4 4 14.4 4.4 12 6 L12 19.4\"/><path d=\"M5.6 8.4 L9.8 8.8 M5.6 11.6 L9.8 12 M5.6 14.8 L9.8 15.2\"/><path d=\"M14.2 8.8 L18.4 8.4 M14.2 12 L18.4 11.6 M14.2 15.2 L18.4 14.8\"/><path fill=\"currentColor\" d=\"M11 2.6 A1 1 0 1 0 13 2.6 A1 1 0 1 0 11 2.6 Z\"/>"
+  },
+  "agent": "opus",
+  "batch": "03"
+ },
+ {
+  "name": "stones-comparison",
+  "concept": "ledger",
+  "meaning": "a book of accounts: entries kept in ruled columns",
+  "hand": "h44",
+  "idea": "pebbles",
+  "note": "dot mark should be inside the right circle instead of flying around",
+  "original": {
+   "regular": "<path d=\"M12 3.6 L12.1 20.4\"/><path d=\"M7.4 5.6 C9 5.5 10 6.8 9.9 8.2 C9.8 9.8 8.8 10.8 7.3 10.8 C5.8 10.7 4.8 9.6 4.9 8.1 C5 6.8 6 5.7 7.6 5.6\"/><path d=\"M7.4 13.2 C9 13.1 10 14.4 9.9 15.8 C9.8 17.4 8.8 18.4 7.3 18.4 C5.8 18.3 4.8 17.2 4.9 15.7 C5 14.4 6 13.3 7.6 13.2\"/><path d=\"M17 8.8 C18.8 8.7 20.2 10.2 20.1 12 C20 13.8 18.8 15.2 17 15.1 C15.2 15 13.9 13.6 14 11.9 C14.1 10.2 15.3 8.9 17.2 8.8\"/>",
+   "solid": "<path d=\"M12 3.6 L12.1 20.4\"/><path fill=\"currentColor\" d=\"M7.4 5.6 C9 5.5 10 6.8 9.9 8.2 C9.8 9.8 8.8 10.8 7.3 10.8 C5.8 10.7 4.8 9.6 4.9 8.1 C5 6.8 6 5.7 7.6 5.6 Z\"/><path fill=\"currentColor\" d=\"M7.4 13.2 C9 13.1 10 14.4 9.9 15.8 C9.8 17.4 8.8 18.4 7.3 18.4 C5.8 18.3 4.8 17.2 4.9 15.7 C5 14.4 6 13.3 7.6 13.2 Z\"/><path fill=\"currentColor\" d=\"M17 8.8 C18.8 8.7 20.2 10.2 20.1 12 C20 13.8 18.8 15.2 17 15.1 C15.2 15 13.9 13.6 14 11.9 C14.1 10.2 15.3 8.9 17.2 8.8 Z\"/>",
+   "marked": "<path d=\"M12 3.6 L12.1 20.4\"/><path d=\"M7.4 5.6 C9 5.5 10 6.8 9.9 8.2 C9.8 9.8 8.8 10.8 7.3 10.8 C5.8 10.7 4.8 9.6 4.9 8.1 C5 6.8 6 5.7 7.6 5.6\"/><path d=\"M7.4 13.2 C9 13.1 10 14.4 9.9 15.8 C9.8 17.4 8.8 18.4 7.3 18.4 C5.8 18.3 4.8 17.2 4.9 15.7 C5 14.4 6 13.3 7.6 13.2\"/><path d=\"M17 8.8 C18.8 8.7 20.2 10.2 20.1 12 C20 13.8 18.8 15.2 17 15.1 C15.2 15 13.9 13.6 14 11.9 C14.1 10.2 15.3 8.9 17.2 8.8\"/><path d=\"M21 4.4 L21.01 4.4\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "03"
+ },
+ {
+  "name": "scale-balance",
+  "concept": "ledger",
+  "meaning": "a book of accounts: entries kept in ruled columns",
+  "hand": "h43",
+  "idea": "weird",
+  "note": "bigger mark",
+  "original": {
+   "regular": "<path d=\"M3.6 15.4 L20.4 9.2\"/><path d=\"M12 12.4 L9.4 19.6 L14.8 19.4 L12.2 12.6\"/><path d=\"M5.4 9.4 C7.6 8.8 9 10.2 8.9 12 C8.8 13.8 7.6 14.4 6.2 14.4 C4.4 14.3 3.6 13 3.8 11.6 C4 10.2 4.8 9.6 7 9.3\"/><path d=\"M14.6 8.2 C15.4 8 16.4 8.6 16.4 9.4 C16.4 10.2 15.8 10.5 15.2 10.4 C14.4 10.3 14 9.8 14.1 9.2 C14.2 8.7 14.4 8.3 15.6 8.3\"/><path d=\"M17.6 7.6 C18.4 7.4 19.4 8 19.4 8.8 C19.4 9.6 18.8 9.9 18.2 9.8 C17.4 9.7 17 9.2 17.1 8.6 C17.2 8.1 17.4 7.7 18.6 7.7\"/>",
+   "solid": "<path d=\"M3.6 15.4 L20.4 9.2\"/><path d=\"M12 12.4 L9.4 19.6 L14.8 19.4 L12.2 12.6\"/><path fill=\"currentColor\" d=\"M5.4 9.4 C7.6 8.8 9 10.2 8.9 12 C8.8 13.8 7.6 14.4 6.2 14.4 C4.4 14.3 3.6 13 3.8 11.6 C4 10.2 4.8 9.6 5.4 9.4 Z\"/><path fill=\"currentColor\" d=\"M14.6 8.2 C15.4 8 16.4 8.6 16.4 9.4 C16.4 10.2 15.8 10.5 15.2 10.4 C14.4 10.3 14 9.8 14.1 9.2 C14.2 8.7 14.4 8.3 14.6 8.2 Z\"/><path fill=\"currentColor\" d=\"M17.6 7.6 C18.4 7.4 19.4 8 19.4 8.8 C19.4 9.6 18.8 9.9 18.2 9.8 C17.4 9.7 17 9.2 17.1 8.6 C17.2 8.1 17.4 7.7 17.6 7.6 Z\"/>",
+   "marked": "<path d=\"M3.6 15.4 L20.4 9.2\"/><path d=\"M12 12.4 L9.4 19.6 L14.8 19.4 L12.2 12.6\"/><path d=\"M5.4 9.4 C7.6 8.8 9 10.2 8.9 12 C8.8 13.8 7.6 14.4 6.2 14.4 C4.4 14.3 3.6 13 3.8 11.6 C4 10.2 4.8 9.6 7 9.3\"/><path d=\"M14.6 8.2 C15.4 8 16.4 8.6 16.4 9.4 C16.4 10.2 15.8 10.5 15.2 10.4 C14.4 10.3 14 9.8 14.1 9.2 C14.2 8.7 14.4 8.3 15.6 8.3\"/><path d=\"M17.6 7.6 C18.4 7.4 19.4 8 19.4 8.8 C19.4 9.6 18.8 9.9 18.2 9.8 C17.4 9.7 17 9.2 17.1 8.6 C17.2 8.1 17.4 7.7 18.6 7.7\"/><path d=\"M12.2 5.4 L12.21 5.4\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "03"
+ },
+ {
+  "name": "book-sheets-vertical",
+  "concept": "ledger",
+  "meaning": "a book of accounts: entries kept in ruled columns",
+  "hand": "h42",
+  "idea": "weird",
+  "note": "give up the marked",
+  "original": {
+   "regular": "<path d=\"M12 20 L4 6 M12 20 L8 4\"/><path d=\"M12 20 L12.3 3.5 M12 20 L16 4\"/><path d=\"M12 20 L20 6\"/>",
+   "solid": "<path fill=\"currentColor\" d=\"M12 20 L4 6 L8 4 Z\"/><path fill=\"currentColor\" d=\"M12 20 L12.3 3.5 L16 4 Z\"/><path d=\"M12 20 L20 6\"/>",
+   "marked": "<path d=\"M12 20 L4 6 M12 20 L8 4\"/><path d=\"M12 20 L12.3 3.5 M12 20 L16 4\"/><path d=\"M12 20 L20 6\"/><path d=\"M20.5 9.8 L20.51 9.8\"/>"
+  },
+  "agent": "opus",
+  "batch": "03"
+ },
+ {
+  "name": "text-circle",
+  "concept": "record",
+  "meaning": "one entry kept on file: a fact written down (not a recording button)",
+  "hand": "h42",
+  "idea": "pebbles",
+  "note": "bigger mark",
+  "original": {
+   "regular": "<path d=\"M4.5 12.5 C4.4 8 7.6 4.6 12.2 4.5 C16.8 4.4 19.6 7.8 19.5 12.2 C19.4 16.6 16.2 19.5 11.8 19.5 C7.5 19.5 4.6 16.8 4.6 12\"/><path d=\"M8.5 10.5 L15 10.3 M8.5 13.6 L13 13.5\"/>",
+   "solid": "<path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M3.6 12.5 C3.5 7.4 7.2 3.6 12.2 3.6 C17.3 3.5 20.5 7.4 20.4 12.2 C20.3 17.1 16.7 20.4 11.8 20.4 C7 20.4 3.7 17.3 3.6 12.5 Z M7.9 9.8 L15.6 9.6 L15.6 11 L7.9 11.2 Z M7.9 12.9 L13.6 12.8 L13.6 14.2 L7.9 14.3 Z\"/>",
+   "marked": "<path d=\"M4.5 12.5 C4.4 8 7.6 4.6 12.2 4.5 C16.8 4.4 19.6 7.8 19.5 12.2 C19.4 16.6 16.2 19.5 11.8 19.5 C7.5 19.5 4.6 16.8 4.6 12\"/><path d=\"M8.5 10.5 L15 10.3 M8.5 13.6 L13 13.5\"/><path d=\"M20 3.5 L20.01 3.5\"/>"
+  },
+  "agent": "opus",
+  "batch": "03"
+ },
+ {
+  "name": "stone-arch",
+  "concept": "record",
+  "meaning": "one entry kept on file: a fact written down (not a recording button)",
+  "hand": "h43",
+  "idea": "pebbles",
+  "note": "no dot in the regular, dot inside the circle only on marked and give up the flying dot over the circle",
+  "original": {
+   "regular": "<path d=\"M5 20.4 L5.2 10 C5.4 3.8 18.6 3.8 18.8 10 L19 20.4\"/><path d=\"M10 13.8 C11.4 12.6 14.4 12.8 15.2 14.8 C16 17 14.4 19 12 19 C9.6 19 8.2 17.2 8.6 15.4 C8.8 14.6 9.2 14.2 11 13.6\"/><path d=\"M12 16.2 L12.01 16.2\"/>",
+   "solid": "<path d=\"M5 20.4 L5.2 10 C5.4 3.8 18.6 3.8 18.8 10 L19 20.4\"/><path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M10 13.8 C11.4 12.6 14.4 12.8 15.2 14.8 C16 17 14.4 19 12 19 C9.6 19 8.2 17.2 8.6 15.4 C8.8 14.6 9.2 14.2 10 13.8 Z M11.2 15.4 L12.8 15.4 L12.8 17 L11.2 17 Z\"/>",
+   "marked": "<path d=\"M5 20.4 L5.2 10 C5.4 3.8 18.6 3.8 18.8 10 L19 20.4\"/><path d=\"M10 13.8 C11.4 12.6 14.4 12.8 15.2 14.8 C16 17 14.4 19 12 19 C9.6 19 8.2 17.2 8.6 15.4 C8.8 14.6 9.2 14.2 11 13.6\"/><path d=\"M12 16.2 L12.01 16.2\"/><path d=\"M12 8.4 L12.01 8.4\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "03"
+ },
+ {
+  "name": "text-pebble",
+  "concept": "record",
+  "meaning": "one entry kept on file: a fact written down (not a recording button)",
+  "hand": "h41",
+  "idea": "pebbles",
+  "note": "bigger mark",
+  "original": {
+   "regular": "<path d=\"M5.4 8.6 C8.4 5.6 15 4.6 18.6 6.6 C21.2 8 21 11.6 19.2 14.6 C17 18.2 11.6 19.8 7.6 18.6 C4.2 17.6 3.4 13.6 4.6 10.2\"/><path d=\"M8.4 10.6 L15.6 9.6 M8.8 13.6 L13.8 13\"/>",
+   "solid": "<path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M4.7 7.9 C8 4.6 15.2 3.6 19.1 5.8 C22 7.4 21.8 11.8 20 14.9 C17.6 19 11.6 20.8 7.4 19.5 C3.4 18.3 2.6 13.8 3.8 10 Z M8.3 10 L15.5 9 L15.7 10.2 L8.5 11.2 Z M8.7 13 L13.7 12.4 L13.9 13.6 L8.9 14.2 Z\"/>",
+   "marked": "<path d=\"M5.4 8.6 C8.4 5.6 15 4.6 18.6 6.6 C21.2 8 21 11.6 19.2 14.6 C17 18.2 11.6 19.8 7.6 18.6 C4.2 17.6 3.4 13.6 4.6 10.2\"/><path d=\"M8.4 10.6 L15.6 9.6 M8.8 13.6 L13.8 13\"/><path d=\"M21 3.4 L21.01 3.4\"/>"
+  },
+  "agent": "opus",
+  "batch": "03"
+ },
+ {
+  "name": "print-echoes",
+  "concept": "record",
+  "meaning": "one entry kept on file: a fact written down (not a recording button)",
+  "hand": "h44",
+  "idea": "weird",
+  "note": "bigger mark on marked variant, and solid is too sharp",
+  "original": {
+   "regular": "<path d=\"M5.6 18.4 C4 11 8 4.4 13.4 4.6 C18 4.8 20 9 19.6 13\"/><path d=\"M8.8 17.4 C7.8 12.8 9.8 8.8 13 8.4 C15.2 8.2 16.4 9.6 16.4 11.6\"/><path d=\"M12.4 12.4 L12.6 20\"/>",
+   "solid": "<path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M5.6 18.4 C4 11 8 4.4 13.4 4.6 C18 4.8 20 9 19.6 13 L19 20.4 L5.6 20.6 Z M8.6 17.2 C7.6 12.8 9.8 8.6 13 8.2 C15.4 8 16.8 9.6 16.6 11.8 L15.2 11.8 C15.2 10.4 14.4 9.6 13.2 9.7 C10.8 10 9.4 12.6 10 17.2 Z M11.7 12.4 L13.3 12.4 L13.3 19 L11.7 19 Z\"/>",
+   "marked": "<path d=\"M5.6 18.4 C4 11 8 4.4 13.4 4.6 C18 4.8 20 9 19.6 13\"/><path d=\"M8.8 17.4 C7.8 12.8 9.8 8.8 13 8.4 C15.2 8.2 16.4 9.6 16.4 11.6\"/><path d=\"M12.4 12.4 L12.6 20\"/><path d=\"M20.6 20 L20.61 20\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "04"
+ },
+ {
+  "name": "shelves",
+  "concept": "inventory",
+  "meaning": "an itemised stock of what exists, counted and listed",
+  "hand": "h43",
+  "idea": "bold",
+  "note": "bigger mark",
+  "original": {
+   "regular": "<path d=\"M3.4 11 L20.6 10.8\"/><path d=\"M3.4 19.6 L20.6 19.4\"/><path d=\"M5.4 10.6 L5.4 6 L10 6 L10 10.6\"/><path d=\"M12.6 10.4 L12.6 4.6 L15.4 4.6 L15.4 10.4\"/><path d=\"M6 19.2 L6 14.6 L11.4 14.6 L11.4 19.2\"/><path d=\"M16 15.6 C17.6 15.2 19 16.2 19 17.6 C19 19 18 19.4 16.8 19.3 C15.6 19.2 14.8 18.4 14.9 17.4 C15 16.6 15.4 15.9 17.4 15.7\"/>",
+   "solid": "<path d=\"M3.4 11 L20.6 10.8\"/><path d=\"M3.4 19.6 L20.6 19.4\"/><path fill=\"currentColor\" d=\"M5.4 10.6 L5.4 6 L10 6 L10 10.6 Z\"/><path fill=\"currentColor\" d=\"M12.6 10.4 L12.6 4.6 L15.4 4.6 L15.4 10.4 Z\"/><path fill=\"currentColor\" d=\"M6 19.2 L6 14.6 L11.4 14.6 L11.4 19.2 Z\"/><path fill=\"currentColor\" d=\"M16 15.6 C17.6 15.2 19 16.2 19 17.6 C19 19 18 19.4 16.8 19.3 C15.6 19.2 14.8 18.4 14.9 17.4 C15 16.6 15.4 15.9 16 15.6 Z\"/>",
+   "marked": "<path d=\"M3.4 11 L20.6 10.8\"/><path d=\"M3.4 19.6 L20.6 19.4\"/><path d=\"M5.4 10.6 L5.4 6 L10 6 L10 10.6\"/><path d=\"M12.6 10.4 L12.6 4.6 L15.4 4.6 L15.4 10.4\"/><path d=\"M6 19.2 L6 14.6 L11.4 14.6 L11.4 19.2\"/><path d=\"M16 15.6 C17.6 15.2 19 16.2 19 17.6 C19 19 18 19.4 16.8 19.3 C15.6 19.2 14.8 18.4 14.9 17.4 C15 16.6 15.4 15.9 17.4 15.7\"/><path d=\"M19.2 6.6 L19.21 6.6\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "04"
+ },
+ {
+  "name": "squared-square",
+  "concept": "inventory",
+  "meaning": "an itemised stock of what exists, counted and listed",
+  "hand": "h44",
+  "idea": "weird",
+  "note": "solid is too sharp",
+  "original": {
+   "regular": "<path d=\"M3.6 3.8 L20.4 3.6 L20.6 20.4 L3.6 20.6 L3.6 4\"/><path d=\"M7.4 7.6 L16.6 7.4 L16.8 16.6 L7.4 16.8 L7.4 7.8\"/><path d=\"M10.4 10.6 L13.6 10.5 L13.7 13.5 L10.5 13.6 L10.4 10.8\"/>",
+   "solid": "<path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M3.6 3.8 L20.4 3.6 L20.6 20.4 L3.6 20.6 Z M7.4 7.6 L16.6 7.4 L16.8 16.6 L7.4 16.8 Z M10.4 10.6 L13.6 10.5 L13.7 13.5 L10.5 13.6 Z\"/>",
+   "marked": "<path d=\"M3.6 3.8 L20.4 3.6 L20.6 20.4 L3.6 20.6 L3.6 4\"/><path d=\"M7.4 7.6 L16.6 7.4 L16.8 16.6 L7.4 16.8 L7.4 7.8\"/><path d=\"M10.4 10.6 L13.6 10.5 L13.7 13.5 L10.5 13.6 L10.4 10.8\"/><path d=\"M12.1 12 L12.11 12\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "04"
+ },
+ {
+  "name": "clipboard-checklist",
+  "concept": "inventory",
+  "meaning": "an itemised stock of what exists, counted and listed",
+  "hand": "h41",
+  "idea": "classical",
+  "note": "solid is too sharp",
+  "original": {
+   "regular": "<path d=\"M6.4 4.6 L4.8 4.6 L5 20.6 L19 20.4 L18.8 4.4 L17.4 4.4\"/><path d=\"M8.6 3.2 L15.4 3.2 L15.4 6 L8.6 6 L8.6 3.6\"/><path d=\"M7.6 10.4 L8.6 11.4 L10.2 9.6 M12 10.6 L16.2 10.6\"/><path d=\"M7.6 15 L8.6 16 L10.2 14.2 M12 15.2 L16 15.2\"/>",
+   "solid": "<path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M4 3.8 L19.6 3.6 L19.8 21.2 L4.2 21.4 Z M7.2 10.9 L7.9 10.2 L8.6 10.9 L9.8 9.3 L10.6 9.9 L8.6 12.4 Z M11.8 10 L16.4 10 L16.4 11.2 L11.8 11.2 Z M7.2 15.5 L7.9 14.8 L8.6 15.5 L9.8 13.9 L10.6 14.5 L8.6 17 Z M11.8 14.6 L16.2 14.6 L16.2 15.8 L11.8 15.8 Z\"/><path d=\"M8.6 3.2 L15.4 3.2 L15.4 6 L8.6 6 L8.6 3.6\"/>",
+   "marked": "<path d=\"M6.4 4.6 L4.8 4.6 L5 20.6 L19 20.4 L18.8 4.4 L17.4 4.4\"/><path d=\"M8.6 3.2 L15.4 3.2 L15.4 6 L8.6 6 L8.6 3.6\"/><path d=\"M7.6 10.4 L8.6 11.4 L10.2 9.6 M12 10.6 L16.2 10.6\"/><path d=\"M7.6 15 L8.6 16 L10.2 14.2 M12 15.2 L16 15.2\"/><path fill=\"currentColor\" d=\"M20 2.8 A1 1 0 1 0 22 2.8 A1 1 0 1 0 20 2.8 Z\"/>"
+  },
+  "agent": "opus",
+  "batch": "03"
+ },
+ {
+  "name": "award",
+  "concept": "commitment",
+  "meaning": "a promise to follow through: a pledge",
+  "hand": "h42",
+  "idea": "classical",
+  "note": "solid too sharp",
+  "original": {
+   "regular": "<path d=\"M6.5 9.2 C6.5 6 9 3.5 12.2 3.5 C15.3 3.5 17.5 6 17.5 9 C17.5 12.1 15.1 14.5 12 14.5 C8.9 14.5 6.5 12.1 6.6 8.8\"/><path d=\"M9.8 9.2 L11.4 10.8 L14.4 7.6\"/><path d=\"M9 13.6 L7.6 20.5 L10 19.2 L11.2 21 L12 14.5\"/><path d=\"M15 13.6 L16.4 20.5 L14 19.2 L12.8 21 L12.2 14.6\"/>",
+   "solid": "<path fill=\"currentColor\" stroke=\"none\" fill-rule=\"evenodd\" d=\"M5.6 9.2 C5.6 5.5 8.5 2.6 12.2 2.6 C15.8 2.6 18.4 5.5 18.4 9 C18.4 12.6 15.6 15.4 12 15.4 C8.4 15.4 5.6 12.6 5.6 9.2 Z M9.3 9.8 L11.4 11.9 L15 8.1 L13.9 7.1 L11.4 9.7 L10.3 8.7 Z\"/><path fill=\"currentColor\" d=\"M9 13.6 L7.6 20.5 L10 19.2 L11.2 21 L12 14.5 Z\"/><path fill=\"currentColor\" d=\"M15 13.6 L16.4 20.5 L14 19.2 L12.8 21 L12.2 14.6 Z\"/>",
+   "marked": "<path d=\"M6.5 9.2 C6.5 6 9 3.5 12.2 3.5 C15.3 3.5 17.5 6 17.5 9 C17.5 12.1 15.1 14.5 12 14.5 C8.9 14.5 6.5 12.1 6.6 8.8\"/><path d=\"M9.8 9.2 L11.4 10.8 L14.4 7.6\"/><path d=\"M9 13.6 L7.6 20.5 L10 19.2 L11.2 21 L12 14.5\"/><path d=\"M15 13.6 L16.4 20.5 L14 19.2 L12.8 21 L12.2 14.6\"/><path d=\"M20.3 4 L20.31 4\"/>"
+  },
+  "agent": "opus",
+  "batch": "03"
+ },
+ {
+  "name": "fork",
+  "concept": "decision",
+  "meaning": "a choice made at a fork, taken and recorded",
+  "hand": "h44",
+  "idea": "weird",
+  "note": "put the dot mark inside the circle instead of flying around",
+  "original": {
+   "regular": "<path d=\"M12.2 20.4 L12 12.6\"/><path d=\"M12 12.6 C11 9.8 8.6 8.6 8.2 7.8\"/><path d=\"M6.2 3.9 C7.8 3.8 9 5 8.9 6.5 C8.8 8 7.6 9 6.1 8.9 C4.6 8.8 3.6 7.6 3.7 6.1 C3.8 4.8 4.9 4 6.4 3.9\"/><path d=\"M12 12.6 C12.6 9.4 15.4 6.4 19.6 5.6\"/><path d=\"M17 3.6 L19.8 5.4 L17.8 8.4\"/>",
+   "solid": "<path d=\"M12.2 20.4 L12 12.6\"/><path d=\"M12 12.6 C11 9.8 8.6 8.6 8.2 7.8\"/><path fill=\"currentColor\" d=\"M6.2 3.9 C7.8 3.8 9 5 8.9 6.5 C8.8 8 7.6 9 6.1 8.9 C4.6 8.8 3.6 7.6 3.7 6.1 C3.8 4.8 4.9 4 6.4 3.9 Z\"/><path d=\"M12 12.6 C12.6 9.4 15.4 6.4 19.6 5.6\"/><path d=\"M17 3.6 L19.8 5.4 L17.8 8.4\"/>",
+   "marked": "<path d=\"M12.2 20.4 L12 12.6\"/><path d=\"M12 12.6 C11 9.8 8.6 8.6 8.2 7.8\"/><path d=\"M6.2 3.9 C7.8 3.8 9 5 8.9 6.5 C8.8 8 7.6 9 6.1 8.9 C4.6 8.8 3.6 7.6 3.7 6.1 C3.8 4.8 4.9 4 6.4 3.9\"/><path d=\"M12 12.6 C12.6 9.4 15.4 6.4 19.6 5.6\"/><path d=\"M17 3.6 L19.8 5.4 L17.8 8.4\"/><path d=\"M17.6 17.4 L17.61 17.4\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "04"
+ },
+ {
+  "name": "node-decision",
+  "concept": "decision",
+  "meaning": "a choice made at a fork, taken and recorded",
+  "hand": "h44",
+  "idea": "pebbles",
+  "note": "put the dot mark inside the circle instead of flying around",
+  "original": {
+   "regular": "<path d=\"M12 20.4 L12 14\"/><path d=\"M12 8.8 C13.6 8.7 14.7 10 14.6 11.5 C14.5 13 13.4 14 12 14 C10.5 13.9 9.4 12.8 9.5 11.4 C9.6 10 10.6 8.9 12.2 8.8\"/><path d=\"M9.8 9.4 C8.6 7.4 7 6 5 5\"/><path d=\"M14.2 9.4 C15.4 7.4 17 6 19 5\"/>",
+   "solid": "<path d=\"M12 20.4 L12 14\"/><path fill=\"currentColor\" d=\"M12 8.8 C13.6 8.7 14.7 10 14.6 11.5 C14.5 13 13.4 14 12 14 C10.5 13.9 9.4 12.8 9.5 11.4 C9.6 10 10.6 8.9 12.2 8.8 Z\"/><path d=\"M9.8 9.4 C8.6 7.4 7 6 5 5\"/><path d=\"M14.2 9.4 C15.4 7.4 17 6 19 5\"/>",
+   "marked": "<path d=\"M12 20.4 L12 14\"/><path d=\"M12 8.8 C13.6 8.7 14.7 10 14.6 11.5 C14.5 13 13.4 14 12 14 C10.5 13.9 9.4 12.8 9.5 11.4 C9.6 10 10.6 8.9 12.2 8.8\"/><path d=\"M9.8 9.4 C8.6 7.4 7 6 5 5\"/><path d=\"M14.2 9.4 C15.4 7.4 17 6 19 5\"/><path d=\"M12 4 L12.01 4\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "04"
+ },
+ {
+  "name": "circle-split",
+  "concept": "decision",
+  "meaning": "a choice made at a fork, taken and recorded",
+  "hand": "h43",
+  "idea": "weird",
+  "note": "put the dot inside a half instead of flying around",
+  "original": {
+   "regular": "<path d=\"M10.6 4.6 C6.4 5 3.8 8.6 4 12.4 C4.2 16.6 7.4 19.4 10.8 19.2 L10.4 13 L10.6 4.8\"/><path d=\"M14 3.6 L13.6 10 L14 16.8 C18 16.6 20.6 13.8 20.8 10.4 C21 6.8 18 3.8 14.2 3.6\"/>",
+   "solid": "<path d=\"M10.6 4.6 C6.4 5 3.8 8.6 4 12.4 C4.2 16.6 7.4 19.4 10.8 19.2 L10.4 13 L10.6 4.8\"/><path fill=\"currentColor\" d=\"M14 3.6 L13.6 10 L14 16.8 C18 16.6 20.6 13.8 20.8 10.4 C21 6.8 18 3.8 14 3.6 Z\"/>",
+   "marked": "<path d=\"M10.6 4.6 C6.4 5 3.8 8.6 4 12.4 C4.2 16.6 7.4 19.4 10.8 19.2 L10.4 13 L10.6 4.8\"/><path d=\"M14 3.6 L13.6 10 L14 16.8 C18 16.6 20.6 13.8 20.8 10.4 C21 6.8 18 3.8 14.2 3.6\"/><path d=\"M12.2 20.6 L12.21 20.6\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "04"
+ },
+ {
+  "name": "decision",
+  "concept": "decision",
+  "meaning": "a choice made at a fork, taken and recorded",
+  "hand": "h42",
+  "idea": "classical",
+  "note": "give up the marked",
+  "original": {
+   "regular": "<path d=\"M12 21 L12 13 C12 10 9 8 6 6\"/><path d=\"M12 13 C12 10 15 8 18 6\"/><path d=\"M5.2 9.2 L5.5 5.5 L9.2 5.4\"/><path d=\"M14.8 5.4 L18.5 5.5 L18.8 9.2\"/>",
+   "solid": "<path d=\"M12 21 L12 13 C12 10 9 8 6 6\"/><path d=\"M12 13 C12 10 15 8 18 6\"/><path fill=\"currentColor\" d=\"M5.2 9.2 L5.5 5.5 L9.2 5.4 Z\"/><path fill=\"currentColor\" d=\"M14.8 5.4 L18.5 5.5 L18.8 9.2 Z\"/>",
+   "marked": "<path d=\"M12 21 L12 13 C12 10 9 8 6 6\"/><path d=\"M12 13 C12 10 15 8 18 6\"/><path d=\"M5.2 9.2 L5.5 5.5 L9.2 5.4\"/><path d=\"M14.8 5.4 L18.5 5.5 L18.8 9.2\"/><path d=\"M21.2 3.2 L21.21 3.2\"/>"
+  },
+  "agent": "opus",
+  "batch": "03"
+ },
+ {
+  "name": "stones-underline-jump",
+  "concept": "decision",
+  "meaning": "a choice made at a fork, taken and recorded",
+  "hand": "h43",
+  "idea": "pebbles",
+  "note": "solid is too sharp, put the dot mark inside the top right circle instead of flying around",
+  "original": {
+   "regular": "<path d=\"M6.2 13.4 C8.4 12.8 10.6 14.2 10.4 16.6 C10.2 18.8 8.6 19.6 7 19.5 C4.8 19.4 3.6 17.8 3.9 15.8 C4.1 14.4 5 13.6 7.8 13.4\"/><path d=\"M15.8 5.6 C18 5 20.2 6.4 20 8.8 C19.8 10.8 18.2 11.8 16.6 11.7 C14.4 11.6 13.2 10 13.5 8.2 C13.7 6.8 14.6 5.8 17.4 5.6\"/><path d=\"M14.4 14.6 L14 16.6\"/><path d=\"M17.4 15 L17.4 17.6\"/><path d=\"M20.2 14.4 L20.6 16.4\"/><path d=\"M3.4 21 L21 20.8\"/>",
+   "solid": "<path d=\"M6.2 13.4 C8.4 12.8 10.6 14.2 10.4 16.6 C10.2 18.8 8.6 19.6 7 19.5 C4.8 19.4 3.6 17.8 3.9 15.8 C4.1 14.4 5 13.6 7.8 13.4\"/><path fill=\"currentColor\" fill-rule=\"evenodd\" stroke=\"none\" d=\"M15.8 5.6 C18 5 20.2 6.4 20 8.8 C19.8 10.8 18.2 11.8 16.6 11.7 C14.4 11.6 13.2 10 13.5 8.2 C13.7 6.8 14.6 5.8 15.8 5.6 Z M14.6 8.6 L15.5 7.8 L16.4 8.6 L17.9 7.1 L18.7 7.9 L16.4 10.2 Z\"/><path d=\"M14.4 14.6 L14 16.6\"/><path d=\"M17.4 15 L17.4 17.6\"/><path d=\"M20.2 14.4 L20.6 16.4\"/><path d=\"M3.4 21 L21 20.8\"/>",
+   "marked": "<path d=\"M6.2 13.4 C8.4 12.8 10.6 14.2 10.4 16.6 C10.2 18.8 8.6 19.6 7 19.5 C4.8 19.4 3.6 17.8 3.9 15.8 C4.1 14.4 5 13.6 7.8 13.4\"/><path d=\"M15.8 5.6 C18 5 20.2 6.4 20 8.8 C19.8 10.8 18.2 11.8 16.6 11.7 C14.4 11.6 13.2 10 13.5 8.2 C13.7 6.8 14.6 5.8 17.4 5.6\"/><path d=\"M14.4 14.6 L14 16.6\"/><path d=\"M17.4 15 L17.4 17.6\"/><path d=\"M20.2 14.4 L20.6 16.4\"/><path d=\"M3.4 21 L21 20.8\"/><path d=\"M9.6 7.6 L9.61 7.6\"/>"
+  },
+  "agent": "sonnet",
+  "batch": "04"
+ },
+ {
+  "name": "kite",
+  "concept": "fun",
+  "meaning": "playful joy, lightness, a smile",
+  "hand": "h41",
+  "idea": "bold",
+  "note": "could be 4 shapes instead of inside lines",
+  "original": {
+   "regular": "<path d=\"M13.6 2.8 L19.4 8.2 L13.8 16.2 L8.2 8.6 Z\"/><path d=\"M13.6 3.4 L13.8 15.4 M8.8 8.6 L18.8 8.2\"/><path d=\"M13.8 16.2 C12.4 18 10.6 17.2 9.2 18.8 C8.2 20 7 19.8 5.4 20.6\"/>",
+   "solid": "<path fill=\"currentColor\" d=\"M13.6 2.8 L19.4 8.2 L13.8 16.2 L8.2 8.6 Z\"/><path d=\"M13.6 3.4 L13.8 15.4 M8.8 8.6 L18.8 8.2\"/><path d=\"M13.8 16.2 C12.4 18 10.6 17.2 9.2 18.8 C8.2 20 7 19.8 5.4 20.6\"/>",
+   "marked": "<path d=\"M13.6 2.8 L19.4 8.2 L13.8 16.2 L8.2 8.6 Z\"/><path d=\"M13.6 3.4 L13.8 15.4 M8.8 8.6 L18.8 8.2\"/><path d=\"M13.8 16.2 C12.4 18 10.6 17.2 9.2 18.8 C8.2 20 7 19.8 5.4 20.6\"/><path fill=\"currentColor\" d=\"M1.85 21.2 A1.25 1.25 0 1 0 4.35 21.2 A1.25 1.25 0 1 0 1.85 21.2 Z\"/>"
+  },
+  "agent": "s7-value",
+  "batch": "01"
+ },
+ {
+  "name": "spring-stone",
+  "concept": "fun",
+  "meaning": "playful joy, lightness, a smile",
+  "hand": "h41",
+  "idea": "weird",
+  "note": "drop the marked variant",
+  "original": {
+   "regular": "<path d=\"M3 19 C5.4 19 7 16.4 6.8 14 C6.6 11.6 4.2 11.8 4.6 14 C5 16.2 9 16.6 10.8 14.4 C12.6 12.2 10.6 10.2 10.2 12 C9.8 14 13.4 14.6 15.2 11\"/><path d=\"M18.4 4 C20 4 21.2 5.1 21.2 6.6 C21.2 8.2 20 9.2 18.6 9.2 C17 9.2 16 8.1 16 6.6 C16 5.1 17.1 4 19.2 4.1\"/>",
+   "solid": "<path d=\"M3 19 C5.4 19 7 16.4 6.8 14 C6.6 11.6 4.2 11.8 4.6 14 C5 16.2 9 16.6 10.8 14.4 C12.6 12.2 10.6 10.2 10.2 12 C9.8 14 13.4 14.6 15.2 11\"/><path fill=\"currentColor\" d=\"M18.4 4 C20 4 21.2 5.1 21.2 6.6 C21.2 8.2 20 9.2 18.6 9.2 C17 9.2 16 8.1 16 6.6 C16 5.1 17.1 4 19.2 4.1\"/>",
+   "marked": "<path d=\"M3 19 C5.4 19 7 16.4 6.8 14 C6.6 11.6 4.2 11.8 4.6 14 C5 16.2 9 16.6 10.8 14.4 C12.6 12.2 10.6 10.2 10.2 12 C9.8 14 13.4 14.6 15.2 11\"/><path d=\"M18.4 4 C20 4 21.2 5.1 21.2 6.6 C21.2 8.2 20 9.2 18.6 9.2 C17 9.2 16 8.1 16 6.6 C16 5.1 17.1 4 19.2 4.1\"/><path fill=\"currentColor\" d=\"M17.5 6.6 A1.1 1.1 0 1 0 19.7 6.6 A1.1 1.1 0 1 0 17.5 6.6 Z\"/>"
+  },
+  "agent": "s7-value",
+  "batch": "01"
+ }
+]

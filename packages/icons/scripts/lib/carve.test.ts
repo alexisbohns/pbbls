@@ -65,6 +65,45 @@ describe("carveSolid", () => {
     expect(keep).toEqual([])
   })
 
+  it("cuts a line meeting the edge only inside the fill, leaving the outline whole", () => {
+    // A vertical line from the middle down to the bottom edge (y = 20): its cut stops at the edge,
+    // so the band below it stays inked and no notch (halo) opens in the outline.
+    const whole = carveSolid([SQUARE], []).area
+    const { area, d } = carveSolid([SQUARE], ["M12 12 L12 20"])
+    // Only the part inside the fill is cut: 8 × 1.75 plus one round cap's half, π × 0.875² / 2.
+    const cut = 8 * 1.75 + (Math.PI * 0.875 * 0.875) / 2
+    expect(whole - area).toBeCloseTo(cut, 0)
+    // The outer ring plus a closed slot: the outline still runs under the line instead of opening at the bottom.
+    expect(d.match(/M/g)).toHaveLength(2)
+    expect(filledArea(d, true)).toBeCloseTo(area, 0)
+  })
+
+  it("cuts a divider through the stroke band too when the outside is not inked (a lit step)", () => {
+    const whole = carveSolid([SQUARE], []).area
+    const { area } = carveSolid([SQUARE], ["M12 12 L12 20"], [], { inkOutside: false })
+    // The whole line is cut, both round caps included: the bottom one bites into the band.
+    expect(whole - area).toBeCloseTo(8 * 1.75 + Math.PI * 0.875 * 0.875, 0)
+  })
+
+  it("cuts a mark repeating a body path as its inside only, keeping its outline", () => {
+    // Two stones filled; the right one is also the mark: in the marked solid it is hollow, its ring kept.
+    const left = "M3 12 C3 9 5 8 7 8 C9 8 11 9 11 12 C11 15 9 16 7 16 C5 16 3 15 3 12 Z"
+    const right = "M13 12 C13 9 15 8 17 8 C19 8 21 9 21 12 C21 15 19 16 17 16 C15 16 13 15 13 12 Z"
+    const whole = carveSolid([left, right], []).area
+    const { area, outside } = carveSolid([left, right], [], [right])
+    expect(outside).toEqual([])
+    // The right stone's fill shrunk by half a stroke is gone; its ring (about the drawn path ± half a stroke) stays.
+    const lone = carveSolid([right], []).area
+    expect(whole - area).toBeGreaterThan(0.2 * lone)
+    expect(whole - area).toBeLessThan(0.6 * lone)
+  })
+
+  it("cuts a line lying mostly deep inside the fill even when it reaches far out (a tick out of its box)", () => {
+    // 11 of 14 units more than half a stroke inside the square, the rest well past the edge.
+    const { keep } = carveSolid([SQUARE], ["M8 12 L22 12"])
+    expect(keep).toEqual([])
+  })
+
   it("keeps a line traced along the body's outline", () => {
     // A hand-drawn rim wavering over the top edge, as a bowl's lip: partly outside the fill, never deep inside.
     const { keep } = carveSolid([SQUARE], ["M4 3.6 L12 4.4 L20 3.6"])

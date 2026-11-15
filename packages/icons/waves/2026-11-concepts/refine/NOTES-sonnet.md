@@ -1,0 +1,6 @@
+Could not follow literally (a dot of 3+ units plus its stroke does not fit inside a small stone or a bar), so the circle itself is filled instead: stones-wave, network-arc, sunshine-up, fork, node-decision, stones-comparison, stones-underline-jump, scale-balance (left pan), shelves (stone), logs-stack (a 3.2 dot on the top bar, "bigger dot" not possible).
+Solid and marked are the same drawing (only one closed shape): sunshine-up, fork, node-decision.
+Regular changed to give the variants a closed path or room: package-arc-bottom (tape closed), stone-speed-underline and stone-arcs and stone-arch (stone slightly larger), square-check (box larger, check moved), stones-group-5 (6 stones cut to 4, the solid limit), backlog-pebbles-h43 (pot closed with its rim), inbox-full (redrawn by hand, taller tray), print-echoes (arch closed with a base), shelves (books closed on the shelf).
+Rule fixes: exactly vertical lines nudged (receipt-3, shelves, squared-square, node-decision, stones-underline-jump); marks over 6x6 shrunk (stones-comparison, stones-stack-box-4, stones-underline-jump).
+Solids hide inner strokes on a filled body (package, label-tag, receipt, circle-ring-bell, stop-circle-2 fills the ring, marked the square).
+Gave up: node-direction-right and receipt-3 marked (skip, as asked).
