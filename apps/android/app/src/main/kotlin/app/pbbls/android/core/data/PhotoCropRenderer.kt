@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.ColorSpace
 import android.graphics.Paint
+import androidx.core.graphics.createBitmap
 import app.pbbls.android.core.model.crop.CropGeometry
 import app.pbbls.android.core.model.crop.CropSize
 import kotlin.math.max
@@ -73,7 +74,7 @@ object PhotoCropRenderer {
     ): Bitmap {
         val srgb = ColorSpace.get(ColorSpace.Named.SRGB)
         val space = (colorSpace as? ColorSpace.Rgb)?.takeIf { it.transferParameters != null } ?: srgb
-        return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888, false, space)
+        return createBitmap(width, height, Bitmap.Config.ARGB_8888, hasAlpha = false, colorSpace = space)
     }
 
     private fun Double.roundToDouble(): Double = Math.round(this).toDouble()

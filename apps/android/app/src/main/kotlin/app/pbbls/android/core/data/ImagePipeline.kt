@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
+import androidx.core.graphics.scale
 import java.io.ByteArrayOutputStream
 
 /**
@@ -87,7 +88,7 @@ object ImagePipeline {
     ): Bitmap {
         var current = image
         while (maxOf(current.width, current.height) > maxEdgePx * 2) {
-            val next = Bitmap.createScaledBitmap(current, (current.width / 2).coerceAtLeast(1), (current.height / 2).coerceAtLeast(1), true)
+            val next = current.scale((current.width / 2).coerceAtLeast(1), (current.height / 2).coerceAtLeast(1))
             if (current !== image) current.recycle()
             current = next
         }
@@ -95,11 +96,9 @@ object ImagePipeline {
         if (longEdge <= maxEdgePx) return current
         val scale = maxEdgePx.toDouble() / longEdge
         val last =
-            Bitmap.createScaledBitmap(
-                current,
+            current.scale(
                 Math.round(current.width * scale).toInt().coerceIn(1, maxEdgePx),
                 Math.round(current.height * scale).toInt().coerceIn(1, maxEdgePx),
-                true,
             )
         if (current !== image) current.recycle()
         return last
