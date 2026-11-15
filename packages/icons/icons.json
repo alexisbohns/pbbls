@@ -10511,6 +10511,690 @@
       "status": "candidate",
       "migrated": [],
       "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "arrow-node-up",
+      "meaning": "Arrow node up: a node with an arrow pointing up.",
+      "tags": { "category": ["web", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-decrease",
+      "meaning": "Stones decrease: stones getting fewer.",
+      "tags": { "category": ["stones", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "sunrise-arrow",
+      "meaning": "Sunrise arrow: a rising sun with an upward arrow.",
+      "tags": { "category": ["sky", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "gauge-high-2",
+      "meaning": "Gauge high: a gauge reading high.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-exclamation",
+      "meaning": "Square exclamation: an exclamation mark in a square.",
+      "tags": { "category": ["alerts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "triangles-upward",
+      "meaning": "Triangles upward: triangles pointing up.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "bars-high",
+      "meaning": "Bars high: bars rising high on a chart.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "cairn-high",
+      "meaning": "Cairn high: a tall cairn of stones.",
+      "tags": { "category": ["cairns"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "slider-high",
+      "meaning": "Slider high: a slider set near the top.",
+      "tags": { "category": ["tools"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "triangle-up",
+      "meaning": "Triangle up: a triangle pointing up.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "bars-low",
+      "meaning": "Bars low: short bars on a chart.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "cairn-low",
+      "meaning": "Cairn low: a short cairn of stones.",
+      "tags": { "category": ["cairns"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "gauge-low-2",
+      "meaning": "Gauge low: a gauge reading low.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "slider-low",
+      "meaning": "Slider low: a slider set near the bottom.",
+      "tags": { "category": ["tools"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "triangle-down",
+      "meaning": "Triangle down: a triangle pointing down.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "bar-medium",
+      "meaning": "Bar medium: a bar set at a middling level.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "cairn-medium",
+      "meaning": "Cairn medium: a cairn of middling height.",
+      "tags": { "category": ["cairns"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "gauge-medium-2",
+      "meaning": "Gauge medium: a gauge reading the middle.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "slider-medium",
+      "meaning": "Slider medium: a slider set to the middle.",
+      "tags": { "category": ["tools"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "bars-undefined",
+      "meaning": "Bars undefined: bars with no value shown.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "gauge-undefined",
+      "meaning": "Gauge undefined: a gauge with no reading.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "slider-undefined",
+      "meaning": "Slider undefined: a slider with no set value.",
+      "tags": { "category": ["tools"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-3",
+      "meaning": "Stones: a small group of stones.",
+      "tags": { "category": ["stones"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "flag-check",
+      "meaning": "Flag check: a flag marked with a tick.",
+      "tags": { "category": ["paths", "actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-checks",
+      "meaning": "Square checks: several ticked squares.",
+      "tags": { "category": ["actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-chevron-down-stop",
+      "meaning": "Circle chevron down stop: a downward chevron in a circle, ending in a stop.",
+      "tags": { "category": ["arrows", "alerts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pouch-stone",
+      "meaning": "Pouch stone: a stone kept in a pouch.",
+      "tags": { "category": ["stones", "collections"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-archive",
+      "meaning": "Square archive: a square box put away in an archive.",
+      "tags": { "category": ["collections"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-hourglass",
+      "meaning": "Square hourglass: an hourglass inside a square.",
+      "tags": { "category": ["time"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-arrow-right-stop",
+      "meaning": "Circle arrow right stop: a right arrow in a circle, ending in a stop.",
+      "tags": { "category": ["arrows", "alerts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-lock",
+      "meaning": "Square lock: a padlock inside a square.",
+      "tags": { "category": ["privacy"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-slash",
+      "meaning": "Circle slash: a circle with a line through it.",
+      "tags": { "category": ["actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "flower-down-soil",
+      "meaning": "Flower down soil: a flower rooted down in soil.",
+      "tags": { "category": ["plants"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-sunset",
+      "meaning": "Square sunset: a sunset framed in a square.",
+      "tags": { "category": ["sky"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-thought",
+      "meaning": "Stones thought: stones shown as a thought.",
+      "tags": { "category": ["stones", "notifications"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-half",
+      "meaning": "Circle half: a circle with half filled in.",
+      "tags": { "category": ["appearance"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "signal-nodes",
+      "meaning": "Signal nodes: signal waves linked by nodes.",
+      "tags": { "category": ["web"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "sprout-soil",
+      "meaning": "Sprout soil: a sprout growing from soil.",
+      "tags": { "category": ["plants"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-code",
+      "meaning": "Square code: code brackets inside a square.",
+      "tags": { "category": ["devices"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-hash",
+      "meaning": "Stone hash: a hash sign marked on a stone.",
+      "tags": { "category": ["stones", "writing"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-pen",
+      "meaning": "Circle pen: a pen writing inside a circle.",
+      "tags": { "category": ["writing"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "flag-scribble",
+      "meaning": "Flag scribble: a flag with a scribbled line.",
+      "tags": { "category": ["glyphs", "paths"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-scribble",
+      "meaning": "Square scribble: a scribbled line inside a square.",
+      "tags": { "category": ["glyphs"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "spark-badge",
+      "meaning": "Spark badge: a badge with a spark on it.",
+      "tags": { "category": ["awards", "fire"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-bulb",
+      "meaning": "Square bulb: a light bulb inside a square.",
+      "tags": { "category": ["fire"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "cairn-bowl",
+      "meaning": "Cairn bowl: a bowl of stones arranged as a cairn.",
+      "tags": { "category": ["cairns", "collections"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-stone",
+      "meaning": "Circle stone: a stone within a circle.",
+      "tags": { "category": ["stones"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-stone-emit",
+      "meaning": "Circle stone emit: a stone in a circle sending out marks.",
+      "tags": { "category": ["stones", "fire"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "flower-soil",
+      "meaning": "Flower soil: a flower growing from soil.",
+      "tags": { "category": ["plants"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-flow",
+      "meaning": "Pebble flow: stones flowing along a path.",
+      "tags": { "category": ["stones", "water"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-play",
+      "meaning": "Square play: a play symbol inside a square.",
+      "tags": { "category": ["play"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-x",
+      "meaning": "Circle x: a cross inside a circle.",
+      "tags": { "category": ["actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-x-olive",
+      "meaning": "Circle x olive: a cross in a circle, one arm ending in an olive-shaped tip.",
+      "tags": { "category": ["actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "flag-x",
+      "meaning": "Flag x: a flag marked with a cross.",
+      "tags": { "category": ["actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "nodes-edge-x",
+      "meaning": "Nodes edge x: nodes linked by an edge that is cut.",
+      "tags": { "category": ["web", "actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "sprout-soil-inverted",
+      "meaning": "Sprout soil inverted: a sprout growing downward from soil.",
+      "tags": { "category": ["plants"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-arrow-down-left",
+      "meaning": "Square arrow down left: an arrow pointing down-left in a square.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-arrow-up",
+      "meaning": "Circle arrow up: an upward arrow in a circle.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-arrow-up-right",
+      "meaning": "Circle arrow up right: a short arrow pointing up and right in a circle.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "sprout-bud-soil",
+      "meaning": "Sprout bud soil: a bud sprouting from soil.",
+      "tags": { "category": ["plants"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-plane",
+      "meaning": "Square plane: a paper plane inside a square.",
+      "tags": { "category": ["transfer"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-arrow-bottom-left",
+      "meaning": "Circle arrow bottom left: an arrow pointing down-left in a circle.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "node-segment-cut-down",
+      "meaning": "Node segment cut down: a node line cut downward.",
+      "tags": { "category": ["web", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "sprout-soil-seed",
+      "meaning": "Sprout soil seed: a seed sprouting from soil.",
+      "tags": { "category": ["plants"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-rotate-clockwise",
+      "meaning": "Square rotate clockwise: a square turning clockwise.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-divided-up",
+      "meaning": "Stone divided up: a stone split upward.",
+      "tags": { "category": ["stones", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-to-stone",
+      "meaning": "Stone to stone: a stone passing its shape to another.",
+      "tags": { "category": ["stones", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "supersede",
+      "meaning": "Supersede: a new stone taking the place of an old one.",
+      "tags": { "category": ["stones", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-arrow-up-right-2",
+      "meaning": "Circle arrow up right: a long arrow crossing the circle up and right.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "node-segment-cut-up",
+      "meaning": "Node segment cut up: a node line cut upward.",
+      "tags": { "category": ["web", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-rotate-backward",
+      "meaning": "Square rotate backward: a square turning backward.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-divided",
+      "meaning": "Stone divided: a stone split in two.",
+      "tags": { "category": ["stones"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "superseded",
+      "meaning": "Superseded: replaced by something newer.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-exclamation",
+      "meaning": "Circle exclamation: an exclamation mark in a circle.",
+      "tags": { "category": ["alerts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "exclamation",
+      "meaning": "Exclamation: an exclamation mark for attention.",
+      "tags": { "category": ["alerts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-zap",
+      "meaning": "Square zap: a lightning bolt inside a square.",
+      "tags": { "category": ["fire"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
     }
   ]
 }
