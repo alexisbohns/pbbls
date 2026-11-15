@@ -1916,4 +1916,680 @@ enum PbblsGlyph: String, CaseIterable, Sendable {
     case basket = "basket"
     /// Shopping: shopping, a bag or a cart.
     case abstractStoneCurve = "abstract-stone-curve"
+    /// Filter dots: dots sorted through a filter.
+    case filterDots = "filter-dots"
+    /// Inbox full: an inbox with no room left.
+    case inboxFull = "inbox-full"
+    /// Logs stack: logs piled one on another.
+    case logsStack = "logs-stack"
+    /// Stack fall: a stack of items tipping over.
+    case stackFall = "stack-fall"
+    /// Stones pot: stones kept in a pot.
+    case stonesPot = "stones-pot"
+    /// Stones stack: stones piled one on another.
+    case stonesStack4 = "stones-stack-4"
+    /// Stones shrink: stones underlined with an arrow that shrinks.
+    case stonesUnderlineShrinkArrow = "stones-underline-shrink-arrow"
+    /// Cell dots: dots arranged in a grid cell.
+    case cellDots = "cell-dots"
+    /// Circle shaded: a circle with part of it filled in.
+    case circleShaded = "circle-shaded"
+    /// Community: several people gathered together.
+    case community = "community"
+    /// Door open: a door standing open.
+    case doorOpen = "door-open"
+    /// Flask lab: a laboratory flask for experiments.
+    case flaskLab = "flask-lab"
+    /// Pebble sprout: a stone with a shoot growing from it.
+    case pebbleSprout = "pebble-sprout"
+    /// Stones group: three stones gathered together.
+    case stonesGroup3 = "stones-group-3"
+    /// Stones group: five stones gathered together.
+    case stonesGroup5 = "stones-group-5"
+    /// Axis bounce: a bouncing motion along an axis.
+    case axisBounce = "axis-bounce"
+    /// Diff: two versions set side by side to compare changes.
+    case diff = "diff"
+    /// List timeline: a list of entries laid along a timeline.
+    case listTimeline = "list-timeline"
+    /// Maze tunnel: a tunnel winding through a maze.
+    case mazeTunnel = "maze-tunnel"
+    /// Award: a prize given in recognition of achievement.
+    case award = "award"
+    /// Certificate: a formal document confirming an achievement.
+    case certificate = "certificate"
+    /// Circle split: a circle divided into two parts.
+    case circleSplit = "circle-split"
+    /// Decision: a choice made between options.
+    case decision = "decision"
+    /// Fork: a split where a path divides in two.
+    case fork = "fork"
+    /// Judge hammer: a gavel used to judge or rule.
+    case judgeHammer = "judge-hammer"
+    /// Node decision: a node where a choice branches off.
+    case nodeDecision = "node-decision"
+    /// Stones underline: stones under a line, with one jumping across.
+    case stonesUnderlineJump = "stones-underline-jump"
+    /// Package arc: a package with an arc beneath it.
+    case packageArcBottom = "package-arc-bottom"
+    /// Stone bowl: a bowl made from a stone.
+    case stoneBowl2 = "stone-bowl-2"
+    /// Stone jump: a stone leaping through the air.
+    case stoneJump = "stone-jump"
+    /// Edge direction: a line on an edge pointing a direction.
+    case edgeDirection = "edge-direction"
+    /// Flow stone: a stone set in a flow of movement.
+    case flowStone = "flow-stone"
+    /// Flow stones: stones carried along in a flow.
+    case flowStones = "flow-stones"
+    /// Infinite: a loop with no end.
+    case infinite = "infinite"
+    /// Network arc: a curved link between network nodes.
+    case networkArc = "network-arc"
+    /// Node direction: a node with an arrow pointing right.
+    case nodeDirectionRight = "node-direction-right"
+    /// Stones wave: stones arranged in a wave.
+    case stonesWave = "stones-wave"
+    /// Clock backward: a clock turned back in time.
+    case clockBackward = "clock-backward"
+    /// Road horizon: a road running to the horizon.
+    case roadHorizon = "road-horizon"
+    /// Stone waves: a stone with waves running to the left.
+    case stoneWavesLeft = "stone-waves-left"
+    /// Target search: a target found by searching.
+    case targetSearch = "target-search"
+    /// Clipboard checklist: a checklist held on a clipboard.
+    case clipboardChecklist = "clipboard-checklist"
+    /// Pebble bars: a stone bar chart with one bar struck through.
+    case pebbleBarsStrike = "pebble-bars-strike"
+    /// Shelves: shelves holding items.
+    case shelves = "shelves"
+    /// Squared square: a square set inside another square.
+    case squaredSquare = "squared-square"
+    /// Book sheets: loose sheets bound like a book.
+    case bookSheets = "book-sheets"
+    /// Sunshine up: sunshine rising upward.
+    case sunshineUp = "sunshine-up"
+    /// Book open text: an open book with text on its pages.
+    case bookOpenText = "book-open-text"
+    /// Book sheets vertical: sheets of a book set upright.
+    case bookSheetsVertical = "book-sheets-vertical"
+    /// Scale balance: a balance scale in equilibrium.
+    case scaleBalance = "scale-balance"
+    /// Stones comparison: stones set side by side to compare.
+    case stonesComparison = "stones-comparison"
+    /// Stones stack comparison: stone stacks side by side to compare.
+    case stonesStackComparison = "stones-stack-comparison"
+    /// Stop circle: a stop sign inside a circle.
+    case stopCircle2 = "stop-circle-2"
+    /// Circle ring bell: a bell ringing inside a circle.
+    case circleRingBell = "circle-ring-bell"
+    /// Receipt: a record of a payment.
+    case receipt3 = "receipt-3"
+    /// Stones stack box: stones stacked in a box.
+    case stonesStackBox4 = "stones-stack-box-4"
+    /// Print echoes: printed marks repeated as echoes.
+    case printEchoes = "print-echoes"
+    /// Stone arch: an arch built from stones.
+    case stoneArch = "stone-arch"
+    /// Text circle: text arranged in a circle.
+    case textCircle = "text-circle"
+    /// Text stone: text written on a stone.
+    case textPebble = "text-pebble"
+    /// Cairn: a stacked pile of stones marking a path.
+    case cairn = "cairn"
+    /// Label tag: a tag tied to an item to name it.
+    case labelTag = "label-tag"
+    /// Label tag: a tag with a hole and two written marks.
+    case labelTag2 = "label-tag-2"
+    /// Package: a parcel wrapped and ready to send.
+    case package = "package"
+    /// Shipment: goods packed for delivery.
+    case shipment = "shipment"
+    /// Stone speed: a stone moving fast with speed lines.
+    case stoneSpeed3 = "stone-speed-3"
+    /// Stone speed underline: a fast stone with a line beneath it.
+    case stoneSpeedUnderline = "stone-speed-underline"
+    /// Circle broken: a circle with a gap in its outline.
+    case circleBroken2 = "circle-broken-2"
+    /// Flask: a laboratory flask.
+    case flask = "flask"
+    /// Flask particles: particles rising from a flask.
+    case flaskParticles = "flask-particles"
+    /// Flask tube check: a test tube and flask with a tick.
+    case flaskTubeCheck = "flask-tube-check"
+    /// Pin waves: a map pin sending out waves.
+    case pinWaves = "pin-waves"
+    /// Recipient stick: a stick marker pointing at a recipient.
+    case recipientStick = "recipient-stick"
+    /// Signal pin: a pin marking a signal.
+    case signalPin = "signal-pin"
+    /// Square check: a checked box.
+    case squareCheck = "square-check"
+    /// Stone arcs: a stone with arcs around it.
+    case stoneArcs = "stone-arcs"
+    /// Stones balance: stones balanced on one another.
+    case stonesBalance = "stones-balance"
+    /// Circle spark: a spark inside a circle.
+    case circleSpark = "circle-spark"
+    /// Destination flag: a flag marking a destination.
+    case destinationFlag = "destination-flag"
+    /// Spark to stone: a spark turning into a stone.
+    case sparkToStone = "spark-to-stone"
+    /// Code square: code brackets inside a square.
+    case codeSquare = "code-square"
+    /// Stone accolade: a stone given as an honour.
+    case stoneAccolade = "stone-accolade"
+    /// Building columns: a building fronted by columns.
+    case buildingColumns = "building-columns"
+    /// Building flat: a flat, low building.
+    case buildingFlat = "building-flat"
+    /// Stone bridge: a bridge built from stone.
+    case stoneBridge = "stone-bridge"
+    /// Triangles: a set of triangles.
+    case triangles = "triangles"
+    /// Branch bud: a bud on a branch.
+    case branchBud = "branch-bud"
+    /// Branch buds: several buds on a branch.
+    case branchBuds = "branch-buds"
+    /// Git branch: a branch splitting off a line of work.
+    case gitBranch = "git-branch"
+    /// Git branch create: a new branch being started.
+    case gitBranchCreate = "git-branch-create"
+    /// Stones: a group of stones piled together.
+    case stones8 = "stones-8"
+    /// Edge: the boundary line of a shape.
+    case edge = "edge"
+    /// Git fork: a line of work splitting into two.
+    case gitForkSm = "git-fork-sm"
+    /// Git diamond: a diamond-shaped commit node in a history.
+    case gitDiamond = "git-diamond"
+    /// Git tree: a branching tree of commits.
+    case gitTree = "git-tree"
+    /// Git triangle: a triangle-shaped commit node.
+    case gitTriangle = "git-triangle"
+    /// Path stones: stones laid along a path.
+    case pathStones = "path-stones"
+    /// Ripples line: ripples spreading along a line.
+    case ripplesLine = "ripples-line"
+    /// Graph: a chart of points and lines.
+    case graph = "graph"
+    /// Chip component: a computer chip component.
+    case chipComponent = "chip-component"
+    /// Puzzle: a puzzle piece.
+    case puzzle = "puzzle"
+    /// Git merge: two lines of work joining into one.
+    case gitMerge = "git-merge"
+    /// Git merge down: a merge flowing downward into one line.
+    case gitMergeDown = "git-merge-down"
+    /// Stones network: stones linked together in a network.
+    case stonesNetwork = "stones-network"
+    /// Node lines: a node joined by two lines.
+    case nodeLines2 = "node-lines-2"
+    /// Node lines: a node joined by three lines.
+    case nodeLines3 = "node-lines-3"
+    /// Node lines: a node joined by five lines.
+    case nodeLines5 = "node-lines-5"
+    /// Stone emits: a stone giving off rays.
+    case stoneEmits2 = "stone-emits-2"
+    /// Stone node: a stone acting as a node in a network.
+    case stoneNode = "stone-node"
+    /// Cairn stone add: a stone added to a cairn.
+    case cairnStoneAdd = "cairn-stone-add"
+    /// Node edge x: a node link cut off with a cross.
+    case nodeEdgeX = "node-edge-x"
+    /// Node node: two nodes linked together.
+    case nodeNode = "node-node"
+    /// Node plus: a node added to a network.
+    case nodePlus = "node-plus"
+    /// Stone node plus: a stone node added to a network.
+    case stoneNodePlus = "stone-node-plus"
+    /// Alarm: an alarm clock ringing for a set time.
+    case alarm = "alarm"
+    /// Bubbles: rising bubbles.
+    case bubbles = "bubbles"
+    /// Node seed: a seed sitting at a node.
+    case nodeSeed = "node-seed"
+    /// Node spark: a spark lighting up a node.
+    case nodeSpark = "node-spark"
+    /// Stone shine: a stone catching the light.
+    case stoneShine2 = "stone-shine-2"
+    /// Circle stones: stones arranged in a circle.
+    case circleStones3 = "circle-stones-3"
+    /// Node edge minus: a link removed from a node.
+    case nodeEdgeMinus = "node-edge-minus"
+    /// Node minus: a node taken away.
+    case nodeMinus = "node-minus"
+    /// Node x: a node crossed out.
+    case nodeX = "node-x"
+    /// Ipod station: a dock for a music player.
+    case ipodStation = "ipod-station"
+    /// Rectangle exchange: two rectangles swapping places.
+    case rectangleExchange = "rectangle-exchange"
+    /// Servers: stacked server units.
+    case servers = "servers"
+    /// Stone emit: a stone giving off a signal.
+    case stoneEmit2 = "stone-emit-2"
+    /// Atoms: atoms linked together.
+    case atoms = "atoms"
+    /// Circle network: a network of nodes inside a circle.
+    case circleNetwork = "circle-network"
+    /// System: parts working together as a whole.
+    case system = "system"
+    /// File check: a file marked as checked.
+    case fileCheck = "file-check"
+    /// Pouch check: a pouch with a tick on it.
+    case pouchCheck = "pouch-check"
+    /// Receipt checks: a receipt with ticks on it.
+    case receiptChecks = "receipt-checks"
+    /// Accolades check: a tick given as an honour.
+    case accoladesCheck = "accolades-check"
+    /// Stone code: code written on a stone.
+    case stoneCode = "stone-code"
+    /// Terminal: a command-line window.
+    case terminal = "terminal"
+    /// Gauge small: a small gauge dial.
+    case gaugeSm = "gauge-sm"
+    /// Rule: a ruler for measuring lines.
+    case rule = "rule"
+    /// Hourglass empty: an hourglass with no sand left.
+    case hourglassEmpty = "hourglass-empty"
+    /// Stone scale up: a stone growing larger.
+    case stoneScaleUp = "stone-scale-up"
+    /// Flag underline: a flag with a line beneath it.
+    case flagUnderline = "flag-underline"
+    /// Search exclamation: a magnifying glass with an alert mark.
+    case searchExclamation = "search-exclamation"
+    /// Plaster: a plaster bandage for a small wound.
+    case plaster = "plaster"
+    /// Square x: a cross inside a square.
+    case squareX = "square-x"
+    /// Circle gauge: a gauge dial inside a circle.
+    case circleGauge = "circle-gauge"
+    /// Monitor: a computer screen.
+    case monitor = "monitor"
+    /// Board growth: a board showing growth.
+    case boardGrowth = "board-growth"
+    /// Eye signal: an eye with a signal beside it.
+    case eyeSignal = "eye-signal"
+    /// Target: a bullseye to aim at.
+    case target = "target"
+    /// Stone scale: a stone weighed on a scale.
+    case stoneScale = "stone-scale"
+    /// Stone speed: a stone moving fast.
+    case stoneSpeed2 = "stone-speed-2"
+    /// Stopwatch: a timer for measuring a duration.
+    case stopwatch2 = "stopwatch-2"
+    /// Gemstone: a cut gem.
+    case gemstone = "gemstone"
+    /// Clipboard check: a clipboard with a tick.
+    case clipboardCheck = "clipboard-check"
+    /// Shield check: a shield with a tick, protection confirmed.
+    case shieldCheck = "shield-check"
+    /// Stamp check: a stamp marked with a tick.
+    case stampCheck = "stamp-check"
+    /// Pillar: a tall column.
+    case pillar = "pillar"
+    /// Stone shake: a stone shaking.
+    case stoneShake = "stone-shake"
+    /// Lock open: an unlocked padlock.
+    case lockOpen = "lock-open"
+    /// Puzzle piece: a single puzzle piece.
+    case puzzlePiece = "puzzle-piece"
+    /// Checkmarks: two ticks, one after the other.
+    case checkmarks = "checkmarks"
+    /// Eye check: an eye with a tick, seen and confirmed.
+    case eyeCheck = "eye-check"
+    /// Search check: a magnifying glass with a tick.
+    case searchCheck = "search-check"
+    /// Door handle: a handle on a door.
+    case doorHandle = "door-handle"
+    /// Letter underline: a letter with a line beneath it.
+    case letterUnderline = "letter-underline"
+    /// Stone pin: a stone marking a place on a map.
+    case stonePin = "stone-pin"
+    /// Sunset chevron down: a setting sun above a downward chevron.
+    case sunsetChevronDown = "sunset-chevron-down"
+    /// Accordion collapsed: a closed accordion section.
+    case accordionCollapsed = "accordion-collapsed"
+    /// Cairn stack: stones stacked into a cairn.
+    case cairnStack = "cairn-stack"
+    /// Circle chevron up: an upward chevron in a circle.
+    case circleChevronUp = "circle-chevron-up"
+    /// Collapse: items folding inward into one.
+    case collapse = "collapse"
+    /// Collapse square: a square with arrows folding inward.
+    case collapseSquare = "collapse-square"
+    /// Pebble shrink: a stone getting smaller.
+    case pebbleShrink = "pebble-shrink"
+    /// Circle half quarter: a circle with a quarter filled in.
+    case circleHalfQuarter = "circle-half-quarter"
+    /// Disabled: a control that cannot be used.
+    case disabled = "disabled"
+    /// Interrupter: a switch that breaks a circuit.
+    case interrupter = "interrupter"
+    /// Rectangle hash: a rectangle with hash marks.
+    case rectangleHash = "rectangle-hash"
+    /// Sunset sea: a sunset over the sea.
+    case sunsetSea = "sunset-sea"
+    /// Toggle disabled: a switch that cannot be changed.
+    case toggleDisabled = "toggle-disabled"
+    /// Enabled: a control switched on and ready.
+    case enabled = "enabled"
+    /// Instant picture: a photo printed straight from a camera.
+    case instantPicture = "instant-picture"
+    /// Stone checkmark: a stone marked with a tick.
+    case stoneCheckmark = "stone-checkmark"
+    /// Stone shine top: a stone lit from the top.
+    case stoneShineTop = "stone-shine-top"
+    /// Accordion expanded: an open accordion section.
+    case accordionExpanded = "accordion-expanded"
+    /// Circle chevron down: a downward chevron in a circle.
+    case circleChevronDown = "circle-chevron-down"
+    /// Expand square: a square with arrows opening outward.
+    case expandSquare = "expand-square"
+    /// Ripples: rings spreading from a point.
+    case ripples2 = "ripples-2"
+    /// Journey: a route travelled from start to finish.
+    case journey = "journey"
+    /// Stairs stone: a stone staircase.
+    case stairsStone = "stairs-stone"
+    /// Chart shapes: shapes arranged on a chart.
+    case chartShapes = "chart-shapes"
+    /// Fibonacci: a pattern from the Fibonacci sequence.
+    case fibonacci = "fibonacci"
+    /// Layout: a page split into three panels.
+    case layout3 = "layout-3"
+    /// Stones box: stones packed in a box.
+    case stonesBox = "stones-box"
+    /// Stones messy: stones scattered in a loose heap.
+    case stonesMessy = "stones-messy"
+    /// Hash: a hash sign.
+    case hash = "hash"
+    /// Matrix: values arranged in rows and columns.
+    case matrix = "matrix"
+    /// Chart square: a bar chart inside a square.
+    case chartSquare = "chart-square"
+    /// Overview: a summary of the whole at a glance.
+    case overview = "overview"
+    /// File text: a file with text on it.
+    case fileText = "file-text"
+    /// Hanging note: a note hung from a peg.
+    case hangingNote = "hanging-note"
+    /// Page text: a page with text on it.
+    case pageText = "page-text"
+    /// Pebble text: text written on a stone.
+    case pebbleText = "pebble-text"
+    /// Stone text: text carved into a stone.
+    case stoneText = "stone-text"
+    /// Window text: a window showing text.
+    case windowText = "window-text"
+    /// Folder text: a folder holding text.
+    case folderText = "folder-text"
+    /// Layout overlap: layout panels overlapping.
+    case layoutOverlap = "layout-overlap"
+    /// Layout pane text: a layout panel with text.
+    case layoutPaneText = "layout-pane-text"
+    /// Layout sidebar text: a layout with a text sidebar.
+    case layoutSidebarText = "layout-sidebar-text"
+    /// Perspective: a view drawn with depth.
+    case perspective = "perspective"
+    /// Copy text: text copied to another place.
+    case copyText = "copy-text"
+    /// Dolmens: stone tables set upright, like ancient monuments.
+    case dolmens3 = "dolmens-3"
+    /// Screens: several screens side by side.
+    case screens = "screens"
+    /// Squircles: rounded squares with smooth corners.
+    case squircles4 = "squircles-4"
+    /// Triptych: three panels set side by side.
+    case triptych = "triptych"
+    /// Walls: walls of stone blocks.
+    case walls = "walls"
+    /// Cursor menu: a menu opened at the cursor.
+    case cursorMenu = "cursor-menu"
+    /// Node tooltip: a tooltip attached to a node.
+    case nodeTooltip = "node-tooltip"
+    /// Pebble chat bubble: a stone-shaped speech bubble.
+    case pebbleChatBubble = "pebble-chat-bubble"
+    /// Tooltip: a small label appearing beside an item.
+    case tooltip = "tooltip"
+    /// Tooltip bubble: a speech bubble giving a short tip.
+    case tooltipBubble = "tooltip-bubble"
+    /// Search chart: a magnifying glass over a chart.
+    case searchChart = "search-chart"
+    /// Arrow node up: a node with an arrow pointing up.
+    case arrowNodeUp = "arrow-node-up"
+    /// Stones decrease: stones getting fewer.
+    case stonesDecrease = "stones-decrease"
+    /// Sunrise arrow: a rising sun with an upward arrow.
+    case sunriseArrow = "sunrise-arrow"
+    /// Gauge high: a gauge reading high.
+    case gaugeHigh2 = "gauge-high-2"
+    /// Square exclamation: an exclamation mark in a square.
+    case squareExclamation = "square-exclamation"
+    /// Triangles upward: triangles pointing up.
+    case trianglesUpward = "triangles-upward"
+    /// Bars high: bars rising high on a chart.
+    case barsHigh = "bars-high"
+    /// Cairn high: a tall cairn of stones.
+    case cairnHigh = "cairn-high"
+    /// Slider high: a slider set near the top.
+    case sliderHigh = "slider-high"
+    /// Triangle up: a triangle pointing up.
+    case triangleUp = "triangle-up"
+    /// Bars low: short bars on a chart.
+    case barsLow = "bars-low"
+    /// Cairn low: a short cairn of stones.
+    case cairnLow = "cairn-low"
+    /// Gauge low: a gauge reading low.
+    case gaugeLow2 = "gauge-low-2"
+    /// Slider low: a slider set near the bottom.
+    case sliderLow = "slider-low"
+    /// Triangle down: a triangle pointing down.
+    case triangleDown = "triangle-down"
+    /// Bar medium: a bar set at a middling level.
+    case barMedium = "bar-medium"
+    /// Cairn medium: a cairn of middling height.
+    case cairnMedium = "cairn-medium"
+    /// Gauge medium: a gauge reading the middle.
+    case gaugeMedium2 = "gauge-medium-2"
+    /// Slider medium: a slider set to the middle.
+    case sliderMedium = "slider-medium"
+    /// Bars undefined: bars with no value shown.
+    case barsUndefined = "bars-undefined"
+    /// Gauge undefined: a gauge with no reading.
+    case gaugeUndefined = "gauge-undefined"
+    /// Slider undefined: a slider with no set value.
+    case sliderUndefined = "slider-undefined"
+    /// Stones: a small group of stones.
+    case stones3 = "stones-3"
+    /// Flag check: a flag marked with a tick.
+    case flagCheck = "flag-check"
+    /// Square checks: several ticked squares.
+    case squareChecks = "square-checks"
+    /// Circle chevron down stop: a downward chevron in a circle, ending in a stop.
+    case circleChevronDownStop = "circle-chevron-down-stop"
+    /// Pouch stone: a stone kept in a pouch.
+    case pouchStone = "pouch-stone"
+    /// Square archive: a square box put away in an archive.
+    case squareArchive = "square-archive"
+    /// Square hourglass: an hourglass inside a square.
+    case squareHourglass = "square-hourglass"
+    /// Circle arrow right stop: a right arrow in a circle, ending in a stop.
+    case circleArrowRightStop = "circle-arrow-right-stop"
+    /// Square lock: a padlock inside a square.
+    case squareLock = "square-lock"
+    /// Circle slash: a circle with a line through it.
+    case circleSlash = "circle-slash"
+    /// Flower down soil: a flower rooted down in soil.
+    case flowerDownSoil = "flower-down-soil"
+    /// Square sunset: a sunset framed in a square.
+    case squareSunset = "square-sunset"
+    /// Stones thought: stones shown as a thought.
+    case stonesThought = "stones-thought"
+    /// Circle half: a circle with half filled in.
+    case circleHalf = "circle-half"
+    /// Signal nodes: signal waves linked by nodes.
+    case signalNodes = "signal-nodes"
+    /// Sprout soil: a sprout growing from soil.
+    case sproutSoil = "sprout-soil"
+    /// Square code: code brackets inside a square.
+    case squareCode = "square-code"
+    /// Stone hash: a hash sign marked on a stone.
+    case stoneHash = "stone-hash"
+    /// Circle pen: a pen writing inside a circle.
+    case circlePen = "circle-pen"
+    /// Flag scribble: a flag with a scribbled line.
+    case flagScribble = "flag-scribble"
+    /// Square scribble: a scribbled line inside a square.
+    case squareScribble = "square-scribble"
+    /// Spark badge: a badge with a spark on it.
+    case sparkBadge = "spark-badge"
+    /// Square bulb: a light bulb inside a square.
+    case squareBulb = "square-bulb"
+    /// Cairn bowl: a bowl of stones arranged as a cairn.
+    case cairnBowl = "cairn-bowl"
+    /// Circle stone: a stone within a circle.
+    case circleStone = "circle-stone"
+    /// Circle stone emit: a stone in a circle sending out marks.
+    case circleStoneEmit = "circle-stone-emit"
+    /// Flower soil: a flower growing from soil.
+    case flowerSoil = "flower-soil"
+    /// Pebble flow: stones flowing along a path.
+    case pebbleFlow = "pebble-flow"
+    /// Square play: a play symbol inside a square.
+    case squarePlay = "square-play"
+    /// Circle x: a cross inside a circle.
+    case circleX = "circle-x"
+    /// Circle x olive: a cross in a circle, one arm ending in an olive-shaped tip.
+    case circleXOlive = "circle-x-olive"
+    /// Flag x: a flag marked with a cross.
+    case flagX = "flag-x"
+    /// Nodes edge x: nodes linked by an edge that is cut.
+    case nodesEdgeX = "nodes-edge-x"
+    /// Sprout soil inverted: a sprout growing downward from soil.
+    case sproutSoilInverted = "sprout-soil-inverted"
+    /// Square arrow down left: an arrow pointing down-left in a square.
+    case squareArrowDownLeft = "square-arrow-down-left"
+    /// Circle arrow up: an upward arrow in a circle.
+    case circleArrowUp = "circle-arrow-up"
+    /// Circle arrow up right: a short arrow pointing up and right in a circle.
+    case circleArrowUpRight = "circle-arrow-up-right"
+    /// Sprout bud soil: a bud sprouting from soil.
+    case sproutBudSoil = "sprout-bud-soil"
+    /// Square plane: a paper plane inside a square.
+    case squarePlane = "square-plane"
+    /// Circle arrow bottom left: an arrow pointing down-left in a circle.
+    case circleArrowBottomLeft = "circle-arrow-bottom-left"
+    /// Node segment cut down: a node line cut downward.
+    case nodeSegmentCutDown = "node-segment-cut-down"
+    /// Sprout soil seed: a seed sprouting from soil.
+    case sproutSoilSeed = "sprout-soil-seed"
+    /// Square rotate clockwise: a square turning clockwise.
+    case squareRotateClockwise = "square-rotate-clockwise"
+    /// Stone divided up: a stone split upward.
+    case stoneDividedUp = "stone-divided-up"
+    /// Stone to stone: a stone passing its shape to another.
+    case stoneToStone = "stone-to-stone"
+    /// Supersede: a new stone taking the place of an old one.
+    case supersede = "supersede"
+    /// Circle arrow up right: a long arrow crossing the circle up and right.
+    case circleArrowUpRight2 = "circle-arrow-up-right-2"
+    /// Node segment cut up: a node line cut upward.
+    case nodeSegmentCutUp = "node-segment-cut-up"
+    /// Square rotate backward: a square turning backward.
+    case squareRotateBackward = "square-rotate-backward"
+    /// Stone divided: a stone split in two.
+    case stoneDivided = "stone-divided"
+    /// Superseded: replaced by something newer.
+    case superseded = "superseded"
+    /// Circle exclamation: an exclamation mark in a circle.
+    case circleExclamation = "circle-exclamation"
+    /// Exclamation: an exclamation mark for attention.
+    case exclamation = "exclamation"
+    /// Square zap: a lightning bolt inside a square.
+    case squareZap = "square-zap"
+    /// Accessibility: a figure showing access for everyone.
+    case accessibility = "accessibility"
+    /// Stone outlined quarters: a stone outlined in four quarters.
+    case stoneOutlinedQuarters = "stone-outlined-quarters"
+    /// Circle lines: lines drawn inside a circle.
+    case circleLines = "circle-lines"
+    /// Database shield: a database guarded by a shield.
+    case databaseShield = "database-shield"
+    /// Clipboard check x: a clipboard with a tick and a cross.
+    case clipboardCheckX = "clipboard-check-x"
+    /// Search signal: a magnifying glass finding a signal.
+    case searchSignal = "search-signal"
+    /// Briefcase: a case for work papers.
+    case briefcase = "briefcase"
+    /// Doctor: a stethoscope.
+    case doctor = "doctor"
+    /// Heart signal: a heart with a signal beside it.
+    case heartSignal = "heart-signal"
+    /// Stone signal: a stone sending out a signal.
+    case stoneSignal2 = "stone-signal-2"
+    /// Thermometer: an instrument for measuring temperature.
+    case thermometer = "thermometer"
+    /// Circle shapes: shapes gathered inside a circle.
+    case circleShapes = "circle-shapes"
+    /// Community underline: a community with a line beneath it.
+    case communityUnderline = "community-underline"
+    /// Parachute: a parachute floating down.
+    case parachute = "parachute"
+    /// Pebble stone stack: stones stacked one on another.
+    case pebbleStoneStack = "pebble-stone-stack"
+    /// Castle: a castle with towers.
+    case castle = "castle"
+    /// Tower: a tall tower.
+    case tower = "tower"
+    /// Coffee: a cup of coffee.
+    case coffee = "coffee"
+    /// Pill: a pill for taking.
+    case pill = "pill"
+    /// Wellness: a figure in a calm, healthy pose.
+    case wellness = "wellness"
+    /// Fibonacci spiral: a spiral following the Fibonacci sequence.
+    case fibonacciSpiral = "fibonacci-spiral"
+    /// Tulip: a tulip flower.
+    case tulip = "tulip"
+    /// Magnet: a magnet pulling things together.
+    case magnet = "magnet"
+    /// Clap: a film clapperboard.
+    case clap = "clap"
+    /// Theatre: a stage with a curtain.
+    case theatre = "theatre"
+    /// Kite: a kite flying on a string.
+    case kite = "kite"
+    /// Spring stone: a stone on a coiled spring.
+    case springStone = "spring-stone"
+    /// Bubble star: a star inside a bubble.
+    case bubbleStar = "bubble-star"
+    /// Scale stones empower: stones on a scale, tipped to lift one up.
+    case scaleStonesEmpower = "scale-stones-empower"
+    /// Gift ribbon: a gift tied with a ribbon.
+    case giftRibbon = "gift-ribbon"
+    /// Stone podium: stones arranged on a podium.
+    case stonePodium = "stone-podium"
+    /// Simplify: reduce a thing to its essentials.
+    case simplify = "simplify"
+    /// Library books: books on library shelves.
+    case libraryBooks = "library-books"
+    /// Variety scribble: several scribbled marks in mixed styles.
+    case varietyScribble = "variety-scribble"
+    /// Variety shapes: several different shapes together.
+    case varietyShapes = "variety-shapes"
+    /// Variety stones: stones of several kinds together.
+    case varietyStones = "variety-stones"
+    /// Instant photo: a photo printed straight from a camera.
+    case instantPhoto = "instant-photo"
+    /// Stack jar: stones stacked inside a jar.
+    case stackJar = "stack-jar"
+    /// Stones jar: stones gathered in a jar.
+    case stonesJar = "stones-jar"
+    /// Abstract butterfly: a butterfly drawn in an abstract style.
+    case abstractButterfly = "abstract-butterfly"
+    /// Abstract flower: a flower drawn in an abstract style.
+    case abstractFlower = "abstract-flower"
 }
