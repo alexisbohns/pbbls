@@ -1190,4 +1190,18 @@
         <item quantity="one">%1$s new.</item>
         <item quantity="other">%1$s new.</item>
     </plurals>
+
+    <!-- Photo crop editor (#1659) -->
+    <string name="crop_tool_ratio">Ratio</string>
+    <string name="crop_tool_rotate">Rotate</string>
+    <string name="crop_rotate_quarter">Rotate 90°</string>
+    <string name="crop_reset">Reset</string>
+    <string name="crop_angle">Angle</string>
+    <plurals name="crop_angle_degrees">
+        <item quantity="one">%d degree</item>
+        <item quantity="other">%d degrees</item>
+    </plurals>
+    <string name="crop_ratio_a11y">%1$d by %2$d</string>
+    <string name="crop_zoom_in">Zoom in</string>
+    <string name="crop_zoom_out">Zoom out</string>
 </resources>
