@@ -44,7 +44,7 @@
 
 - **affordance**: `door-handle` ★, `letter-underline` ★, `stone-pin` ★, `sunset-chevron-down` ★
 - **collapse**: `accordion-collapsed` (finalist), `cairn-stack` ★, `circle-chevron-up` ★, `collapse` ★, `collapse-square` ★, `pebble-shrink` (finalist)
-- **disabled**: `circle-half-quarter` ★, `disabled` (finalist), `interruptor` ★, `rectangle-hash` ★, `sunset-sea` ★, `toggle-disabled` ★
+- **disabled**: `circle-half-quarter` ★, `disabled` (finalist), `interrupter` ★, `rectangle-hash` ★, `sunset-sea` ★, `toggle-disabled` ★
 - **enabled**: `enabled` (finalist), `instant-picture` ★, `stone-checkmark` ★, `stone-shine-top` ★
 - **expand**: `accordion-expanded` ★, `circle-chevron-down` (finalist), `expand-square` ★, `ripples-2` ★
 - **journey**: `journey` (finalist), `stairs-stone` (finalist)
