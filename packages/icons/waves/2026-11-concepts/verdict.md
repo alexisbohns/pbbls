@@ -1,7 +1,7 @@
 # Verdict
 
-317 drawings kept under 93 concepts; 3 abandoned.
-110 finalists, 208 starred, 55 redrawn in a refinement round, 21 variants dropped.
+333 drawings kept under 102 concepts; 3 abandoned.
+121 finalists, 213 starred, 57 redrawn in a refinement round, 23 variants dropped.
 
 ## s1-delivery
 
@@ -108,6 +108,17 @@
 - **security**: `castle` (finalist), `tower` (finalist)
 - **therapeutic**: `coffee` ★, `pill` (finalist)
 - **wellness**: `wellness` (finalist)
+## s7-value
+
+- **aesthetics**: `fibonacci-spiral` (finalist), `tulip` ★
+- **attractiveness**: `magnet` (finalist)
+- **entertainment**: `clap` (finalist), `theatre` (finalist)
+- **fun**: `kite` (finalist), `spring-stone` ★
+- **recognition**: `bubble-star` (finalist)
+- **reduce-effort**: `scale-stones-empower` ★
+- **reward**: `gift-ribbon` (finalist), `stone-podium` (finalist)
+- **simplify**: `simplify` (finalist)
+- **variety**: `library-books` ★, `variety-scribble` ★, `variety-shapes` (finalist), `variety-stones` (finalist)
 
 Concepts with no finalist: delivery, changelog, flow, journal, log, ledger, record, commitment, data, database, api, architecture, agentic, view, inform, affordance, resolved, privacy.
 

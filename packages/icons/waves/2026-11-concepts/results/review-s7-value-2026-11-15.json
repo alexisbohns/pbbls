@@ -1,0 +1,397 @@
+{
+  "dec": {
+    "aesthetics/h41.bold": "keep",
+    "aesthetics/h41.classical": "keep",
+    "attractiveness/h41.classical": "keep",
+    "entertainment/h41.weird": "keep",
+    "entertainment/h43.bold": "keep",
+    "fun/h41.bold": "refine",
+    "fun/h41.weird": "refine",
+    "recognition/h43.classical": "keep",
+    "reduce-effort/h43.weird": "keep",
+    "reward/h41.pebbles": "keep",
+    "reward/h43.bold": "keep",
+    "simplify/h41.weird": "keep",
+    "variety/h41.classical": "keep",
+    "variety/h43.bold": "keep",
+    "variety/h43.pebbles": "keep",
+    "variety/h43.weird": "keep"
+  },
+  "finals": {
+    "aesthetics": [
+      "h41.bold"
+    ],
+    "attractiveness": [
+      "h41.classical"
+    ],
+    "badge-value": [],
+    "entertainment": [
+      "h43.bold",
+      "h41.weird"
+    ],
+    "fun": [
+      "h41.bold"
+    ],
+    "organize": [],
+    "recognition": [
+      "h43.classical"
+    ],
+    "reduce-effort": [],
+    "reward": [
+      "h43.bold",
+      "h41.pebbles"
+    ],
+    "sensorial": [],
+    "simplify": [
+      "h41.weird"
+    ],
+    "variety": [
+      "h41.classical",
+      "h43.pebbles"
+    ]
+  },
+  "names": {
+    "aesthetics/h41.bold": "fibonacci-spiral",
+    "aesthetics/h41.classical": "tulip",
+    "attractiveness/h41.classical": "magnet",
+    "entertainment/h41.weird": "theatre",
+    "entertainment/h43.bold": "clap",
+    "fun/h41.bold": "kite",
+    "fun/h41.weird": "spring-stone",
+    "recognition/h43.classical": "bubble-star",
+    "reduce-effort/h43.weird": "scale-stones-empower",
+    "reward/h41.pebbles": "stone-podium",
+    "reward/h43.bold": "gift-ribbon",
+    "simplify/h41.weird": "simplify",
+    "variety/h41.classical": "variety-shapes",
+    "variety/h43.bold": "library-books",
+    "variety/h43.pebbles": "variety-stones",
+    "variety/h43.weird": "variety-scribble"
+  },
+  "none": {
+    "aesthetics": false,
+    "attractiveness": false,
+    "entertainment": false,
+    "fun": false,
+    "recognition": false,
+    "reward": false,
+    "simplify": false,
+    "variety": false
+  },
+  "note": {
+    "fun/h41.bold": "could be 4 shapes instead of inside lines"
+  },
+  "ref": {},
+  "results": {
+    "app": "concept-icon-review",
+    "complete": false,
+    "concepts": [
+      {
+        "concept": "simplify",
+        "finalists": [
+          "h41.weird"
+        ],
+        "none": false
+      },
+      {
+        "concept": "organize",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "reduce-effort",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "variety",
+        "finalists": [
+          "h41.classical",
+          "h43.pebbles"
+        ],
+        "none": false
+      },
+      {
+        "concept": "sensorial",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "aesthetics",
+        "finalists": [
+          "h41.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "attractiveness",
+        "finalists": [
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "fun",
+        "finalists": [
+          "h41.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "entertainment",
+        "finalists": [
+          "h43.bold",
+          "h41.weird"
+        ],
+        "none": false
+      },
+      {
+        "concept": "reward",
+        "finalists": [
+          "h43.bold",
+          "h41.pebbles"
+        ],
+        "none": false
+      },
+      {
+        "concept": "badge-value",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "recognition",
+        "finalists": [
+          "h43.classical"
+        ],
+        "none": false
+      }
+    ],
+    "drawings": [
+      {
+        "candidate": "h41.weird",
+        "concept": "simplify",
+        "decision": "keep",
+        "finalist": true,
+        "id": "simplify/h41.weird",
+        "name": "simplify",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "reduce-effort",
+        "decision": "keep",
+        "finalist": false,
+        "id": "reduce-effort/h43.weird",
+        "name": "scale-stones-empower",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "variety",
+        "decision": "keep",
+        "finalist": true,
+        "id": "variety/h41.classical",
+        "name": "variety-shapes",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.pebbles",
+        "concept": "variety",
+        "decision": "keep",
+        "finalist": true,
+        "id": "variety/h43.pebbles",
+        "name": "variety-stones",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "variety",
+        "decision": "keep",
+        "finalist": false,
+        "id": "variety/h43.bold",
+        "name": "library-books",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "variety",
+        "decision": "keep",
+        "finalist": false,
+        "id": "variety/h43.weird",
+        "name": "variety-scribble",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "aesthetics",
+        "decision": "keep",
+        "finalist": true,
+        "id": "aesthetics/h41.bold",
+        "name": "fibonacci-spiral",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "aesthetics",
+        "decision": "keep",
+        "finalist": false,
+        "id": "aesthetics/h41.classical",
+        "name": "tulip",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "attractiveness",
+        "decision": "keep",
+        "finalist": true,
+        "id": "attractiveness/h41.classical",
+        "name": "magnet",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "fun",
+        "decision": "refine",
+        "finalist": true,
+        "id": "fun/h41.bold",
+        "name": "kite",
+        "nameOk": true,
+        "refine": "could be 4 shapes instead of inside lines",
+        "starred": false,
+        "variants": {
+          "solid": "refine"
+        }
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "fun",
+        "decision": "refine",
+        "finalist": false,
+        "id": "fun/h41.weird",
+        "name": "spring-stone",
+        "nameOk": true,
+        "refine": "",
+        "starred": true,
+        "variants": {
+          "marked": "drop"
+        }
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "entertainment",
+        "decision": "keep",
+        "finalist": true,
+        "id": "entertainment/h43.bold",
+        "name": "clap",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "entertainment",
+        "decision": "keep",
+        "finalist": true,
+        "id": "entertainment/h41.weird",
+        "name": "theatre",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "reward",
+        "decision": "keep",
+        "finalist": true,
+        "id": "reward/h43.bold",
+        "name": "gift-ribbon",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "reward",
+        "decision": "keep",
+        "finalist": true,
+        "id": "reward/h41.pebbles",
+        "name": "stone-podium",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "recognition",
+        "decision": "keep",
+        "finalist": true,
+        "id": "recognition/h43.classical",
+        "name": "bubble-star",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      }
+    ],
+    "exportedAt": "2026-11-15T11:02:54.096Z",
+    "refinements": [],
+    "stars": [
+      "reduce-effort/h43.weird",
+      "variety/h43.bold",
+      "variety/h43.weird",
+      "aesthetics/h41.classical",
+      "fun/h41.weird"
+    ],
+    "version": 1
+  },
+  "rev": 307,
+  "seed": 213806718,
+  "stars": [
+    "reduce-effort/h43.weird",
+    "variety/h43.bold",
+    "variety/h43.weird",
+    "aesthetics/h41.classical",
+    "fun/h41.weird"
+  ],
+  "updatedAt": "2026-11-15T11:02:54.096Z",
+  "v": 1,
+  "vf": {
+    "fun/h41.bold": {
+      "solid": "refine"
+    },
+    "fun/h41.weird": {
+      "marked": "drop"
+    }
+  }
+}
