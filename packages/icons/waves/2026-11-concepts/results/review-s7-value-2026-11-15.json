@@ -81,7 +81,14 @@
   "note": {
     "fun/h41.bold": "could be 4 shapes instead of inside lines"
   },
-  "ref": {},
+  "ref": {
+    "kite": {
+      "d": "accept"
+    },
+    "spring-stone": {
+      "d": "accept"
+    }
+  },
   "results": {
     "app": "concept-icon-review",
     "complete": false,
@@ -365,7 +372,24 @@
       }
     ],
     "exportedAt": "2026-11-15T11:02:54.096Z",
-    "refinements": [],
+    "refinements": [
+      {
+        "concept": "fun",
+        "decision": "accept",
+        "name": "kite",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      },
+      {
+        "concept": "fun",
+        "decision": "accept",
+        "name": "spring-stone",
+        "note": null,
+        "round": 1,
+        "variants": {}
+      }
+    ],
     "stars": [
       "reduce-effort/h43.weird",
       "variety/h43.bold",
