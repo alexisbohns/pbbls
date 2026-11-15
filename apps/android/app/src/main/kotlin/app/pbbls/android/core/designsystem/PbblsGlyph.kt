@@ -3080,6 +3080,264 @@ enum class PbblsGlyph(
 
     /** Stones balance: stones balanced on one another. */
     STONES_BALANCE("stones-balance"),
+
+    /** Circle spark: a spark inside a circle. */
+    CIRCLE_SPARK("circle-spark"),
+
+    /** Destination flag: a flag marking a destination. */
+    DESTINATION_FLAG("destination-flag"),
+
+    /** Spark to stone: a spark turning into a stone. */
+    SPARK_TO_STONE("spark-to-stone"),
+
+    /** Code square: code brackets inside a square. */
+    CODE_SQUARE("code-square"),
+
+    /** Stone accolade: a stone given as an honour. */
+    STONE_ACCOLADE("stone-accolade"),
+
+    /** Building columns: a building fronted by columns. */
+    BUILDING_COLUMNS("building-columns"),
+
+    /** Building flat: a flat, low building. */
+    BUILDING_FLAT("building-flat"),
+
+    /** Stone bridge: a bridge built from stone. */
+    STONE_BRIDGE("stone-bridge"),
+
+    /** Triangles: a set of triangles. */
+    TRIANGLES("triangles"),
+
+    /** Branch bud: a bud on a branch. */
+    BRANCH_BUD("branch-bud"),
+
+    /** Branch buds: several buds on a branch. */
+    BRANCH_BUDS("branch-buds"),
+
+    /** Git branch: a branch splitting off a line of work. */
+    GIT_BRANCH("git-branch"),
+
+    /** Git branch create: a new branch being started. */
+    GIT_BRANCH_CREATE("git-branch-create"),
+
+    /** Stones: a group of stones piled together. */
+    STONES_8("stones-8"),
+
+    /** Edge: the boundary line of a shape. */
+    EDGE("edge"),
+
+    /** Git fork: a line of work splitting into two. */
+    GIT_FORK_SM("git-fork-sm"),
+
+    /** Git diamond: a diamond-shaped commit node in a history. */
+    GIT_DIAMOND("git-diamond"),
+
+    /** Git tree: a branching tree of commits. */
+    GIT_TREE("git-tree"),
+
+    /** Git triangle: a triangle-shaped commit node. */
+    GIT_TRIANGLE("git-triangle"),
+
+    /** Path stones: stones laid along a path. */
+    PATH_STONES("path-stones"),
+
+    /** Ripples line: ripples spreading along a line. */
+    RIPPLES_LINE("ripples-line"),
+
+    /** Graph: a chart of points and lines. */
+    GRAPH("graph"),
+
+    /** Chip component: a computer chip component. */
+    CHIP_COMPONENT("chip-component"),
+
+    /** Puzzle: a puzzle piece. */
+    PUZZLE("puzzle"),
+
+    /** Git merge: two lines of work joining into one. */
+    GIT_MERGE("git-merge"),
+
+    /** Git merge down: a merge flowing downward into one line. */
+    GIT_MERGE_DOWN("git-merge-down"),
+
+    /** Stones network: stones linked together in a network. */
+    STONES_NETWORK("stones-network"),
+
+    /** Node lines: a node joined by two lines. */
+    NODE_LINES_2("node-lines-2"),
+
+    /** Node lines: a node joined by three lines. */
+    NODE_LINES_3("node-lines-3"),
+
+    /** Node lines: a node joined by five lines. */
+    NODE_LINES_5("node-lines-5"),
+
+    /** Stone emits: a stone giving off rays. */
+    STONE_EMITS_2("stone-emits-2"),
+
+    /** Stone node: a stone acting as a node in a network. */
+    STONE_NODE("stone-node"),
+
+    /** Cairn stone add: a stone added to a cairn. */
+    CAIRN_STONE_ADD("cairn-stone-add"),
+
+    /** Node edge x: a node link cut off with a cross. */
+    NODE_EDGE_X("node-edge-x"),
+
+    /** Node node: two nodes linked together. */
+    NODE_NODE("node-node"),
+
+    /** Node plus: a node added to a network. */
+    NODE_PLUS("node-plus"),
+
+    /** Stone node plus: a stone node added to a network. */
+    STONE_NODE_PLUS("stone-node-plus"),
+
+    /** Alarm: an alarm clock ringing for a set time. */
+    ALARM("alarm"),
+
+    /** Bubbles: rising bubbles. */
+    BUBBLES("bubbles"),
+
+    /** Node seed: a seed sitting at a node. */
+    NODE_SEED("node-seed"),
+
+    /** Node spark: a spark lighting up a node. */
+    NODE_SPARK("node-spark"),
+
+    /** Stone shine: a stone catching the light. */
+    STONE_SHINE_2("stone-shine-2"),
+
+    /** Circle stones: stones arranged in a circle. */
+    CIRCLE_STONES_3("circle-stones-3"),
+
+    /** Node edge minus: a link removed from a node. */
+    NODE_EDGE_MINUS("node-edge-minus"),
+
+    /** Node minus: a node taken away. */
+    NODE_MINUS("node-minus"),
+
+    /** Node x: a node crossed out. */
+    NODE_X("node-x"),
+
+    /** Ipod station: a dock for a music player. */
+    IPOD_STATION("ipod-station"),
+
+    /** Rectangle exchange: two rectangles swapping places. */
+    RECTANGLE_EXCHANGE("rectangle-exchange"),
+
+    /** Servers: stacked server units. */
+    SERVERS("servers"),
+
+    /** Stone emit: a stone giving off a signal. */
+    STONE_EMIT_2("stone-emit-2"),
+
+    /** Atoms: atoms linked together. */
+    ATOMS("atoms"),
+
+    /** Circle network: a network of nodes inside a circle. */
+    CIRCLE_NETWORK("circle-network"),
+
+    /** System: parts working together as a whole. */
+    SYSTEM("system"),
+
+    /** File check: a file marked as checked. */
+    FILE_CHECK("file-check"),
+
+    /** Pouch check: a pouch with a tick on it. */
+    POUCH_CHECK("pouch-check"),
+
+    /** Receipt checks: a receipt with ticks on it. */
+    RECEIPT_CHECKS("receipt-checks"),
+
+    /** Accolades check: a tick given as an honour. */
+    ACCOLADES_CHECK("accolades-check"),
+
+    /** Stone code: code written on a stone. */
+    STONE_CODE("stone-code"),
+
+    /** Terminal: a command-line window. */
+    TERMINAL("terminal"),
+
+    /** Gauge small: a small gauge dial. */
+    GAUGE_SM("gauge-sm"),
+
+    /** Rule: a ruler for measuring lines. */
+    RULE("rule"),
+
+    /** Hourglass empty: an hourglass with no sand left. */
+    HOURGLASS_EMPTY("hourglass-empty"),
+
+    /** Stone scale up: a stone growing larger. */
+    STONE_SCALE_UP("stone-scale-up"),
+
+    /** Flag underline: a flag with a line beneath it. */
+    FLAG_UNDERLINE("flag-underline"),
+
+    /** Search exclamation: a magnifying glass with an alert mark. */
+    SEARCH_EXCLAMATION("search-exclamation"),
+
+    /** Plaster: a plaster bandage for a small wound. */
+    PLASTER("plaster"),
+
+    /** Square x: a cross inside a square. */
+    SQUARE_X("square-x"),
+
+    /** Circle gauge: a gauge dial inside a circle. */
+    CIRCLE_GAUGE("circle-gauge"),
+
+    /** Monitor: a computer screen. */
+    MONITOR("monitor"),
+
+    /** Board growth: a board showing growth. */
+    BOARD_GROWTH("board-growth"),
+
+    /** Eye signal: an eye with a signal beside it. */
+    EYE_SIGNAL("eye-signal"),
+
+    /** Target: a bullseye to aim at. */
+    TARGET("target"),
+
+    /** Stone scale: a stone weighed on a scale. */
+    STONE_SCALE("stone-scale"),
+
+    /** Stone speed: a stone moving fast. */
+    STONE_SPEED_2("stone-speed-2"),
+
+    /** Stopwatch: a timer for measuring a duration. */
+    STOPWATCH_2("stopwatch-2"),
+
+    /** Gemstone: a cut gem. */
+    GEMSTONE("gemstone"),
+
+    /** Clipboard check: a clipboard with a tick. */
+    CLIPBOARD_CHECK("clipboard-check"),
+
+    /** Shield check: a shield with a tick, protection confirmed. */
+    SHIELD_CHECK("shield-check"),
+
+    /** Stamp check: a stamp marked with a tick. */
+    STAMP_CHECK("stamp-check"),
+
+    /** Pillar: a tall column. */
+    PILLAR("pillar"),
+
+    /** Stone shake: a stone shaking. */
+    STONE_SHAKE("stone-shake"),
+
+    /** Lock open: an unlocked padlock. */
+    LOCK_OPEN("lock-open"),
+
+    /** Puzzle piece: a single puzzle piece. */
+    PUZZLE_PIECE("puzzle-piece"),
+
+    /** Checkmarks: two ticks, one after the other. */
+    CHECKMARKS("checkmarks"),
+
+    /** Eye check: an eye with a tick, seen and confirmed. */
+    EYE_CHECK("eye-check"),
+
+    /** Search check: a magnifying glass with a tick. */
+    SEARCH_CHECK("search-check"),
     ;
 
     companion object {
