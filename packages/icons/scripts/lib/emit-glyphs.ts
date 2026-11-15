@@ -60,7 +60,8 @@ export function buildGlyph(row: IconRow, source: string, overrides: Record<strin
   paths.forEach((p, i) => {
     if (p.role !== "mark" && p.role !== "step") return
     // Paths of the same role fill together, so they never carve each other (a mark's dot inside its lit blob).
-    const together = (q: GlyphPath) => q.role === p.role && (p.role === "mark" || q.step === p.step)
+    // A hidden mark that repeats a body path (one stone of a filled row, lit) is not carved by that path either.
+    const together = (q: GlyphPath) => q.d === p.d || (q.role === p.role && (p.role === "mark" || q.step === p.step))
     const inner = paths.flatMap((q, j) => (j !== i && !q.hidden && !together(q) ? [j] : []))
     const carved = carveSolid([p.d], inner.map((j) => paths[j]?.d ?? ""), [], { inkOutside: false })
     if (carved.keep.length === inner.length) return

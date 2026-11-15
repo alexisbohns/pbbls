@@ -130,7 +130,12 @@ export function carveSolid(body: readonly string[], others: readonly string[], h
   const cutters: IntPath[] = []
   holes.forEach((d, i) => {
     if (!inside(d, reach)) outside.push(i)
-    else cutters.push(...paintedRegion(d))
+    else if (body.includes(d)) {
+      // A mark repeating a body path (one stone of a filled row, lit) is cut out as its inside only:
+      // the stone keeps its outline, so the marked solid shows it hollow among the filled ones.
+      const own = boolean(ClipperLib.ClipType.ctUnion, flattenPath(d).filter((s) => s.points.length >= 3).map((s) => toInt(s.points)), [])
+      cutters.push(...offset(own, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon, -HALF_STROKE))
+    } else cutters.push(...paintedRegion(d))
   })
   // A carved line knocks out its stroke only inside the fill and stays inked outside it: where it meets
   // the edge (a door on the ground line) the outline is not notched, and a tail past the edge is drawn.
