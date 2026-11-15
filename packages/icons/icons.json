@@ -8522,6 +8522,699 @@
       "status": "candidate",
       "migrated": [],
       "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "filter-dots",
+      "meaning": "Filter dots: dots sorted through a filter.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "inbox-full",
+      "meaning": "Inbox full: an inbox with no room left.",
+      "tags": { "category": ["notifications"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "logs-stack",
+      "meaning": "Logs stack: logs piled one on another.",
+      "tags": { "category": ["plants"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stack-fall",
+      "meaning": "Stack fall: a stack of items tipping over.",
+      "tags": { "category": ["collections"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-pot",
+      "meaning": "Stones pot: stones kept in a pot.",
+      "tags": { "category": ["stones", "collections"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-stack-4",
+      "meaning": "Stones stack: stones piled one on another.",
+      "tags": { "category": ["cairns", "stones"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-underline-shrink-arrow",
+      "meaning": "Stones shrink: stones underlined with an arrow that shrinks.",
+      "tags": { "category": ["stones", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "cell-dots",
+      "meaning": "Cell dots: dots arranged in a grid cell.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-shaded",
+      "meaning": "Circle shaded: a circle with part of it filled in.",
+      "tags": { "category": ["appearance"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "community",
+      "meaning": "Community: several people gathered together.",
+      "tags": { "category": ["souls"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "door-open",
+      "meaning": "Door open: a door standing open.",
+      "tags": { "category": ["places"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "flask-lab",
+      "meaning": "Flask lab: a laboratory flask for experiments.",
+      "tags": { "category": ["tools"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-sprout",
+      "meaning": "Pebble sprout: a stone with a shoot growing from it.",
+      "tags": { "category": ["stones", "plants"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-group-3",
+      "meaning": "Stones group: three stones gathered together.",
+      "tags": { "category": ["stones"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-group-5",
+      "meaning": "Stones group: five stones gathered together.",
+      "tags": { "category": ["stones"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "axis-bounce",
+      "meaning": "Axis bounce: a bouncing motion along an axis.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "diff",
+      "meaning": "Diff: two versions set side by side to compare changes.",
+      "tags": { "category": ["documents"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "list-timeline",
+      "meaning": "List timeline: a list of entries laid along a timeline.",
+      "tags": { "category": ["paths", "charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "maze-tunnel",
+      "meaning": "Maze tunnel: a tunnel winding through a maze.",
+      "tags": { "category": ["paths"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "award",
+      "meaning": "Award: a prize given in recognition of achievement.",
+      "tags": { "category": ["awards"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "certificate",
+      "meaning": "Certificate: a formal document confirming an achievement.",
+      "tags": { "category": ["awards", "documents"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-split",
+      "meaning": "Circle split: a circle divided into two parts.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "decision",
+      "meaning": "Decision: a choice made between options.",
+      "tags": { "category": ["paths"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "fork",
+      "meaning": "Fork: a split where a path divides in two.",
+      "tags": { "category": ["paths"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "judge-hammer",
+      "meaning": "Judge hammer: a gavel used to judge or rule.",
+      "tags": { "category": ["tools"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "node-decision",
+      "meaning": "Node decision: a node where a choice branches off.",
+      "tags": { "category": ["paths", "web"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-underline-jump",
+      "meaning": "Stones underline: stones under a line, with one jumping across.",
+      "tags": { "category": ["stones", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "package-arc-bottom",
+      "meaning": "Package arc: a package with an arc beneath it.",
+      "tags": { "category": ["transfer"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-bowl-2",
+      "meaning": "Stone bowl: a bowl made from a stone.",
+      "tags": { "category": ["stones", "collections"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-jump",
+      "meaning": "Stone jump: a stone leaping through the air.",
+      "tags": { "category": ["stones", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "edge-direction",
+      "meaning": "Edge direction: a line on an edge pointing a direction.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "flow-stone",
+      "meaning": "Flow stone: a stone set in a flow of movement.",
+      "tags": { "category": ["stones", "water"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "flow-stones",
+      "meaning": "Flow stones: stones carried along in a flow.",
+      "tags": { "category": ["stones", "water"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "infinite",
+      "meaning": "Infinite: a loop with no end.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "network-arc",
+      "meaning": "Network arc: a curved link between network nodes.",
+      "tags": { "category": ["web"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "node-direction-right",
+      "meaning": "Node direction: a node with an arrow pointing right.",
+      "tags": { "category": ["web", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-wave",
+      "meaning": "Stones wave: stones arranged in a wave.",
+      "tags": { "category": ["stones", "water"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "clock-backward",
+      "meaning": "Clock backward: a clock turned back in time.",
+      "tags": { "category": ["time", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "road-horizon",
+      "meaning": "Road horizon: a road running to the horizon.",
+      "tags": { "category": ["paths", "land"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-waves-left",
+      "meaning": "Stone waves: a stone with waves running to the left.",
+      "tags": { "category": ["stones", "water"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "target-search",
+      "meaning": "Target search: a target found by searching.",
+      "tags": { "category": ["maps", "play"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "clipboard-checklist",
+      "meaning": "Clipboard checklist: a checklist held on a clipboard.",
+      "tags": { "category": ["documents", "actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-bars-strike",
+      "meaning": "Pebble bars: a stone bar chart with one bar struck through.",
+      "tags": { "category": ["stones", "charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "shelves",
+      "meaning": "Shelves: shelves holding items.",
+      "tags": { "category": ["collections"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "squared-square",
+      "meaning": "Squared square: a square set inside another square.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "book-sheets",
+      "meaning": "Book sheets: loose sheets bound like a book.",
+      "tags": { "category": ["documents"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "sunshine-up",
+      "meaning": "Sunshine up: sunshine rising upward.",
+      "tags": { "category": ["sky", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "book-open-text",
+      "meaning": "Book open text: an open book with text on its pages.",
+      "tags": { "category": ["documents"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "book-sheets-vertical",
+      "meaning": "Book sheets vertical: sheets of a book set upright.",
+      "tags": { "category": ["documents"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "scale-balance",
+      "meaning": "Scale balance: a balance scale in equilibrium.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-comparison",
+      "meaning": "Stones comparison: stones set side by side to compare.",
+      "tags": { "category": ["stones", "charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-stack-comparison",
+      "meaning": "Stones stack comparison: stone stacks side by side to compare.",
+      "tags": { "category": ["stones", "charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stop-circle-2",
+      "meaning": "Stop circle: a stop sign inside a circle.",
+      "tags": { "category": ["alerts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-ring-bell",
+      "meaning": "Circle ring bell: a bell ringing inside a circle.",
+      "tags": { "category": ["notifications"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "receipt-3",
+      "meaning": "Receipt: a record of a payment.",
+      "tags": { "category": ["shopping"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-stack-box-4",
+      "meaning": "Stones stack box: stones stacked in a box.",
+      "tags": { "category": ["stones", "collections"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "print-echoes",
+      "meaning": "Print echoes: printed marks repeated as echoes.",
+      "tags": { "category": ["writing"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-arch",
+      "meaning": "Stone arch: an arch built from stones.",
+      "tags": { "category": ["stones", "cairns"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "text-circle",
+      "meaning": "Text circle: text arranged in a circle.",
+      "tags": { "category": ["writing"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "text-pebble",
+      "meaning": "Text stone: text written on a stone.",
+      "tags": { "category": ["stones", "writing"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "cairn",
+      "meaning": "Cairn: a stacked pile of stones marking a path.",
+      "tags": { "category": ["cairns"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "label-tag",
+      "meaning": "Label tag: a tag tied to an item to name it.",
+      "tags": { "category": ["shopping"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "label-tag-2",
+      "meaning": "Label tag: a tag with a hole and two written marks.",
+      "tags": { "category": ["shopping"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "package",
+      "meaning": "Package: a parcel wrapped and ready to send.",
+      "tags": { "category": ["transfer", "shopping"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "shipment",
+      "meaning": "Shipment: goods packed for delivery.",
+      "tags": { "category": ["transfer", "shopping"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-speed-3",
+      "meaning": "Stone speed: a stone moving fast with speed lines.",
+      "tags": { "category": ["stones", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-speed-underline",
+      "meaning": "Stone speed underline: a fast stone with a line beneath it.",
+      "tags": { "category": ["stones", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-broken-2",
+      "meaning": "Circle broken: a circle with a gap in its outline.",
+      "tags": { "category": ["alerts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "flask",
+      "meaning": "Flask: a laboratory flask.",
+      "tags": { "category": ["tools"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "flask-particles",
+      "meaning": "Flask particles: particles rising from a flask.",
+      "tags": { "category": ["tools"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "flask-tube-check",
+      "meaning": "Flask tube check: a test tube and flask with a tick.",
+      "tags": { "category": ["tools", "actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pin-waves",
+      "meaning": "Pin waves: a map pin sending out waves.",
+      "tags": { "category": ["maps", "web"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "recipient-stick",
+      "meaning": "Recipient stick: a stick marker pointing at a recipient.",
+      "tags": { "category": ["notifications"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "signal-pin",
+      "meaning": "Signal pin: a pin marking a signal.",
+      "tags": { "category": ["maps", "web"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "square-check",
+      "meaning": "Square check: a checked box.",
+      "tags": { "category": ["actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-arcs",
+      "meaning": "Stone arcs: a stone with arcs around it.",
+      "tags": { "category": ["stones", "fire"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-balance",
+      "meaning": "Stones balance: stones balanced on one another.",
+      "tags": { "category": ["stones", "cairns"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
     }
   ]
 }

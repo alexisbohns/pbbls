@@ -2849,6 +2849,237 @@ enum class PbblsGlyph(
 
     /** Shopping: shopping, a bag or a cart. */
     ABSTRACT_STONE_CURVE("abstract-stone-curve"),
+
+    /** Filter dots: dots sorted through a filter. */
+    FILTER_DOTS("filter-dots"),
+
+    /** Inbox full: an inbox with no room left. */
+    INBOX_FULL("inbox-full"),
+
+    /** Logs stack: logs piled one on another. */
+    LOGS_STACK("logs-stack"),
+
+    /** Stack fall: a stack of items tipping over. */
+    STACK_FALL("stack-fall"),
+
+    /** Stones pot: stones kept in a pot. */
+    STONES_POT("stones-pot"),
+
+    /** Stones stack: stones piled one on another. */
+    STONES_STACK_4("stones-stack-4"),
+
+    /** Stones shrink: stones underlined with an arrow that shrinks. */
+    STONES_UNDERLINE_SHRINK_ARROW("stones-underline-shrink-arrow"),
+
+    /** Cell dots: dots arranged in a grid cell. */
+    CELL_DOTS("cell-dots"),
+
+    /** Circle shaded: a circle with part of it filled in. */
+    CIRCLE_SHADED("circle-shaded"),
+
+    /** Community: several people gathered together. */
+    COMMUNITY("community"),
+
+    /** Door open: a door standing open. */
+    DOOR_OPEN("door-open"),
+
+    /** Flask lab: a laboratory flask for experiments. */
+    FLASK_LAB("flask-lab"),
+
+    /** Pebble sprout: a stone with a shoot growing from it. */
+    PEBBLE_SPROUT("pebble-sprout"),
+
+    /** Stones group: three stones gathered together. */
+    STONES_GROUP_3("stones-group-3"),
+
+    /** Stones group: five stones gathered together. */
+    STONES_GROUP_5("stones-group-5"),
+
+    /** Axis bounce: a bouncing motion along an axis. */
+    AXIS_BOUNCE("axis-bounce"),
+
+    /** Diff: two versions set side by side to compare changes. */
+    DIFF("diff"),
+
+    /** List timeline: a list of entries laid along a timeline. */
+    LIST_TIMELINE("list-timeline"),
+
+    /** Maze tunnel: a tunnel winding through a maze. */
+    MAZE_TUNNEL("maze-tunnel"),
+
+    /** Award: a prize given in recognition of achievement. */
+    AWARD("award"),
+
+    /** Certificate: a formal document confirming an achievement. */
+    CERTIFICATE("certificate"),
+
+    /** Circle split: a circle divided into two parts. */
+    CIRCLE_SPLIT("circle-split"),
+
+    /** Decision: a choice made between options. */
+    DECISION("decision"),
+
+    /** Fork: a split where a path divides in two. */
+    FORK("fork"),
+
+    /** Judge hammer: a gavel used to judge or rule. */
+    JUDGE_HAMMER("judge-hammer"),
+
+    /** Node decision: a node where a choice branches off. */
+    NODE_DECISION("node-decision"),
+
+    /** Stones underline: stones under a line, with one jumping across. */
+    STONES_UNDERLINE_JUMP("stones-underline-jump"),
+
+    /** Package arc: a package with an arc beneath it. */
+    PACKAGE_ARC_BOTTOM("package-arc-bottom"),
+
+    /** Stone bowl: a bowl made from a stone. */
+    STONE_BOWL_2("stone-bowl-2"),
+
+    /** Stone jump: a stone leaping through the air. */
+    STONE_JUMP("stone-jump"),
+
+    /** Edge direction: a line on an edge pointing a direction. */
+    EDGE_DIRECTION("edge-direction"),
+
+    /** Flow stone: a stone set in a flow of movement. */
+    FLOW_STONE("flow-stone"),
+
+    /** Flow stones: stones carried along in a flow. */
+    FLOW_STONES("flow-stones"),
+
+    /** Infinite: a loop with no end. */
+    INFINITE("infinite"),
+
+    /** Network arc: a curved link between network nodes. */
+    NETWORK_ARC("network-arc"),
+
+    /** Node direction: a node with an arrow pointing right. */
+    NODE_DIRECTION_RIGHT("node-direction-right"),
+
+    /** Stones wave: stones arranged in a wave. */
+    STONES_WAVE("stones-wave"),
+
+    /** Clock backward: a clock turned back in time. */
+    CLOCK_BACKWARD("clock-backward"),
+
+    /** Road horizon: a road running to the horizon. */
+    ROAD_HORIZON("road-horizon"),
+
+    /** Stone waves: a stone with waves running to the left. */
+    STONE_WAVES_LEFT("stone-waves-left"),
+
+    /** Target search: a target found by searching. */
+    TARGET_SEARCH("target-search"),
+
+    /** Clipboard checklist: a checklist held on a clipboard. */
+    CLIPBOARD_CHECKLIST("clipboard-checklist"),
+
+    /** Pebble bars: a stone bar chart with one bar struck through. */
+    PEBBLE_BARS_STRIKE("pebble-bars-strike"),
+
+    /** Shelves: shelves holding items. */
+    SHELVES("shelves"),
+
+    /** Squared square: a square set inside another square. */
+    SQUARED_SQUARE("squared-square"),
+
+    /** Book sheets: loose sheets bound like a book. */
+    BOOK_SHEETS("book-sheets"),
+
+    /** Sunshine up: sunshine rising upward. */
+    SUNSHINE_UP("sunshine-up"),
+
+    /** Book open text: an open book with text on its pages. */
+    BOOK_OPEN_TEXT("book-open-text"),
+
+    /** Book sheets vertical: sheets of a book set upright. */
+    BOOK_SHEETS_VERTICAL("book-sheets-vertical"),
+
+    /** Scale balance: a balance scale in equilibrium. */
+    SCALE_BALANCE("scale-balance"),
+
+    /** Stones comparison: stones set side by side to compare. */
+    STONES_COMPARISON("stones-comparison"),
+
+    /** Stones stack comparison: stone stacks side by side to compare. */
+    STONES_STACK_COMPARISON("stones-stack-comparison"),
+
+    /** Stop circle: a stop sign inside a circle. */
+    STOP_CIRCLE_2("stop-circle-2"),
+
+    /** Circle ring bell: a bell ringing inside a circle. */
+    CIRCLE_RING_BELL("circle-ring-bell"),
+
+    /** Receipt: a record of a payment. */
+    RECEIPT_3("receipt-3"),
+
+    /** Stones stack box: stones stacked in a box. */
+    STONES_STACK_BOX_4("stones-stack-box-4"),
+
+    /** Print echoes: printed marks repeated as echoes. */
+    PRINT_ECHOES("print-echoes"),
+
+    /** Stone arch: an arch built from stones. */
+    STONE_ARCH("stone-arch"),
+
+    /** Text circle: text arranged in a circle. */
+    TEXT_CIRCLE("text-circle"),
+
+    /** Text stone: text written on a stone. */
+    TEXT_PEBBLE("text-pebble"),
+
+    /** Cairn: a stacked pile of stones marking a path. */
+    CAIRN("cairn"),
+
+    /** Label tag: a tag tied to an item to name it. */
+    LABEL_TAG("label-tag"),
+
+    /** Label tag: a tag with a hole and two written marks. */
+    LABEL_TAG_2("label-tag-2"),
+
+    /** Package: a parcel wrapped and ready to send. */
+    PACKAGE("package"),
+
+    /** Shipment: goods packed for delivery. */
+    SHIPMENT("shipment"),
+
+    /** Stone speed: a stone moving fast with speed lines. */
+    STONE_SPEED_3("stone-speed-3"),
+
+    /** Stone speed underline: a fast stone with a line beneath it. */
+    STONE_SPEED_UNDERLINE("stone-speed-underline"),
+
+    /** Circle broken: a circle with a gap in its outline. */
+    CIRCLE_BROKEN_2("circle-broken-2"),
+
+    /** Flask: a laboratory flask. */
+    FLASK("flask"),
+
+    /** Flask particles: particles rising from a flask. */
+    FLASK_PARTICLES("flask-particles"),
+
+    /** Flask tube check: a test tube and flask with a tick. */
+    FLASK_TUBE_CHECK("flask-tube-check"),
+
+    /** Pin waves: a map pin sending out waves. */
+    PIN_WAVES("pin-waves"),
+
+    /** Recipient stick: a stick marker pointing at a recipient. */
+    RECIPIENT_STICK("recipient-stick"),
+
+    /** Signal pin: a pin marking a signal. */
+    SIGNAL_PIN("signal-pin"),
+
+    /** Square check: a checked box. */
+    SQUARE_CHECK("square-check"),
+
+    /** Stone arcs: a stone with arcs around it. */
+    STONE_ARCS("stone-arcs"),
+
+    /** Stones balance: stones balanced on one another. */
+    STONES_BALANCE("stones-balance"),
     ;
 
     companion object {
