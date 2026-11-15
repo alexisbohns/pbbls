@@ -1,0 +1,479 @@
+{
+  "dec": {
+    "accessibility/h41.classical": "keep",
+    "accessibility/h41.weird": "keep",
+    "anxiety/h43.weird": "keep",
+    "data-protection/h41.classical": "keep",
+    "diagnosis/h41.bold": "keep",
+    "diagnosis/h43.classical": "keep",
+    "doctor/h41.bold": "keep",
+    "doctor/h41.classical": "keep",
+    "health/h41.classical": "keep",
+    "health/h41.pebbles": "keep",
+    "health/h43.bold": "keep",
+    "inclusion/h41.bold": "keep",
+    "inclusion/h41.classical": "keep",
+    "safety/h41.pebbles": "keep",
+    "safety/h41.weird": "keep",
+    "security/h41.bold": "keep",
+    "security/h43.bold": "keep",
+    "therapeutic/h41.bold": "keep",
+    "therapeutic/h41.classical": "keep",
+    "wellness/h41.classical": "keep"
+  },
+  "finals": {
+    "accessibility": [
+      "h41.classical",
+      "h41.weird"
+    ],
+    "anxiety": [],
+    "avoid-hassles": [],
+    "data-protection": [
+      "h41.classical"
+    ],
+    "diagnosis": [
+      "h43.classical",
+      "h41.bold"
+    ],
+    "doctor": [
+      "h41.classical",
+      "h41.bold"
+    ],
+    "gdpr": [],
+    "health": [
+      "h41.pebbles",
+      "h41.classical",
+      "h43.bold"
+    ],
+    "inclusion": [
+      "h41.classical",
+      "h41.bold"
+    ],
+    "privacy": [],
+    "risk": [],
+    "safety": [
+      "h41.weird"
+    ],
+    "security": [
+      "h41.bold",
+      "h43.bold"
+    ],
+    "store-compliance": [],
+    "therapeutic": [
+      "h41.classical"
+    ],
+    "wellness": [
+      "h41.classical"
+    ]
+  },
+  "names": {
+    "accessibility/h41.classical": "accessibility",
+    "accessibility/h41.weird": "stone-outlined-quarters",
+    "anxiety/h43.weird": "circle-lines",
+    "data-protection/h41.classical": "database-shield",
+    "diagnosis/h41.bold": "clipboard-check-x",
+    "diagnosis/h43.classical": "search-signal",
+    "doctor/h41.bold": "briefcase",
+    "doctor/h41.classical": "doctor",
+    "health/h41.classical": "heart-signal",
+    "health/h41.pebbles": "stone-signal-2",
+    "health/h43.bold": "thermometer",
+    "inclusion/h41.bold": "circle-shapes",
+    "inclusion/h41.classical": "community-underline",
+    "safety/h41.pebbles": "pebble-stone-stack",
+    "safety/h41.weird": "parachute",
+    "security/h41.bold": "castle",
+    "security/h43.bold": "tower",
+    "therapeutic/h41.bold": "coffee",
+    "therapeutic/h41.classical": "pill",
+    "wellness/h41.classical": "wellness"
+  },
+  "none": {
+    "accessibility": false,
+    "data-protection": false,
+    "diagnosis": false,
+    "doctor": false,
+    "health": false,
+    "inclusion": false,
+    "privacy": true,
+    "safety": false,
+    "security": false,
+    "therapeutic": false,
+    "wellness": false
+  },
+  "note": {},
+  "ref": {},
+  "results": {
+    "app": "concept-icon-review",
+    "complete": true,
+    "concepts": [
+      {
+        "concept": "security",
+        "finalists": [
+          "h41.bold",
+          "h43.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "privacy",
+        "finalists": [],
+        "none": true
+      },
+      {
+        "concept": "data-protection",
+        "finalists": [
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "gdpr",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "safety",
+        "finalists": [
+          "h41.weird"
+        ],
+        "none": false
+      },
+      {
+        "concept": "store-compliance",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "risk",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "health",
+        "finalists": [
+          "h41.pebbles",
+          "h41.classical",
+          "h43.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "diagnosis",
+        "finalists": [
+          "h43.classical",
+          "h41.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "doctor",
+        "finalists": [
+          "h41.classical",
+          "h41.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "therapeutic",
+        "finalists": [
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "wellness",
+        "finalists": [
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "accessibility",
+        "finalists": [
+          "h41.classical",
+          "h41.weird"
+        ],
+        "none": false
+      },
+      {
+        "concept": "inclusion",
+        "finalists": [
+          "h41.classical",
+          "h41.bold"
+        ],
+        "none": false
+      },
+      {
+        "concept": "anxiety",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "avoid-hassles",
+        "finalists": [],
+        "none": false
+      }
+    ],
+    "drawings": [
+      {
+        "candidate": "h41.bold",
+        "concept": "security",
+        "decision": "keep",
+        "finalist": true,
+        "id": "security/h41.bold",
+        "name": "castle",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "security",
+        "decision": "keep",
+        "finalist": true,
+        "id": "security/h43.bold",
+        "name": "tower",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "data-protection",
+        "decision": "keep",
+        "finalist": true,
+        "id": "data-protection/h41.classical",
+        "name": "database-shield",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "safety",
+        "decision": "keep",
+        "finalist": true,
+        "id": "safety/h41.weird",
+        "name": "parachute",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "safety",
+        "decision": "keep",
+        "finalist": false,
+        "id": "safety/h41.pebbles",
+        "name": "pebble-stone-stack",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.pebbles",
+        "concept": "health",
+        "decision": "keep",
+        "finalist": true,
+        "id": "health/h41.pebbles",
+        "name": "stone-signal-2",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "health",
+        "decision": "keep",
+        "finalist": true,
+        "id": "health/h41.classical",
+        "name": "heart-signal",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "health",
+        "decision": "keep",
+        "finalist": true,
+        "id": "health/h43.bold",
+        "name": "thermometer",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.classical",
+        "concept": "diagnosis",
+        "decision": "keep",
+        "finalist": true,
+        "id": "diagnosis/h43.classical",
+        "name": "search-signal",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "diagnosis",
+        "decision": "keep",
+        "finalist": true,
+        "id": "diagnosis/h41.bold",
+        "name": "clipboard-check-x",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "doctor",
+        "decision": "keep",
+        "finalist": true,
+        "id": "doctor/h41.classical",
+        "name": "doctor",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "doctor",
+        "decision": "keep",
+        "finalist": true,
+        "id": "doctor/h41.bold",
+        "name": "briefcase",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "therapeutic",
+        "decision": "keep",
+        "finalist": true,
+        "id": "therapeutic/h41.classical",
+        "name": "pill",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "therapeutic",
+        "decision": "keep",
+        "finalist": false,
+        "id": "therapeutic/h41.bold",
+        "name": "coffee",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "wellness",
+        "decision": "keep",
+        "finalist": true,
+        "id": "wellness/h41.classical",
+        "name": "wellness",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "accessibility",
+        "decision": "keep",
+        "finalist": true,
+        "id": "accessibility/h41.classical",
+        "name": "accessibility",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.weird",
+        "concept": "accessibility",
+        "decision": "keep",
+        "finalist": true,
+        "id": "accessibility/h41.weird",
+        "name": "stone-outlined-quarters",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "inclusion",
+        "decision": "keep",
+        "finalist": true,
+        "id": "inclusion/h41.classical",
+        "name": "community-underline",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "inclusion",
+        "decision": "keep",
+        "finalist": true,
+        "id": "inclusion/h41.bold",
+        "name": "circle-shapes",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.weird",
+        "concept": "anxiety",
+        "decision": "keep",
+        "finalist": false,
+        "id": "anxiety/h43.weird",
+        "name": "circle-lines",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      }
+    ],
+    "exportedAt": "2026-11-15T10:11:34.382Z",
+    "refinements": [],
+    "stars": [
+      "safety/h41.pebbles",
+      "therapeutic/h41.bold",
+      "anxiety/h43.weird"
+    ],
+    "version": 1
+  },
+  "rev": 312,
+  "seed": 2350729964,
+  "stars": [
+    "safety/h41.pebbles",
+    "therapeutic/h41.bold",
+    "anxiety/h43.weird"
+  ],
+  "updatedAt": "2026-11-15T10:11:34.382Z",
+  "v": 1,
+  "vf": {}
+}

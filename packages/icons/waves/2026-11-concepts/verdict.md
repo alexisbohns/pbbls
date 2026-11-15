@@ -1,7 +1,7 @@
 # Verdict
 
-297 drawings kept under 82 concepts; 3 abandoned.
-93 finalists, 205 starred, 55 redrawn in a refinement round, 21 variants dropped.
+317 drawings kept under 93 concepts; 3 abandoned.
+110 finalists, 208 starred, 55 redrawn in a refinement round, 21 variants dropped.
 
 ## s1-delivery
 
@@ -95,7 +95,20 @@
 - **status-supersede**: `circle-arrow-bottom-left` ★, `node-segment-cut-down` ★, `sprout-soil-seed` ★, `square-rotate-clockwise` ★, `stone-divided-up` ★, `stone-to-stone` ★, `supersed` (finalist)
 - **status-superseded**: `circle-arrow-up-right-2` ★, `node-segment-cut-up` ★, `square-rotate-backward` ★, `stone-divided` ★, `superseded` (finalist)
 - **status-warning**: `circle-exclamation` (finalist), `exlamation` ★, `square-zap` ★
+## s6-trust
 
-Concepts with no finalist: delivery, changelog, flow, journal, log, ledger, record, commitment, data, database, api, architecture, agentic, view, inform, affordance, resolved.
+- **accessibility**: `accessibility` (finalist), `stone-outlined-quarters` (finalist)
+- **anxiety**: `circle-lines` ★
+- **data-protection**: `database-shield` (finalist)
+- **diagnosis**: `clipboard-check-x` (finalist), `search-signal` (finalist)
+- **doctor**: `briefcase` (finalist), `doctor` (finalist)
+- **health**: `heart-signal` (finalist), `stone-signal-2` (finalist), `thermometer` (finalist)
+- **inclusion**: `circle-shapes` (finalist), `community-underline` (finalist)
+- **safety**: `parachute` (finalist), `pebble-stone-stack` ★
+- **security**: `castle` (finalist), `tower` (finalist)
+- **therapeutic**: `coffee` ★, `pill` (finalist)
+- **wellness**: `wellness` (finalist)
+
+Concepts with no finalist: delivery, changelog, flow, journal, log, ledger, record, commitment, data, database, api, architecture, agentic, view, inform, affordance, resolved, privacy.
 
 Abandoned: changelog/h42.pebbles, flow/h44.pebbles, page/h41.classical.
