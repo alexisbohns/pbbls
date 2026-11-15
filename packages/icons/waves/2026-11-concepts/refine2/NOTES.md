@@ -1,0 +1,6 @@
+- check-refine --r2: 2 errors left on purpose, both "mark's centre not inside a closed shape": the notes ask for exactly that (square-check: dot after the tick's tail as in checkmark-dot; filter-dots: the round-0 dot below the filter). Overrule the check for these two, or say so and they get re-marked.
+- square-check: round-0 regular, but the tick's tail is cut from 20,5.4 to 18.2,7.4 so a 3-unit dot fits past it inside the canvas; solid fills the box and the tick is carved.
+- flask: new closed liquid shape inside the round-1 flask, inset ~2.5 from walls so the carve doesn't eat the glass; solid fills only the liquid; marked keeps the bubble above it.
+- cairn: solid fills the base stone and the top circle (the middle stone is an open arc, left unfilled).
+- filter-dots: round-1 closed funnel + the five dots + round-0 drip dot below; solid fills the funnel (dots carved); marked fills a dot over the drip.
+- circle-ring-bell: solid fills the disc, ripples carved; marked dot is now 3 units, stroke none, at the ripples' source, clear of the outline. logs-stack: marked skipped. scale-balance: solid also fills the triangle base.

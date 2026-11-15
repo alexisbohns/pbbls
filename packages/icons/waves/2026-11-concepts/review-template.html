@@ -1,0 +1,526 @@
+<title>Concept Icon Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ysabeau:ital,wght@0,1..1000;1,1..1000&family=Ysabeau+SC:wght@500;600&display=swap">
+<style>
+/* Layout: sticky bar (phase tabs + concept stepper), then a grid of candidate cards, each shown in situation. */
+:root{
+  --ground:#ECE8DF;--stock:#FBF9F4;--ink:#1F1D1A;--ink-2:#686255;--rule:rgba(31,29,26,.16);
+  --accent:#8E4955;--on-accent:#FFFFFF;--like:#2F6F6A;--star:#B07A12;--off:#C9C4B8;--warn:#EA6B00;
+  --display:"Ysabeau",ui-serif,Georgia,serif;--label:"Ysabeau SC","Ysabeau",ui-serif,Georgia,serif;
+  --body:"Ysabeau",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#141416;--stock:#1E1D1B;--ink:#ECE6DA;--ink-2:#A59E91;--rule:rgba(236,230,218,.14);
+  --accent:#FFB2BC;--on-accent:#131315;--like:#7FD1C7;--star:#E8B54A;--off:#45454B;--warn:#FF9A4D;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#141416;--stock:#1E1D1B;--ink:#ECE6DA;--ink-2:#A59E91;--rule:rgba(236,230,218,.14);
+  --accent:#FFB2BC;--on-accent:#131315;--like:#7FD1C7;--star:#E8B54A;--off:#45454B;--warn:#FF9A4D;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--ground)}
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+.wrap{max-width:1360px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 56px}
+.kick{font-family:var(--label);letter-spacing:.14em;font-weight:600;font-size:12px;color:var(--ink-2);text-transform:lowercase}
+h1{font-family:var(--display);font-weight:300;font-size:clamp(28px,4.6vw,40px);line-height:1.05;letter-spacing:-.02em;margin:4px 0 8px;text-wrap:balance}
+h2{font-family:var(--label);font-weight:600;font-size:13px;letter-spacing:.16em;color:var(--ink-2);margin:28px 0 10px;text-transform:lowercase}
+p{max-width:66ch;margin:0 0 10px}
+.muted{color:var(--ink-2)}
+.btn{appearance:none;border:0;border-radius:12px;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:600;padding:9px 16px;min-height:44px;cursor:pointer}
+.btn:disabled{background:var(--off);color:var(--ink-2);cursor:not-allowed}
+.btn.quiet{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--rule)}
+.link{appearance:none;border:0;background:none;color:var(--ink);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px 4px;min-height:44px}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--ink-2);outline-offset:2px}
+/* sticky bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--ground);padding-block:10px;border-bottom:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.tabs{display:flex;gap:4px}
+.tab{appearance:none;border:0;background:none;font:inherit;font-weight:600;color:var(--ink-2);padding:8px 14px;min-height:44px;border-radius:12px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--stock);color:var(--ink);box-shadow:inset 0 0 0 1px var(--rule)}
+.step{display:flex;align-items:center;gap:6px;flex:1 1 320px;min-width:0}
+.step select{flex:1 1 auto;min-width:0;font:inherit;color:var(--ink);background:var(--stock);border:1px solid var(--rule);border-radius:10px;padding:9px 10px;min-height:44px}
+.iconbtn{appearance:none;border:1px solid var(--rule);background:var(--stock);color:var(--ink);border-radius:10px;width:44px;height:44px;font:inherit;font-size:18px;cursor:pointer}
+.iconbtn:disabled{opacity:.4;cursor:not-allowed}
+.sync{font-size:13px;color:var(--ink-2);margin-left:auto}
+/* concept header */
+.head{padding-block:18px 6px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:flex-end}
+.head .t{flex:1 1 320px;min-width:0}
+.head .meaning{color:var(--ink-2);font-style:italic;max-width:64ch}
+.tally{font-size:14px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.tally b{color:var(--ink)}
+.none{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-2)}
+.none input{width:20px;height:20px;accent-color:var(--accent)}
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;padding-top:12px}
+.card{position:relative;min-width:0;background:var(--stock);border:1px solid var(--rule);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:12px}
+.card.fin{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.grid.full .card:not(.fin){opacity:.62}
+.badge{position:absolute;top:-10px;left:12px;background:var(--accent);color:var(--on-accent);border-radius:999px;padding:1px 10px;font-weight:700;font-size:13px;display:none}
+.card.fin .badge{display:block}
+.open{appearance:none;border:0;background:none;padding:0;margin:0;color:inherit;font:inherit;text-align:left;cursor:zoom-in;display:flex;flex-direction:column;gap:12px;border-radius:10px}
+.tabbar{display:grid;grid-template-columns:repeat(5,1fr);background:var(--ground);border-radius:12px;padding:8px 2px 6px}
+.tabbar .t{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--ink-2);min-width:0}
+.tabbar .t span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tabbar .t.on{color:var(--accent);font-weight:600}
+svg.i{display:block;flex:none}
+svg.i.sk{opacity:.22}
+.triple figure.sk figcaption,.row figure.sk figcaption{text-decoration:line-through}
+.vbtn{appearance:none;background:none;border:2px solid transparent;border-radius:12px;padding:6px 8px;color:inherit;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
+.vbtn:focus-visible{outline:2px solid var(--ink-2)}
+.vbtn .st{font-size:11px;min-height:15px;color:var(--ink-2)}
+.vbtn.refine{border-color:var(--accent)}.vbtn.refine .st{color:var(--accent);font-weight:700}
+.vbtn.drop svg{opacity:.2}.vbtn.drop{border-color:var(--rule);border-style:dashed}.vbtn.drop .st{color:var(--warn);font-weight:700}
+.vbtn.drop::after,.triple figure.sk::after{content:"";position:absolute;left:14%;right:14%;top:44%;border-top:2px solid var(--warn);transform:rotate(-35deg);pointer-events:none}
+.triple figure{position:relative}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px 5px 8px;border-radius:999px;border:1px solid var(--rule);font-size:13px;max-width:100%;color:var(--ink)}
+.chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip.sel{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.triple{display:flex;justify-content:space-around;align-items:flex-end;color:var(--ink)}
+.triple figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:3px}
+.triple figcaption{font-size:11px;color:var(--ink-2)}
+.acts{display:flex;gap:6px}
+.pill{flex:1 1 0;appearance:none;border:1px solid var(--rule);background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:600;border-radius:10px;min-height:44px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.pill[aria-pressed="true"].fn{background:var(--accent);border-color:transparent;color:var(--on-accent)}
+.pill[aria-pressed="true"].st{background:var(--star);border-color:transparent;color:#1A1408}
+.pill:disabled{opacity:.45;cursor:not-allowed}
+/* inspector */
+.insp{position:fixed;inset:0;z-index:40;background:rgba(10,10,12,.62);overflow:auto;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.insp-in{max-width:980px;margin:0 auto;background:var(--ground);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.insp-top{display:flex;align-items:center;gap:10px}
+.insp-top .fig{font-family:var(--display);font-size:22px;font-weight:420;flex:1;min-width:0}
+.panes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
+.pane{border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:14px}
+.paper{background:#FEF9EF;--p-ink:#1D1B16;--p-2:#6B655A;--p-acc:#8E4955;--p-on:#fff;--p-rule:rgba(29,27,22,.16);color:var(--p-ink)}
+.night{background:#131315;--p-ink:#E7E2D9;--p-2:#9C968B;--p-acc:#FFB2BC;--p-on:#131315;--p-rule:rgba(231,226,217,.16);color:var(--p-ink)}
+.pane .row{display:flex;align-items:flex-end;justify-content:space-around;gap:8px}
+.pane .tabbar{background:transparent;border:1px solid var(--p-rule)}
+.pane .tabbar .t{color:var(--p-2)}.pane .tabbar .t.on{color:var(--p-acc)}
+.pane .chip{border-color:var(--p-rule);color:var(--p-ink)}
+.pane .chip.sel{background:var(--p-acc);color:var(--p-on);border-color:transparent}
+.listrow{display:flex;align-items:center;gap:12px;padding:10px 4px;border-top:1px solid var(--p-rule);border-bottom:1px solid var(--p-rule);font-size:15px}
+.listrow .sp{flex:1}
+.pbtn{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;background:var(--p-acc);color:var(--p-on);border-radius:12px;padding:9px 16px;font-weight:600}
+.sizes{display:flex;gap:14px;align-items:center;justify-content:center}
+/* naming */
+.nlist{display:flex;flex-direction:column;gap:10px}
+.nrow{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px 16px;background:var(--stock);border:1px solid var(--rule);border-radius:14px;padding:12px;align-items:start}
+.nrow.abandon{opacity:.6}
+.nfig{display:flex;gap:8px;align-items:center;color:var(--ink);padding:6px 8px;background:var(--ground);border-radius:10px}
+.nmain{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ntag{font-size:13px;color:var(--ink-2)}
+.nin{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.nin input[type=text]{flex:1 1 180px;min-width:0;font:inherit;color:var(--ink);background:var(--ground);border:1px solid var(--rule);border-radius:10px;padding:9px 10px;min-height:44px}
+.nin input.bad{border-color:var(--warn)}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.seg button{appearance:none;border:0;background:transparent;color:var(--ink);font:inherit;font-size:14px;font-weight:600;padding:8px 12px;min-height:44px;cursor:pointer;border-left:1px solid var(--rule)}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.err{color:var(--warn);font-size:13px}
+.note{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--ground);border:1px solid var(--rule);border-radius:10px;padding:8px 10px;min-height:60px;resize:vertical}
+textarea.json{display:block;width:100%;min-height:200px;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--ink);background:var(--stock);border:1px solid var(--rule);border-radius:12px;padding:10px}
+.row2{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.rrow{background:var(--stock);border:1px solid var(--rule);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.rrow.accept{border-color:var(--like)}.rrow.abandon{opacity:.6}
+.ba{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.ba .side{background:var(--ground);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:10px}
+.ba .cap{font-family:var(--label);letter-spacing:.14em;font-size:12px;color:var(--ink-2)}
+.rnote{background:var(--ground);border-radius:10px;padding:8px 10px;font-size:14px;color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<!--SPRITES-->
+<div class="wrap">
+  <div class="bar">
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" id="tab-review" aria-selected="true">Review</button>
+      <button type="button" class="tab" role="tab" id="tab-names" aria-selected="false">Names <span id="names-count"></span></button>
+      <button type="button" class="tab" role="tab" id="tab-refine" aria-selected="false" hidden>Refinements <span id="refine-count"></span></button>
+    </div>
+    <div class="step" id="stepper">
+      <button type="button" class="iconbtn" id="prev" aria-label="Previous concept">&larr;</button>
+      <select id="pick" aria-label="Concept"></select>
+      <button type="button" class="iconbtn" id="next" aria-label="Next concept">&rarr;</button>
+    </div>
+    <span class="sync" id="sync" role="status"></span>
+  </div>
+
+  <section id="screen-review">
+    <div class="head">
+      <div class="t"><div class="kick" id="where"></div><h1 id="fig"></h1><div class="meaning" id="meaning"></div></div>
+      <div>
+        <div class="tally" id="tally"></div>
+        <label class="none"><input type="checkbox" id="nofin"> No finalist for this concept</label>
+      </div>
+    </div>
+    <p class="muted">Each card is one idea in three variants, seen as the active tab, as chips and on its own. Open a card to see it larger, on Paper and Night. Choose 1 to 3 finalists; star any you want to keep for another use.</p>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section id="screen-refine" hidden>
+    <div class="kick">refinement round</div>
+    <h1>Before and after</h1>
+    <p class="muted">Each drawing you asked to refine, next to its refinement, with your note. Accept it, ask for another pass with a new note, or abandon it.</p>
+    <label class="none"><input type="checkbox" id="refine-showdone"> <span id="refine-showdone-t">Show accepted</span></label>
+    <div class="nlist" id="rlist"></div>
+  </section>
+
+  <section id="screen-names" hidden>
+    <div class="kick">naming and decisions</div>
+    <h1>Name what you kept</h1>
+    <p class="muted" id="names-intro"></p>
+    <label class="none"><input type="checkbox" id="names-showdone"> <span id="names-showdone-t">Show completed</span></label>
+    <div class="nlist" id="nlist"></div>
+    <h2>Export</h2>
+    <div class="row2"><button type="button" class="btn" id="copy">Copy JSON</button><span class="muted" id="copy-status" role="status"></span></div>
+    <textarea class="json" id="json" readonly spellcheck="false" aria-label="Selections and decisions as JSON"></textarea>
+  </section>
+</div>
+
+<div class="insp" id="insp" hidden role="dialog" aria-modal="true" aria-label="Candidate in situation">
+  <div class="insp-in">
+    <div class="insp-top"><div class="fig" id="insp-fig"></div><button type="button" class="pill fn" id="insp-fin" style="flex:none"></button><button type="button" class="pill st" id="insp-star" style="flex:none"></button><button type="button" class="btn quiet" id="insp-close">Close</button></div>
+    <div class="panes" id="panes"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+const DATA = /*__DATA__*/null;
+const KEY = "concept-icon-review-v1";
+const FORMS = ["regular", "solid", "marked"];
+const FORM_WORD = /(^|-)(regular|marked|solid|parts|of)$/;
+const $ = (id) => document.getElementById(id);
+const CON = Object.fromEntries(DATA.concepts.map((c) => [c.n, c]));
+const ORDER = DATA.concepts.map((c) => c.n);
+const RESERVED = new Set(DATA.reserved);
+const UI = {names: false, refine: false}, recent = new Set();
+try { const u = JSON.parse(localStorage.getItem(KEY + "-ui") || "{}"); UI.names = !!u.names; UI.refine = !!u.refine; } catch (e) {}
+const saveUI = () => { try { localStorage.setItem(KEY + "-ui", JSON.stringify(UI)); } catch (e) {} };
+let S = null, cur = ORDER[0], db = null, uid = null, writing = Promise.resolve(), timer = null, inspId = null;
+
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const label = (n) => n.replace(/-/g, " ");
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function mulberry32(a){return function(){a=(a+0x6D2B79F5)|0;let t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296;};}
+function shuffled(arr, seed){const a=arr.slice(), r=mulberry32(seed);for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const id = (concept, cand) => concept + "/" + cand;           // candidate id: concept/hand.idea
+const split = (cid) => { const k = cid.indexOf("/"); return [cid.slice(0, k), cid.slice(k + 1)]; };
+
+/* ---------- state ---------- */
+function fresh(){ return {v: 1, rev: 0, seed: (Math.random() * 4294967295) >>> 0, finals: {}, stars: [], none: {}, names: {}, dec: {}, note: {}, ref: {}, vf: {}}; }
+function valid(s){ if (s && s.v === 1) { if (!s.ref) s.ref = {}; if (!s.vf) s.vf = {}; } return s && s.v === 1 && s.finals && Array.isArray(s.stars) && s.names && s.dec; }
+function touch(){
+  S.rev += 1;
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+  $("sync").textContent = db ? "Saving…" : "Saved on this device only.";
+  clearTimeout(timer); timer = setTimeout(remoteSave, 700);
+}
+function remoteSave(){
+  if (!db || !uid) return;
+  const body = JSON.parse(JSON.stringify(S)); body.updatedAt = new Date().toISOString(); body.results = compute();
+  writing = writing.then(() => db.doc("review/" + uid).set(body)).then(
+    () => { $("sync").textContent = "Saved for Claude to read."; },
+    (e) => { $("sync").textContent = e && e.code === "quota_exceeded" ? "Storage full: copy the JSON." : "Saved on this device only."; });
+}
+
+/* ---------- drawing ---------- */
+const SKIPS = new Set(DATA.skips || []);
+const skipKey = (concept, cand, form) => (cand[0] === "R" ? cand + "/" + concept : concept + "/" + cand) + "/" + form;
+function sym(concept, cand, form, size){
+  const sk = SKIPS.has(skipKey(concept, cand, form)) ? " sk" : "";
+  if (/^R\d?$/.test(cand)) return '<svg class="i' + sk + '" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#' + (cand === "R" ? "r" : "r" + cand[1]) + "-" + concept + "-" + form + '"/></svg>';
+  const [h, idea] = cand.split(".");
+  return '<svg class="i' + sk + '" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#' + h + "-" + concept + "-" + idea + "-" + form + '"/></svg>';
+}
+function filler(n, size){ return '<svg class="i" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#f-' + n + '"/></svg>'; }
+function tabbar(concept, cand, form, size, lbl){
+  const F = DATA.fillers, slots = [F[0], F[1], null, F[3], F[4]];
+  return '<div class="tabbar">' + slots.map((f) => f
+    ? '<div class="t">' + filler(f.n, size) + '<span>' + esc(f.l) + '</span></div>'
+    : '<div class="t on">' + sym(concept, cand, form, size) + '<span>' + esc(lbl || label(concept)) + '</span></div>').join("") + '</div>';
+}
+function chips(concept, cand, size, lbl){
+  const l = esc(lbl || label(concept));
+  return '<div class="chips"><span class="chip">' + sym(concept, cand, "regular", size) + '<span>' + l + '</span></span>' +
+    '<span class="chip sel">' + sym(concept, cand, "solid", size) + '<span>' + l + '</span></span>' +
+    '<span class="chip">' + sym(concept, cand, "marked", size) + '<span>' + l + '</span></span></div>';
+}
+function triple(concept, cand, size){
+  return '<div class="triple">' + FORMS.map((f) => { const sk = SKIPS.has(skipKey(concept, cand, f)); return '<figure class="' + (sk ? "sk" : "") + '">' + sym(concept, cand, f, size) + '<figcaption>' + f + (sk ? " · dropped" : "") + '</figcaption></figure>'; }).join("") + '</div>';
+}
+
+/* ---------- review ---------- */
+function finals(c){ return S.finals[c] || (S.finals[c] = []); }
+function renderReview(){
+  const c = CON[cur], fin = finals(cur), i = ORDER.indexOf(cur);
+  $("where").textContent = "concept " + (i + 1) + " of " + ORDER.length;
+  $("fig").textContent = label(cur);
+  $("meaning").textContent = c.m;
+  $("pick").value = cur; $("prev").disabled = i === 0; $("next").disabled = i === ORDER.length - 1;
+  $("nofin").checked = !!S.none[cur];
+  const order = shuffled(c.c, (S.seed ^ hash(cur)) >>> 0);
+  $("grid").innerHTML = order.map((cand, n) =>
+    '<div class="card" data-c="' + cand + '"><span class="badge"></span>' +
+    '<button type="button" class="open" aria-label="Open candidate ' + (n + 1) + ' larger">' + tabbar(cur, cand, "solid", 22) + chips(cur, cand, 16) + triple(cur, cand, 34) + '</button>' +
+    '<div class="acts"><button type="button" class="pill fn" data-act="fin" aria-pressed="false">Finalist</button><button type="button" class="pill st" data-act="star" aria-pressed="false" aria-label="Star: keep for another use">&#9733; Star</button></div></div>').join("");
+  paintCards(); renderTally();
+}
+function paintCards(){
+  const fin = finals(cur);
+  $("grid").classList.toggle("full", fin.length >= 3);
+  $("grid").querySelectorAll(".card").forEach((card) => {
+    const cand = card.dataset.c, k = fin.indexOf(cand), starred = S.stars.includes(id(cur, cand));
+    card.classList.toggle("fin", k >= 0);
+    card.querySelector(".badge").textContent = k >= 0 ? "finalist " + (k + 1) : "";
+    const f = card.querySelector('[data-act="fin"]'), s = card.querySelector('[data-act="star"]');
+    f.setAttribute("aria-pressed", k >= 0 ? "true" : "false"); f.textContent = k >= 0 ? "Finalist ✓" : "Finalist";
+    f.disabled = k < 0 && fin.length >= 3;
+    s.setAttribute("aria-pressed", starred ? "true" : "false");
+  });
+}
+function renderTally(){
+  const fin = finals(cur).length, st = S.stars.filter((x) => x.startsWith(cur + "/")).length;
+  const done = ORDER.filter((n) => finals(n).length || S.none[n]).length;
+  $("tally").innerHTML = "<b>" + fin + "</b> of 3 finalists · <b>" + st + "</b> starred · " + done + " of " + ORDER.length + " concepts reviewed";
+  Array.from($("pick").options).forEach((o, k) => { const n = ORDER[k]; o.textContent = (finals(n).length || S.none[n] ? "✓ " : "· ") + label(n); });
+  updateNamesCount();
+}
+function toggleFinal(concept, cand){
+  const fin = finals(concept), k = fin.indexOf(cand);
+  if (k >= 0) fin.splice(k, 1); else if (fin.length < 3) { fin.push(cand); S.none[concept] = false; } else return;
+  touch();
+}
+function toggleStar(concept, cand){
+  const x = id(concept, cand), k = S.stars.indexOf(x);
+  if (k >= 0) S.stars.splice(k, 1); else S.stars.push(x);
+  touch();
+}
+
+/* ---------- inspector ---------- */
+function pane(cls, concept, cand){
+  const l = esc(label(concept));
+  return '<div class="pane ' + cls + '">' +
+    '<div class="row">' + FORMS.map((f) => { const sk = SKIPS.has(skipKey(concept, cand, f)); return '<figure class="' + (sk ? "sk" : "") + '" style="margin:0;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative">' + sym(concept, cand, f, 72) + '<figcaption style="font-size:11px;color:var(--p-2)">' + f + (sk ? " · dropped" : "") + '</figcaption></figure>'; }).join("") + '</div>' +
+    '<div class="sizes">' + [16, 20, 24, 32].map((z) => sym(concept, cand, "regular", z)).join("") + '<span style="width:8px"></span>' + [16, 20, 24, 32].map((z) => sym(concept, cand, "solid", z)).join("") + '<span style="width:8px"></span>' + [16, 20, 24, 32].map((z) => sym(concept, cand, "marked", z)).join("") + '</div>' +
+    tabbar(concept, cand, "solid", 26) + chips(concept, cand, 18) +
+    '<div class="listrow">' + sym(concept, cand, "regular", 24) + '<span>' + l + '</span><span class="sp"></span><span style="color:var(--p-2)">&rsaquo;</span></div>' +
+    '<div class="pbtn">' + sym(concept, cand, "solid", 20) + l + '</div></div>';
+}
+function openInsp(cand){
+  inspId = cand;
+  $("insp-fig").textContent = label(cur) + " · candidate";
+  $("panes").innerHTML = pane("paper", cur, cand) + pane("night", cur, cand);
+  paintInsp(); $("insp").hidden = false; $("insp-close").focus();
+}
+function paintInsp(){
+  const fin = finals(cur), k = fin.indexOf(inspId), starred = S.stars.includes(id(cur, inspId));
+  const f = $("insp-fin"), s = $("insp-star");
+  f.setAttribute("aria-pressed", k >= 0 ? "true" : "false"); f.textContent = k >= 0 ? "Finalist ✓" : "Finalist"; f.disabled = k < 0 && fin.length >= 3;
+  s.setAttribute("aria-pressed", starred ? "true" : "false"); s.innerHTML = "&#9733; Star";
+}
+function closeInsp(){ $("insp").hidden = true; inspId = null; }
+
+/* ---------- variant flags on a picked drawing (shared by Names and Refinements) ---------- */
+function vbtnX(x, concept, cand, f, size){
+  const s = (S.vf[x] || {})[f] || "", sk = SKIPS.has(skipKey(concept, cand, f));
+  return '<button type="button" class="vbtn ' + s + '" data-vx="' + esc(x) + '" data-vf="' + f + '" aria-label="' + f + ': click to flag refine, again to drop, again to reset">' + sym(concept, cand, f, size) +
+    '<span class="st">' + (s === "refine" ? "refine" : s === "drop" ? "drop" : sk ? "dropped" : "") + '</span><span style="font-size:11px;color:var(--ink-2)">' + f + '</span></button>';
+}
+function cycleVar(x, f){
+  const v = S.vf[x] || (S.vf[x] = {});
+  v[f] = v[f] === "refine" ? "drop" : v[f] === "drop" ? "" : "refine";
+  if (v[f] && S.dec[x] !== "abandon") S.dec[x] = "refine";
+  recent.add(x); touch();
+}
+const hasFlags = (x) => Object.values(S.vf[x] || {}).some((s) => s);
+const refinedKeys = () => new Set((DATA.refine || []).map((r) => r.concept + "/" + r.cand));
+const inRound = (q) => refinedKeys().has(q.n + "/" + q.cand);
+
+/* ---------- naming ---------- */
+function picked(){
+  const out = [], seen = new Set();
+  ORDER.forEach((n) => {
+    finals(n).forEach((cand) => { const x = id(n, cand); if (!seen.has(x)) { seen.add(x); out.push({x, n, cand, fin: true, star: S.stars.includes(x)}); } });
+    S.stars.filter((x) => x.startsWith(n + "/")).forEach((x) => { if (!seen.has(x)) { seen.add(x); out.push({x, n, cand: split(x)[1], fin: false, star: true}); } });
+  });
+  return out;
+}
+function suggest(q){
+  const taken = new Set(picked().filter((p) => p.x !== q.x).map((p) => (S.names[p.x] || "").trim()).filter(Boolean));
+  const idea = q.cand.split(".")[1];
+  for (const c of [q.n, q.n + "-" + idea, q.n + "-" + idea + "-2", q.n + "-" + idea + "-3"]) if (!RESERVED.has(c) && !taken.has(c) && !FORM_WORD.test(c)) return c;
+  return "";
+}
+function nameError(x){
+  const v = (S.names[x] || "").trim();
+  if (!v) return "A name is needed.";
+  if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(v)) return "Use lowercase words joined by hyphens.";
+  if (FORM_WORD.test(v)) return "A name never ends in a form word (regular, solid, marked, parts, of).";
+  if (RESERVED.has(v)) return "Already an icon in the set.";
+  const dup = picked().find((p) => p.x !== x && S.dec[p.x] !== "abandon" && (S.names[p.x] || "").trim() === v);
+  if (dup) return "Already used by another candidate.";
+  return "";
+}
+function isDone(x){ const d = S.dec[x]; return d === "abandon" || ((d === "keep" || d === "refine") && !nameError(x)); }
+function updateNamesCount(){ updateRefCount(); const p = picked(); $("names-count").textContent = p.length ? "(" + p.filter((q) => isDone(q.x)).length + "/" + p.length + ")" : ""; }
+function renderNames(){
+  const all = picked(), left = ORDER.filter((n) => !finals(n).length && !S.none[n]).length;
+  const doneN = all.filter((q) => isDone(q.x)).length, p = all.filter((q) => UI.names || !isDone(q.x) || recent.has(q.x));
+  $("names-showdone").checked = UI.names; $("names-showdone-t").textContent = "Show completed (" + doneN + ")";
+  $("names-intro").textContent = all.length
+    ? (all.length - doneN) + " drawings left to decide, " + doneN + " completed" + (UI.names ? "" : " and hidden") + ". Name it (unique, lowercase, hyphens), then keep it, abandon it or ask for a refinement. An abandoned drawing needs no name." + (left ? " " + left + " concepts have no finalist yet." : "")
+    : "Nothing selected yet. Pick finalists or star drawings in Review first.";
+  $("nlist").innerHTML = p.map((q) => {
+    const d = S.dec[q.x] || "", err = d === "abandon" ? "" : (S.names[q.x] ? nameError(q.x) : "");
+    return '<div class="nrow ' + (d === "abandon" ? "abandon" : "") + '" data-x="' + esc(q.x) + '">' +
+      '<div class="nfig">' + FORMS.map((f) => vbtnX(q.x, q.n, q.cand, f, 32)).join("") + '</div>' +
+      '<div class="nmain"><div class="ntag">' + esc(label(q.n)) + ' · ' + (q.fin ? "finalist" : "") + (q.fin && q.star ? " + " : "") + (q.star ? "&#9733; starred" : "") + '</div>' +
+      '<div class="nin"><input type="text" data-k="name" id="n-' + esc(q.x.replace(/[^a-z0-9]/gi, "_")) + '" value="' + esc(S.names[q.x] || "") + '" placeholder="' + esc(q.n) + '" aria-label="Name for ' + esc(label(q.n)) + '" autocomplete="off" autocapitalize="off" spellcheck="false" class="' + (err ? "bad" : "") + '">' +
+      (S.names[q.x] ? "" : (() => { const sg = suggest(q); return sg ? '<button type="button" class="link" data-suggest="' + esc(sg) + '">Use &ldquo;' + esc(sg) + '&rdquo;</button>' : ""; })()) + '<div class="seg" role="group" aria-label="Decision">' + [["keep", "Keep"], ["refine", "Refine"], ["abandon", "Abandon"]].map(([k, t]) => '<button type="button" data-d="' + k + '" aria-pressed="' + (d === k) + '">' + t + '</button>').join("") + '</div></div>' +
+      '<div class="err" data-err>' + esc(err) + '</div>' +
+      (d === "refine" ? '<textarea class="note" data-k="note" aria-label="What to refine" placeholder="What should change?">' + esc(S.note[q.x] || "") + '</textarea>' : "") +
+      '</div></div>';
+  }).join("");
+  renderJson(); updateNamesCount();
+}
+function pickCard(q, mode){
+  const lbl = label(q.n), tag = (q.fin ? "finalist" : "") + (q.fin && q.star ? " + " : "") + (q.star ? "&#9733; starred" : "");
+  return '<div class="rrow" data-x="' + esc(q.x) + '"><div class="ntag"><b>' + esc(S.names[q.x] || lbl) + '</b> · ' + esc(lbl) + ' · ' + tag + '</div>' +
+    '<div class="ba"><div class="side"><div class="cap">' + (mode === "req" ? "waiting for a refinement" : "selected, not judged yet") + '</div>' + tabbar(q.n, q.cand, "solid", 22, lbl) + chips(q.n, q.cand, 16, lbl) +
+    '<div class="triple">' + FORMS.map((f) => vbtnX(q.x, q.n, q.cand, f, 34)).join("") + '</div></div></div>' +
+    (mode === "req"
+      ? '<textarea class="note" data-xk="note" aria-label="What to refine" placeholder="What should change?">' + esc(S.note[q.x] || "") + '</textarea><div class="nin"><button type="button" class="btn quiet" data-keep="1">Keep as is</button><button type="button" class="btn quiet" data-cancel="1">Cancel the request</button></div>'
+      : '<div class="nin"><button type="button" class="btn quiet" data-ask="1">Ask for a refinement</button></div>') + '</div>';
+}
+function renderRefine(){
+  const RA = DATA.refine || [], isRDone = (r) => ["accept", "abandon"].includes((S.ref[r.key] || {}).d);
+  const doneR = RA.filter(isRDone).length, R = RA.filter((r) => UI.refine || !isRDone(r) || recent.has(r.key));
+  $("refine-showdone").checked = UI.refine; $("refine-showdone-t").textContent = "Show accepted and abandoned (" + doneR + ")";
+  const pk = picked().filter((q) => !inRound(q) && S.dec[q.x] !== "abandon");
+  const reqs = pk.filter((q) => S.dec[q.x] === "refine" || hasFlags(q.x)), und = pk.filter((q) => !(S.dec[q.x] || hasFlags(q.x)));
+  const head = (t, n) => '<h2>' + t + ' (' + n + ')</h2>';
+  const pre = (reqs.length ? head("Refinement requests", reqs.length) + reqs.map((q) => pickCard(q, "req")).join("") : "") +
+    (und.length ? head("Selected, not judged yet", und.length) + und.map((q) => pickCard(q, "und")).join("") : "") + ((reqs.length || und.length) && R.length ? head("Redrawn, to judge", R.length) : "");
+  $("rlist").innerHTML = pre + (R.length ? R.map((r) => {
+    const st = S.ref[r.key] || {}, d = st.d || "", lbl = label(r.concept);
+    const vs = st.v || {};
+    const vtriple = () => '<div class="triple">' + FORMS.map((f) => { const s = vs[f] || "", sk = SKIPS.has(skipKey(r.name, r.rc, f));
+      return '<button type="button" class="vbtn ' + s + '" data-v="' + f + '" aria-label="' + f + ': click to flag refine, again to drop, again to reset">' + sym(r.name, r.rc, f, 34) + '<span class="st">' + (s === "refine" ? "refine" : s === "drop" ? "drop" : sk ? "dropped" : "") + '</span><span style="font-size:11px;color:var(--ink-2)">' + f + '</span></button>'; }).join("") + '</div>';
+    const side = (cap, c, n, after) => '<div class="side"><div class="cap">' + cap + '</div>' + tabbar(n, c, "solid", 22, lbl) + chips(n, c, 16, lbl) + (after ? vtriple() : triple(n, c, 34)) + '</div>';
+    return '<div class="rrow ' + d + '" data-r="' + esc(r.key) + '"><div class="ntag"><b>' + esc(r.name) + '</b> · ' + esc(lbl) + (r.rc === "R2" ? " · second pass" : r.rc === "R3" ? " · third pass" : "") + '</div>' +
+      '<div class="ba">' + side("before", r.cand, r.concept, false) + side("after", r.rc, r.name, true) + '</div>' +
+      '<div class="rnote">Your note: ' + esc(r.note) + '</div>' +
+      '<div class="nin"><div class="seg" role="group" aria-label="Decision">' + [["accept", "Accept"], ["again", "Refine again"], ["abandon", "Abandon"]].map(([k, t]) => '<button type="button" data-rd="' + k + '" aria-pressed="' + (d === k) + '">' + t + '</button>').join("") + '</div></div>' +
+      (d === "again" || Object.values(vs).some((x) => x) ? '<textarea class="note" data-rk="note" aria-label="What to change in this pass" placeholder="What should change now?">' + esc(st.note || "") + '</textarea>' : "") + '</div>';
+  }).join("") : (pre ? "" : '<p class="muted">' + (RA.length ? "Everything here is accepted or abandoned. Tick the box above to see it again." : "No refinements yet.") + '</p>'));
+  updateRefCount();
+}
+function updateRefCount(){
+  const R = DATA.refine || [], todo = R.filter((r) => !(S.ref[r.key] || {}).d).length;
+  const pk = picked().filter((q) => !inRound(q) && S.dec[q.x] !== "abandon"), reqs = pk.filter((q) => S.dec[q.x] === "refine" || hasFlags(q.x)).length;
+  $("refine-count").textContent = (todo + reqs) ? "(" + (todo + reqs) + ")" : ""; $("tab-refine").hidden = false;
+}
+function compute(){
+  const p = picked();
+  return {app: "concept-icon-review", version: 1, exportedAt: new Date().toISOString(),
+    concepts: ORDER.map((n) => ({concept: n, none: !!S.none[n], finalists: finals(n).slice()})),
+    stars: S.stars.slice(),
+    drawings: p.map((q) => ({id: q.x, concept: q.n, candidate: q.cand, finalist: q.fin, starred: q.star,
+      name: (S.names[q.x] || "").trim() || null, decision: S.dec[q.x] || null, refine: S.dec[q.x] === "refine" ? (S.note[q.x] || "") : null, variants: Object.fromEntries(Object.entries(S.vf[q.x] || {}).filter(([, s]) => s)), nameOk: S.dec[q.x] === "abandon" ? null : !nameError(q.x)})),
+    refinements: (DATA.refine || []).map((r) => ({name: r.name, round: r.rc === "R" ? 1 : +r.rc[1], concept: r.concept, decision: (S.ref[r.key] || {}).d || null, note: (S.ref[r.key] || {}).d === "again" ? ((S.ref[r.key] || {}).note || "") : null, variants: Object.fromEntries(Object.entries((S.ref[r.key] || {}).v || {}).filter(([, s]) => s))})),
+    complete: p.length > 0 && p.every((q) => isDone(q.x))};
+}
+function renderJson(){ $("json").value = JSON.stringify(compute(), null, 2); }
+
+/* ---------- wiring ---------- */
+function showTab(t){
+  recent.clear();
+  $("tab-review").setAttribute("aria-selected", String(t === "review")); $("tab-names").setAttribute("aria-selected", String(t === "names")); $("tab-refine").setAttribute("aria-selected", String(t === "refine"));
+  $("screen-review").hidden = t !== "review"; $("screen-names").hidden = t !== "names"; $("screen-refine").hidden = t !== "refine"; $("stepper").hidden = t !== "review";
+  if (t === "names") renderNames(); else if (t === "refine") renderRefine(); else renderReview();
+  window.scrollTo(0, 0);
+}
+function go(n){ cur = n; try { sessionStorage.setItem(KEY + "-cur", n); } catch (e) {} renderReview(); window.scrollTo(0, 0); }
+$("names-showdone").addEventListener("change", (e) => { UI.names = e.target.checked; saveUI(); recent.clear(); renderNames(); });
+$("refine-showdone").addEventListener("change", (e) => { UI.refine = e.target.checked; saveUI(); recent.clear(); renderRefine(); });
+$("tab-review").addEventListener("click", () => showTab("review"));
+$("tab-names").addEventListener("click", () => showTab("names"));
+$("tab-refine").addEventListener("click", () => showTab("refine"));
+$("rlist").addEventListener("click", (e) => {
+  const px = e.target.closest("[data-vx]"), ask = e.target.closest("[data-ask]"), can = e.target.closest("[data-cancel]"), kp = e.target.closest("[data-keep]"), prow = e.target.closest(".rrow");
+  if (px) { cycleVar(px.dataset.vx, px.dataset.vf); renderRefine(); const el = $("rlist").querySelector('[data-vx="' + CSS.escape(px.dataset.vx) + '"][data-vf="' + px.dataset.vf + '"]'); if (el) el.focus(); return; }
+  if ((ask || can || kp) && prow && prow.dataset.x) { const x = prow.dataset.x; if (ask) S.dec[x] = "refine"; else if (kp) { S.dec[x] = "keep"; S.vf[x] = {}; } else { S.dec[x] = ""; S.vf[x] = {}; } recent.add(x); touch(); renderRefine(); return; }
+  const vb = e.target.closest("[data-v]"), vrow = e.target.closest(".rrow");
+  if (vb && vrow) {
+    const n = vrow.dataset.r, st = S.ref[n] || (S.ref[n] = {}), v = st.v || (st.v = {}), f = vb.dataset.v;
+    v[f] = v[f] === "refine" ? "drop" : v[f] === "drop" ? "" : "refine";
+    if (v[f] === "refine" && (!st.d || st.d === "accept")) st.d = "again";
+    recent.add(n); touch(); renderRefine();
+    const el = $("rlist").querySelector('[data-r="' + CSS.escape(n) + '"] [data-v="' + f + '"]'); if (el) el.focus();
+    return;
+  }
+  const b = e.target.closest("[data-rd]"), row = e.target.closest(".rrow"); if (!b || !row) return;
+  const n = row.dataset.r, st = S.ref[n] || (S.ref[n] = {}); st.d = st.d === b.dataset.rd ? "" : b.dataset.rd; recent.add(n); touch(); renderRefine();
+  const el = $("rlist").querySelector('[data-r="' + CSS.escape(n) + '"] [data-rd="' + b.dataset.rd + '"]'); if (el) el.focus();
+});
+$("rlist").addEventListener("input", (e) => { const row = e.target.closest(".rrow");
+  if (row && row.dataset.x && e.target.dataset.xk === "note") { S.note[row.dataset.x] = e.target.value; touch(); return; } if (!row || e.target.dataset.rk !== "note") return; (S.ref[row.dataset.r] || (S.ref[row.dataset.r] = {})).note = e.target.value; touch(); });
+$("prev").addEventListener("click", () => go(ORDER[Math.max(0, ORDER.indexOf(cur) - 1)]));
+$("next").addEventListener("click", () => go(ORDER[Math.min(ORDER.length - 1, ORDER.indexOf(cur) + 1)]));
+$("pick").addEventListener("change", (e) => go(e.target.value));
+$("nofin").addEventListener("change", (e) => { S.none[cur] = e.target.checked; if (e.target.checked) S.finals[cur] = []; touch(); renderReview(); });
+$("grid").addEventListener("click", (e) => {
+  const card = e.target.closest(".card"); if (!card) return;
+  const cand = card.dataset.c, a = e.target.closest("[data-act]");
+  if (a) { if (a.dataset.act === "fin") toggleFinal(cur, cand); else toggleStar(cur, cand); paintCards(); renderTally(); $("nofin").checked = !!S.none[cur]; return; }
+  if (e.target.closest(".open")) openInsp(cand);
+});
+$("insp-fin").addEventListener("click", () => { toggleFinal(cur, inspId); paintInsp(); paintCards(); renderTally(); $("nofin").checked = !!S.none[cur]; });
+$("insp-star").addEventListener("click", () => { toggleStar(cur, inspId); paintInsp(); paintCards(); renderTally(); });
+$("insp-close").addEventListener("click", closeInsp);
+$("insp").addEventListener("click", (e) => { if (e.target === $("insp")) closeInsp(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("insp").hidden) closeInsp(); });
+$("nlist").addEventListener("input", (e) => {
+  const row = e.target.closest(".nrow"); if (!row) return;
+  const x = row.dataset.x, k = e.target.dataset.k;
+  if (k === "name") { S.names[x] = e.target.value; const err = S.dec[x] === "abandon" ? "" : nameError(x); e.target.classList.toggle("bad", !!err); row.querySelector("[data-err]").textContent = err; }
+  else if (k === "note") S.note[x] = e.target.value;
+  recent.add(x); touch(); renderJson(); updateNamesCount();
+});
+$("nlist").addEventListener("click", (e) => {
+  const sgb = e.target.closest("[data-suggest]"), srow = e.target.closest(".nrow");
+  if (sgb && srow) { const x = srow.dataset.x; S.names[x] = sgb.dataset.suggest; recent.add(x); touch(); renderNames(); const el = $("nlist").querySelector('[data-x="' + CSS.escape(x) + '"] [data-k="name"]'); if (el) el.focus(); return; }
+  const vb = e.target.closest("[data-vx]");
+  if (vb) { cycleVar(vb.dataset.vx, vb.dataset.vf); renderNames(); const el = $("nlist").querySelector('[data-vx="' + CSS.escape(vb.dataset.vx) + '"][data-vf="' + vb.dataset.vf + '"]'); if (el) el.focus(); return; }
+  const b = e.target.closest("[data-d]"), row = e.target.closest(".nrow"); if (!b || !row) return;
+  const x = row.dataset.x; S.dec[x] = S.dec[x] === b.dataset.d ? "" : b.dataset.d;
+  recent.add(x); touch(); const keep = document.activeElement && document.activeElement.id; renderNames();
+  const el = row.dataset.x && $("nlist").querySelector('[data-x="' + CSS.escape(x) + '"] [data-d="' + b.dataset.d + '"]'); if (el) el.focus();
+});
+$("copy").addEventListener("click", () => {
+  const text = $("json").value, ta = $("json");
+  const fb = () => { ta.focus(); ta.select(); $("copy-status").textContent = "Clipboard blocked: the text is selected, copy it by hand."; };
+  try { navigator.clipboard.writeText(text).then(() => { $("copy-status").textContent = "Copied."; }, fb); } catch (e) { fb(); }
+});
+
+/* ---------- boot ---------- */
+$("pick").innerHTML = ORDER.map((n) => '<option value="' + n + '">' + esc(label(n)) + '</option>').join("");
+try { S = JSON.parse(localStorage.getItem(KEY) || "null"); if (!valid(S)) S = null; } catch (e) { S = null; }
+if (!S) S = fresh();
+try { const c = sessionStorage.getItem(KEY + "-cur"); if (c && CON[c]) cur = c; } catch (e) {}
+updateRefCount();
+if (!ORDER.length) { $("grid").textContent = "No drawings yet."; } else renderReview();
+(async () => {
+  try {
+    if (!window.claude || !window.claude.use) return;
+    const [d, u] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+    if (!d || !u) return;
+    const me = await u.id(); if (!me) return;
+    db = d; uid = me;
+    const snap = await db.doc("review/" + uid).get();
+    if (snap.exists) {
+      const r = JSON.parse(JSON.stringify(snap.data())); delete r.results; delete r.updatedAt;
+      if (valid(r) && r.rev > S.rev) { S = r; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} if (!$("screen-review").hidden) renderReview(); else renderNames(); }
+    }
+    $("sync").textContent = "Signed in: selections are saved for Claude to read.";
+  } catch (e) { /* stays local */ }
+})();
+</script>

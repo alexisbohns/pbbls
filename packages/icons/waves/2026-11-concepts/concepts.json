@@ -1,0 +1,802 @@
+{
+ "squads": {
+  "s1-delivery": {
+   "title": "Delivery & record",
+   "note": null,
+   "count": 16
+  },
+  "s2-system": {
+   "title": "System & code",
+   "note": null,
+   "count": 18
+  },
+  "s3-surface": {
+   "title": "Surface & interface",
+   "note": null,
+   "count": 15
+  },
+  "s4-quality": {
+   "title": "Quality & verification",
+   "note": null,
+   "count": 16
+  },
+  "s5-status": {
+   "title": "Status & priority",
+   "note": "FAMILY SETS. These 20 concepts are two families used as chips and badges on work items: 14 statuses (status-*) and 6 priorities (priority, priority-*). Within ONE idea (classical, bold, pebbles or weird) draw the whole family in ONE shared vocabulary (a common container or gesture, the meaning carried by what changes inside it), so the set reads as a set. Between ideas the vocabularies differ. status-superseded (this one is the old one, replaced) and status-supersede (this one takes over) are two sides of the same relation: draw them as a pair. The priorities form a scale: critical > high > medium > low, and undefined is 'not ranked yet'; the scale must be readable without a label, at 20 px.",
+   "count": 20
+  },
+  "s6-trust": {
+   "title": "Safety, trust & care",
+   "note": null,
+   "count": 16
+  },
+  "s7-value": {
+   "title": "Experience & appeal",
+   "note": null,
+   "count": 12
+  },
+  "s8-meaning": {
+   "title": "Meaning & belonging",
+   "note": null,
+   "count": 13
+  }
+ },
+ "concepts": [
+  {
+   "name": "delivery",
+   "meaning": "work handed over and arrived in users' hands",
+   "squad": "s1-delivery",
+   "batch": "01"
+  },
+  {
+   "name": "shipment",
+   "meaning": "a parcel on its way: something packed and sent out",
+   "squad": "s1-delivery",
+   "batch": "01"
+  },
+  {
+   "name": "release",
+   "meaning": "a numbered version going out to users (not the status chip, the act and the version)",
+   "squad": "s1-delivery",
+   "batch": "01"
+  },
+  {
+   "name": "beta",
+   "meaning": "pre-release testing with a first circle of early users",
+   "squad": "s1-delivery",
+   "batch": "01"
+  },
+  {
+   "name": "test",
+   "meaning": "trying something to see if it works: a check, an experiment",
+   "squad": "s1-delivery",
+   "batch": "01"
+  },
+  {
+   "name": "changelog",
+   "meaning": "the written list of what changed between versions",
+   "squad": "s1-delivery",
+   "batch": "01"
+  },
+  {
+   "name": "backlog",
+   "meaning": "the queue of work waiting to be picked up",
+   "squad": "s1-delivery",
+   "batch": "01"
+  },
+  {
+   "name": "flow",
+   "meaning": "something moving smoothly through steps without blockage",
+   "squad": "s1-delivery",
+   "batch": "01"
+  },
+  {
+   "name": "history",
+   "meaning": "past events in order: looking back through time",
+   "squad": "s1-delivery",
+   "batch": "02"
+  },
+  {
+   "name": "journal",
+   "meaning": "a personal diary kept day after day",
+   "squad": "s1-delivery",
+   "batch": "02"
+  },
+  {
+   "name": "log",
+   "meaning": "an append-only, chronological record of events",
+   "squad": "s1-delivery",
+   "batch": "02"
+  },
+  {
+   "name": "ledger",
+   "meaning": "a book of accounts: entries kept in ruled columns",
+   "squad": "s1-delivery",
+   "batch": "02"
+  },
+  {
+   "name": "record",
+   "meaning": "one entry kept on file: a fact written down (not a recording button)",
+   "squad": "s1-delivery",
+   "batch": "02"
+  },
+  {
+   "name": "inventory",
+   "meaning": "an itemised stock of what exists, counted and listed",
+   "squad": "s1-delivery",
+   "batch": "02"
+  },
+  {
+   "name": "commitment",
+   "meaning": "a promise to follow through: a pledge",
+   "squad": "s1-delivery",
+   "batch": "02"
+  },
+  {
+   "name": "decision",
+   "meaning": "a choice made at a fork, taken and recorded",
+   "squad": "s1-delivery",
+   "batch": "02"
+  },
+  {
+   "name": "data",
+   "meaning": "raw information held: records, values, numbers",
+   "squad": "s2-system",
+   "batch": "01"
+  },
+  {
+   "name": "database",
+   "meaning": "where data is stored and structured: tables, rows",
+   "squad": "s2-system",
+   "batch": "01"
+  },
+  {
+   "name": "server",
+   "meaning": "a machine in the back that answers requests",
+   "squad": "s2-system",
+   "batch": "01"
+  },
+  {
+   "name": "api",
+   "meaning": "the contract through which two programs talk: endpoints, requests and answers",
+   "squad": "s2-system",
+   "batch": "01"
+  },
+  {
+   "name": "system",
+   "meaning": "many parts working together as one whole",
+   "squad": "s2-system",
+   "batch": "01"
+  },
+  {
+   "name": "architecture",
+   "meaning": "how the whole is structured: the plan of the building",
+   "squad": "s2-system",
+   "batch": "01"
+  },
+  {
+   "name": "integration",
+   "meaning": "parts joined so they work with each other: a plug, a connection between services",
+   "squad": "s2-system",
+   "batch": "01"
+  },
+  {
+   "name": "agentic",
+   "meaning": "an AI agent acting on its own, on your behalf, toward a goal",
+   "squad": "s2-system",
+   "batch": "01"
+  },
+  {
+   "name": "git",
+   "meaning": "version control: the tool and its tree of changes",
+   "squad": "s2-system",
+   "batch": "02"
+  },
+  {
+   "name": "branch",
+   "meaning": "a line of work diverging from the main line (git)",
+   "squad": "s2-system",
+   "batch": "02"
+  },
+  {
+   "name": "fork",
+   "meaning": "a copy taken to go your own way (git fork); also a split in the road",
+   "squad": "s2-system",
+   "batch": "02"
+  },
+  {
+   "name": "merge",
+   "meaning": "two lines of work coming together into one",
+   "squad": "s2-system",
+   "batch": "02"
+  },
+  {
+   "name": "node",
+   "meaning": "a point in a graph: a vertex",
+   "squad": "s2-system",
+   "batch": "02"
+  },
+  {
+   "name": "graph",
+   "meaning": "nodes connected by edges: a network",
+   "squad": "s2-system",
+   "batch": "02"
+  },
+  {
+   "name": "edge",
+   "meaning": "the link between two nodes",
+   "squad": "s2-system",
+   "batch": "02"
+  },
+  {
+   "name": "node-add",
+   "meaning": "add a node to the graph (the action)",
+   "squad": "s2-system",
+   "batch": "02"
+  },
+  {
+   "name": "node-new",
+   "meaning": "a node that is newly created: fresh, just appeared (a state, distinct from node-add)",
+   "squad": "s2-system",
+   "batch": "03"
+  },
+  {
+   "name": "node-remove",
+   "meaning": "remove a node from the graph (the action)",
+   "squad": "s2-system",
+   "batch": "03"
+  },
+  {
+   "name": "journey",
+   "meaning": "a path travelled across steps and time, with a start and an arrival",
+   "squad": "s3-surface",
+   "batch": "01"
+  },
+  {
+   "name": "overview",
+   "meaning": "the whole picture at a glance: a bird's-eye summary",
+   "squad": "s3-surface",
+   "batch": "01"
+  },
+  {
+   "name": "view",
+   "meaning": "one way of looking at the content: a lens on the data",
+   "squad": "s3-surface",
+   "batch": "01"
+  },
+  {
+   "name": "page",
+   "meaning": "a single screen or document of the app or site",
+   "squad": "s3-surface",
+   "batch": "01"
+  },
+  {
+   "name": "screens",
+   "meaning": "the set of an app's screens seen together",
+   "squad": "s3-surface",
+   "batch": "01"
+  },
+  {
+   "name": "layout",
+   "meaning": "how things are arranged on a surface",
+   "squad": "s3-surface",
+   "batch": "01"
+  },
+  {
+   "name": "pane",
+   "meaning": "one panel of a split window",
+   "squad": "s3-surface",
+   "batch": "01"
+  },
+  {
+   "name": "matrix",
+   "meaning": "a grid of rows and columns crossing two dimensions",
+   "squad": "s3-surface",
+   "batch": "01"
+  },
+  {
+   "name": "tooltip",
+   "meaning": "a small floating hint that explains an element",
+   "squad": "s3-surface",
+   "batch": "02"
+  },
+  {
+   "name": "enabled",
+   "meaning": "switched on, available to use",
+   "squad": "s3-surface",
+   "batch": "02"
+  },
+  {
+   "name": "disabled",
+   "meaning": "present but unavailable: cannot be used",
+   "squad": "s3-surface",
+   "batch": "02"
+  },
+  {
+   "name": "expand",
+   "meaning": "open up to show more: unfold, bigger",
+   "squad": "s3-surface",
+   "batch": "02"
+  },
+  {
+   "name": "collapse",
+   "meaning": "fold up to hide detail: smaller",
+   "squad": "s3-surface",
+   "batch": "02"
+  },
+  {
+   "name": "inform",
+   "meaning": "tell, notify, make known: an information notice",
+   "squad": "s3-surface",
+   "batch": "02"
+  },
+  {
+   "name": "affordance",
+   "meaning": "a shape that shows what you can do with it: a handle, a button that looks pressable",
+   "squad": "s3-surface",
+   "batch": "02"
+  },
+  {
+   "name": "quality",
+   "meaning": "a high standard met: well made, checked, trustworthy",
+   "squad": "s4-quality",
+   "batch": "01"
+  },
+  {
+   "name": "parity",
+   "meaning": "the same thing on every platform: iOS, Android and web in step",
+   "squad": "s4-quality",
+   "batch": "01"
+  },
+  {
+   "name": "code-quality",
+   "meaning": "clean, readable, well-structured code",
+   "squad": "s4-quality",
+   "batch": "01"
+  },
+  {
+   "name": "verification",
+   "meaning": "checking that something is true or correct",
+   "squad": "s4-quality",
+   "batch": "01"
+  },
+  {
+   "name": "quality-assurance",
+   "meaning": "the process of checking quality before release: testing plus sign-off",
+   "squad": "s4-quality",
+   "batch": "01"
+  },
+  {
+   "name": "acceptances",
+   "meaning": "the conditions a piece of work must meet to be accepted, as a checklist",
+   "squad": "s4-quality",
+   "batch": "01"
+  },
+  {
+   "name": "criterion",
+   "meaning": "one standard a thing is judged against: a single check",
+   "squad": "s4-quality",
+   "batch": "01"
+  },
+  {
+   "name": "finding",
+   "meaning": "something discovered during an audit: a reported issue",
+   "squad": "s4-quality",
+   "batch": "01"
+  },
+  {
+   "name": "resolved",
+   "meaning": "an issue that has been dealt with and closed",
+   "squad": "s4-quality",
+   "batch": "02"
+  },
+  {
+   "name": "solved",
+   "meaning": "a problem solved: the answer found",
+   "squad": "s4-quality",
+   "batch": "02"
+  },
+  {
+   "name": "fixed",
+   "meaning": "something broken, now mended",
+   "squad": "s4-quality",
+   "batch": "02"
+  },
+  {
+   "name": "performance",
+   "meaning": "speed and responsiveness: how fast it runs",
+   "squad": "s4-quality",
+   "batch": "02"
+  },
+  {
+   "name": "efficiency",
+   "meaning": "the most result for the least waste",
+   "squad": "s4-quality",
+   "batch": "02"
+  },
+  {
+   "name": "reliability",
+   "meaning": "can be counted on: works every time, stays up",
+   "squad": "s4-quality",
+   "batch": "02"
+  },
+  {
+   "name": "observability",
+   "meaning": "seeing inside a running system through its signals (logs, metrics, traces)",
+   "squad": "s4-quality",
+   "batch": "02"
+  },
+  {
+   "name": "monitoring",
+   "meaning": "watching something continuously, ready for a signal to go off",
+   "squad": "s4-quality",
+   "batch": "02"
+  },
+  {
+   "name": "status-idea",
+   "meaning": "a spark, just an idea, not yet planned",
+   "squad": "s5-status",
+   "batch": "01"
+  },
+  {
+   "name": "status-backlog",
+   "meaning": "accepted and waiting in the queue",
+   "squad": "s5-status",
+   "batch": "01"
+  },
+  {
+   "name": "status-development",
+   "meaning": "being built right now",
+   "squad": "s5-status",
+   "batch": "01"
+  },
+  {
+   "name": "status-release",
+   "meaning": "built and on its way out: being shipped, awaiting review",
+   "squad": "s5-status",
+   "batch": "01"
+  },
+  {
+   "name": "status-blocked",
+   "meaning": "stuck, cannot move on until something is solved",
+   "squad": "s5-status",
+   "batch": "01"
+  },
+  {
+   "name": "status-live",
+   "meaning": "in production, in users' hands, running",
+   "squad": "s5-status",
+   "batch": "01"
+  },
+  {
+   "name": "status-archived",
+   "meaning": "put away, kept but no longer active",
+   "squad": "s5-status",
+   "batch": "01"
+  },
+  {
+   "name": "status-deprecated",
+   "meaning": "still there but on its way out: do not use any more",
+   "squad": "s5-status",
+   "batch": "01"
+  },
+  {
+   "name": "status-warning",
+   "meaning": "a caution state: attention needed",
+   "squad": "s5-status",
+   "batch": "02"
+  },
+  {
+   "name": "status-superseded",
+   "meaning": "replaced by something newer: this is the old one",
+   "squad": "s5-status",
+   "batch": "02"
+  },
+  {
+   "name": "status-supersede",
+   "meaning": "the act of replacing: this one takes the place of an older one",
+   "squad": "s5-status",
+   "batch": "02"
+  },
+  {
+   "name": "status-approved",
+   "meaning": "accepted, validated, signed off",
+   "squad": "s5-status",
+   "batch": "02"
+  },
+  {
+   "name": "status-rejected",
+   "meaning": "refused, turned down",
+   "squad": "s5-status",
+   "batch": "02"
+  },
+  {
+   "name": "status-draft",
+   "meaning": "a work in progress, not final, unpublished",
+   "squad": "s5-status",
+   "batch": "02"
+  },
+  {
+   "name": "priority",
+   "meaning": "what comes first: ranking by importance (the general concept)",
+   "squad": "s5-status",
+   "batch": "02"
+  },
+  {
+   "name": "priority-critical",
+   "meaning": "top of the scale: drop everything",
+   "squad": "s5-status",
+   "batch": "02"
+  },
+  {
+   "name": "priority-high",
+   "meaning": "important, soon",
+   "squad": "s5-status",
+   "batch": "03"
+  },
+  {
+   "name": "priority-medium",
+   "meaning": "middle of the scale: normal",
+   "squad": "s5-status",
+   "batch": "03"
+  },
+  {
+   "name": "priority-low",
+   "meaning": "bottom of the scale: when there is time",
+   "squad": "s5-status",
+   "batch": "03"
+  },
+  {
+   "name": "priority-undefined",
+   "meaning": "not ranked yet: priority unknown",
+   "squad": "s5-status",
+   "batch": "03"
+  },
+  {
+   "name": "security",
+   "meaning": "protection against attackers",
+   "squad": "s6-trust",
+   "batch": "01"
+  },
+  {
+   "name": "privacy",
+   "meaning": "what is kept to oneself, shielded from others' eyes",
+   "squad": "s6-trust",
+   "batch": "01"
+  },
+  {
+   "name": "data-protection",
+   "meaning": "the care taken of personal data and the rights of its owner",
+   "squad": "s6-trust",
+   "batch": "01"
+  },
+  {
+   "name": "gdpr",
+   "meaning": "the European data-protection regulation, a legal framework (do not copy the EU flag or its ring of stars)",
+   "squad": "s6-trust",
+   "batch": "01"
+  },
+  {
+   "name": "safety",
+   "meaning": "being kept from harm: a safe place, a net under you",
+   "squad": "s6-trust",
+   "batch": "01"
+  },
+  {
+   "name": "store-compliance",
+   "meaning": "meeting the rules of the app stores to be allowed in",
+   "squad": "s6-trust",
+   "batch": "01"
+  },
+  {
+   "name": "risk",
+   "meaning": "something that might go wrong: a chance of harm",
+   "squad": "s6-trust",
+   "batch": "01"
+  },
+  {
+   "name": "health",
+   "meaning": "the vitals of a person or a system: is it well",
+   "squad": "s6-trust",
+   "batch": "01"
+  },
+  {
+   "name": "diagnosis",
+   "meaning": "identifying what is wrong by examining signs",
+   "squad": "s6-trust",
+   "batch": "02"
+  },
+  {
+   "name": "doctor",
+   "meaning": "the practitioner who cares for health (no face, no cross: a stethoscope-level reading)",
+   "squad": "s6-trust",
+   "batch": "02"
+  },
+  {
+   "name": "therapeutic",
+   "meaning": "that which heals or soothes: a care practice",
+   "squad": "s6-trust",
+   "batch": "02"
+  },
+  {
+   "name": "wellness",
+   "meaning": "being well in body and mind: balance, calm, vitality",
+   "squad": "s6-trust",
+   "batch": "02"
+  },
+  {
+   "name": "accessibility",
+   "meaning": "usable by everyone, whatever their abilities",
+   "squad": "s6-trust",
+   "batch": "02"
+  },
+  {
+   "name": "inclusion",
+   "meaning": "everyone has a place: welcoming difference",
+   "squad": "s6-trust",
+   "batch": "02"
+  },
+  {
+   "name": "anxiety",
+   "meaning": "worry, tension: a mind racing, a tight chest",
+   "squad": "s6-trust",
+   "batch": "02"
+  },
+  {
+   "name": "avoid-hassles",
+   "meaning": "no trouble: friction removed, a smooth path",
+   "squad": "s6-trust",
+   "batch": "02"
+  },
+  {
+   "name": "simplify",
+   "meaning": "make less complex: fewer parts, stripped down",
+   "squad": "s7-value",
+   "batch": "01"
+  },
+  {
+   "name": "organize",
+   "meaning": "put things in order: sort, group, tidy",
+   "squad": "s7-value",
+   "batch": "01"
+  },
+  {
+   "name": "reduce-effort",
+   "meaning": "less work needed: lighter, easier, a shortcut",
+   "squad": "s7-value",
+   "batch": "01"
+  },
+  {
+   "name": "variety",
+   "meaning": "many different kinds: a mix, a range",
+   "squad": "s7-value",
+   "batch": "01"
+  },
+  {
+   "name": "sensorial",
+   "meaning": "felt through the senses: touch, sound, sight, smell, taste",
+   "squad": "s7-value",
+   "batch": "01"
+  },
+  {
+   "name": "aesthetics",
+   "meaning": "beauty: form pleasing to the eye, taste",
+   "squad": "s7-value",
+   "batch": "01"
+  },
+  {
+   "name": "attractiveness",
+   "meaning": "what draws you in: appeal, charm",
+   "squad": "s7-value",
+   "batch": "01"
+  },
+  {
+   "name": "fun",
+   "meaning": "playful joy, lightness, a smile",
+   "squad": "s7-value",
+   "batch": "01"
+  },
+  {
+   "name": "entertainment",
+   "meaning": "something that holds attention and amuses: a show, play",
+   "squad": "s7-value",
+   "batch": "02"
+  },
+  {
+   "name": "reward",
+   "meaning": "a prize for effort",
+   "squad": "s7-value",
+   "batch": "02"
+  },
+  {
+   "name": "badge-value",
+   "meaning": "the worth of an earned badge or achievement",
+   "squad": "s7-value",
+   "batch": "02"
+  },
+  {
+   "name": "recognition",
+   "meaning": "being seen and acknowledged for what you did",
+   "squad": "s7-value",
+   "batch": "02"
+  },
+  {
+   "name": "belonging",
+   "meaning": "being part of a group, having a place in it",
+   "squad": "s8-meaning",
+   "batch": "01"
+  },
+  {
+   "name": "community",
+   "meaning": "a group of people together, sharing something",
+   "squad": "s8-meaning",
+   "batch": "01"
+  },
+  {
+   "name": "hope",
+   "meaning": "expecting good to come: a light ahead",
+   "squad": "s8-meaning",
+   "batch": "01"
+  },
+  {
+   "name": "nostalgia",
+   "meaning": "longing for the past: a memory warmed by time",
+   "squad": "s8-meaning",
+   "batch": "01"
+  },
+  {
+   "name": "heirloom",
+   "meaning": "an object passed down through generations",
+   "squad": "s8-meaning",
+   "batch": "01"
+  },
+  {
+   "name": "legacy",
+   "meaning": "what you leave behind for those who come after",
+   "squad": "s8-meaning",
+   "batch": "01"
+  },
+  {
+   "name": "debt",
+   "meaning": "something owed: the weight of an obligation",
+   "squad": "s8-meaning",
+   "batch": "01"
+  },
+  {
+   "name": "transcendence",
+   "meaning": "going beyond the ordinary: rising above",
+   "squad": "s8-meaning",
+   "batch": "01"
+  },
+  {
+   "name": "money",
+   "meaning": "currency, cost, what things are worth",
+   "squad": "s8-meaning",
+   "batch": "02"
+  },
+  {
+   "name": "saving",
+   "meaning": "putting aside for later: thrift, keeping",
+   "squad": "s8-meaning",
+   "batch": "02"
+  },
+  {
+   "name": "success",
+   "meaning": "a goal reached: achievement",
+   "squad": "s8-meaning",
+   "batch": "02"
+  },
+  {
+   "name": "self-actualization",
+   "meaning": "becoming the fullest version of yourself: growth toward your potential",
+   "squad": "s8-meaning",
+   "batch": "02"
+  },
+  {
+   "name": "motivation",
+   "meaning": "the drive that makes you start and keep going",
+   "squad": "s8-meaning",
+   "batch": "02"
+  }
+ ]
+}

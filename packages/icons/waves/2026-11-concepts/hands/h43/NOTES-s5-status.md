@@ -1,0 +1,5 @@
+# h43 notes, squad s5-status (20 concepts, all three batches pass check.py)
+
+Family vocabularies. Statuses: classical = a ring with the state drawn inside; bold = a rounded card with a different object inside (bulb, hourglass, brackets, padlock, setting sun); pebbles = stones (heap, skipped stone, stone between walls, ripples, strata); weird = a line between two beads, the trace between them carrying the state. Priorities: classical = three rising bars with empty slots as dots, a baseline for the general one, a bang for critical; bold = triangles; pebbles = a cairn counted in stones; weird = a rod with a bead sliding along it.
+Hardest: status-superseded / status-supersede (a true pair: mirrored arrows, mirrored loop arrows, size-swapped stones, mirrored lines); priority-low/undefined (almost nothing to draw, so the scale had to live in what is absent); status-live and status-development in the bold idea (tiny objects in a card at 20 px).
+Marks follow the 6x6 rule for filled existing shapes, so most marked variants use a dot inside a shape or a foot dot at the end of the rod.
