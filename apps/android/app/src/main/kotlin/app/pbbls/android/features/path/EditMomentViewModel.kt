@@ -21,7 +21,11 @@ import app.pbbls.android.core.model.MomentSavePayload
 import app.pbbls.android.core.model.PebbleDraft
 import app.pbbls.android.core.model.PebbleSnapPayload
 import app.pbbls.android.core.ui.momentWriteErrorRes
+import app.pbbls.android.features.path.crop.CropPickGate
+import app.pbbls.android.features.path.crop.CropSession
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +49,8 @@ sealed interface EditMomentUiState {
         val snap: FormSnap? = null,
         val isSaving: Boolean = false,
         @StringRes val saveErrorRes: Int? = null,
+        /** The photo open in the crop editor (#1659), drawn over the form; null when the editor is closed. */
+        val cropping: CropSession? = null,
     ) : EditMomentUiState {
         /** A name or a photo (D3); the screen shows `edit_moment_needs_content` while false (R6). */
         val hasContent: Boolean by lazy { draft.name.isNotBlank() || snap != null }
@@ -82,6 +88,16 @@ class EditMomentViewModel
 
         private var loadedMomentId: String? = null
         private var detachedSnap: FormSnap.Existing? = null
+
+        /**
+         * Which pick the form is waiting on, from its tap until Done has handed it to the coordinator (#1659):
+         * Save waits meanwhile, a later pick supersedes an earlier one, and a read that lands after Cancel or a
+         * dismissal opens nothing.
+         */
+        private val cropGate = CropPickGate()
+
+        /** The latest pick's read, held so a dismissal can stop it. */
+        private var loadJob: Job? = null
 
         private val userId: String?
             get() = supabase.session?.user?.id
@@ -141,14 +157,54 @@ class EditMomentViewModel
             }
         }
 
+        /** A pick: read for the crop editor, which opens once the bytes are in (#1659). */
         fun onPhotoPicked(uri: Uri) {
-            if (isSaving) return
-            val id = userId ?: return
-            // At the tap, so a slower earlier pick never lands over a later one.
+            if (isSaving || userId == null) return
+            val token = cropGate.begin()
+            loadJob?.cancel()
+            loadJob =
+                viewModelScope.launch {
+                    val source =
+                        runCatchingCancellable { media.cropSource(uri) }
+                            .onFailure { Log.e(TAG, "photo could not be read for the crop editor", it) }
+                            .getOrNull()
+                    if (!cropGate.finishLoading(token, opened = source != null)) {
+                        Log.i(TAG, "crop load dropped: superseded or closed while loading")
+                        return@launch
+                    }
+                    if (source != null) updateContent { it.copy(cropping = CropSession(source, token)) }
+                }
+        }
+
+        /** Cancel in the editor, or back: nothing is attached. */
+        fun onCropCancelled() {
+            val session = content?.cropping ?: return
+            cropGate.release(session.token)
+            updateContent { it.copy(cropping = null) }
+        }
+
+        /**
+         * Done in the editor: what the window shows is rendered, processed and attached. The token is held until
+         * the coordinator has it, so Save keeps waiting through that gap.
+         */
+        fun onCropDone() {
+            val session = content?.cropping ?: return
+            updateContent { it.copy(cropping = null) }
+            val id = userId
+            if (isSaving || id == null) {
+                cropGate.release(session.token)
+                return
+            }
+            val geometry = session.state.geometry.normalized()
+            // At Done, so a slower earlier photo never lands over a later one.
             val generation = snaps.nextPickGeneration()
-            viewModelScope.launch {
-                runCatchingCancellable { snaps.attach(media.process(uri), id, generation) }
-                    .onFailure { Log.e(TAG, "photo pick processing failed", it) }
+            viewModelScope.launch(start = CoroutineStart.ATOMIC) {
+                try {
+                    runCatchingCancellable { snaps.attach(media.processCropped(session.source, geometry), id, generation) }
+                        .onFailure { Log.e(TAG, "cropped photo processing failed", it) }
+                } finally {
+                    cropGate.release(session.token)
+                }
             }
         }
 
@@ -170,8 +226,17 @@ class EditMomentViewModel
             updateContent { it.copy(snap = snaps.formSnap) }
         }
 
+        /** Back: the editor's Cancel while it is open, else a dismissal. */
+        fun onSystemBack() {
+            if (content?.cropping != null) onCropCancelled() else dismiss()
+        }
+
         fun dismiss() {
             if (content?.isSaving == true) return
+            // A photo still loading or open in the editor opens nothing once the form is gone.
+            cropGate.clear()
+            loadJob?.cancel()
+            updateContent { it.copy(cropping = null) }
             viewModelScope.launch {
                 userId?.let { snaps.cancelAndCleanup(it) }
                 effectsOut.emit(EditMomentEffect.Dismissed)
@@ -181,7 +246,7 @@ class EditMomentViewModel
         fun save() {
             val state = content ?: return
             if (!state.canSave) return
-            if (snaps.isUploading) {
+            if (snaps.isUploading || cropGate.isActive) {
                 updateContent { it.copy(saveErrorRes = R.string.pebble_save_error_photo_uploading) }
                 return
             }

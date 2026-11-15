@@ -2,11 +2,12 @@ package app.pbbls.android.features.path
 
 import android.content.Context
 import android.net.Uri
+import app.pbbls.android.core.data.CropSource
 import app.pbbls.android.core.data.ProcessedImage
 import app.pbbls.android.core.data.SnapProcessor
+import app.pbbls.android.core.model.crop.CropGeometry
 import app.pbbls.android.features.path.valence.ValencePrewarmer
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.time.OffsetDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,17 +20,22 @@ import javax.inject.Singleton
  * the calls behind this seam is what lets the edit and flow ViewModel tests run
  * with no device at all.
  *
- * The photo methods stay untested even so: they take a `Uri`, which cannot be
- * constructed off device either. They are covered when Robolectric lands (#857);
- * the fake refuses them loudly in the meantime rather than returning a
- * plausible-looking nothing.
+ * The photo methods take a `Uri` and a `Bitmap`, which only exist under
+ * Robolectric; the fake refuses them loudly until a test arms it, rather than
+ * returning a plausible-looking nothing.
  */
 interface ComposerMedia {
-    /** EXIF capture date, or null when the pick carries no metadata. */
-    suspend fun captureDate(uri: Uri): OffsetDateTime?
+    /**
+     * A pick, read for the crop editor (#1659): the working image and its EXIF capture date, read
+     * before the decode drops the metadata. Throws when the photo does not decode.
+     */
+    suspend fun cropSource(uri: Uri): CropSource
 
-    /** Decode, downscale and re-encode a pick into upload renditions. */
-    suspend fun process(uri: Uri): ProcessedImage
+    /** Done in the crop editor: what the window shows, as the upload renditions. */
+    suspend fun processCropped(
+        source: CropSource,
+        geometry: CropGeometry,
+    ): ProcessedImage
 
     /**
      * Warm the valence fan's eighteen wobbled assets. Process-wide caches, so a
@@ -49,9 +55,12 @@ class AndroidComposerMedia
         private val snapProcessor: SnapProcessor,
         private val valencePrewarmer: ValencePrewarmer,
     ) : ComposerMedia {
-        override suspend fun captureDate(uri: Uri): OffsetDateTime? = snapProcessor.captureDate(context, uri)
+        override suspend fun cropSource(uri: Uri): CropSource = snapProcessor.cropSource(context, uri)
 
-        override suspend fun process(uri: Uri): ProcessedImage = snapProcessor.process(context, uri)
+        override suspend fun processCropped(
+            source: CropSource,
+            geometry: CropGeometry,
+        ): ProcessedImage = snapProcessor.processCropped(source, geometry)
 
         override suspend fun prewarmValence() = valencePrewarmer.prewarm(context)
     }

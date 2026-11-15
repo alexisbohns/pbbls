@@ -23,7 +23,7 @@ import app.pbbls.android.core.designsystem.PbblsGlyphSize
 import app.pbbls.android.core.designsystem.Spacing
 
 /**
- * The photo step's fixed-slot controls (record-flow D3; iOS `RecordPhotoControls`): the way past the
+ * The photo step's controls under the picker, in thumb reach (record-flow D3, #1659; iOS `RecordPhotoControls`): the way past the
  * picture without one, and the camera, only where a camera app answers. "Just write" takes the width, so
  * the camera stays 48 dp at any font size and the label is what wraps. Owned by `CaptureFlowScreen`,
  * which advances and launches.

@@ -1,7 +1,9 @@
 package app.pbbls.android.testing
 
+import android.graphics.Bitmap
 import android.net.Uri
 import app.pbbls.android.core.data.CameraPhotos
+import app.pbbls.android.core.data.CropSource
 import app.pbbls.android.core.data.ProcessedImage
 import kotlinx.coroutines.CompletableDeferred
 
@@ -28,7 +30,7 @@ class FakeCameraPhotos : CameraPhotos {
     /** Thrown by the next [newShot], then cleared. */
     var failNewShot: Exception? = null
 
-    /** Holds [process] until completed, for "still saving" cases. */
+    /** Holds [process] and [cropSource] until completed, for "still saving" and "still reading" cases. */
     var processGate: CompletableDeferred<Unit>? = null
 
     override fun isAvailable(): Boolean = available
@@ -47,6 +49,13 @@ class FakeCameraPhotos : CameraPhotos {
     override suspend fun process(shot: String): ProcessedImage {
         processGate?.await()
         return processed ?: error("unreadable photo")
+    }
+
+    /** Capture's read for the crop editor: a small bitmap, or a throw when [processed] is null (an unreadable photo). */
+    override suspend fun cropSource(shot: String): CropSource {
+        processGate?.await()
+        if (processed == null) error("unreadable photo")
+        return CropSource(image = Bitmap.createBitmap(40, 30, Bitmap.Config.ARGB_8888), captureDate = null)
     }
 
     override fun delete(shot: String) {

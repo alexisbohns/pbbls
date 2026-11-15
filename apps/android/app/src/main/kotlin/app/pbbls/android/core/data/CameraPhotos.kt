@@ -34,8 +34,11 @@ interface CameraPhotos {
     /** The content URI the camera app writes [shot] through. */
     fun uriFor(shot: String): Uri
 
-    /** Decode, downscale and re-encode the shot into the upload renditions (as Capture's pick). */
+    /** Decode, downscale and re-encode the shot into the upload renditions: Home's one-shot moment, uncropped. */
     suspend fun process(shot: String): ProcessedImage
+
+    /** The shot read for Capture's crop editor (#1659). Throws when it does not decode. */
+    suspend fun cropSource(shot: String): CropSource
 
     /** Removes the shot's file. Never throws: a file left behind is logged, and the cache is the OS's to clear. */
     fun delete(shot: String)
@@ -66,6 +69,8 @@ class AndroidCameraPhotos
         override fun uriFor(shot: String): Uri = FileProvider.getUriForFile(context, "${context.packageName}.camera", File(shot))
 
         override suspend fun process(shot: String): ProcessedImage = snapProcessor.process(context, Uri.fromFile(File(shot)))
+
+        override suspend fun cropSource(shot: String): CropSource = snapProcessor.cropSource(context, Uri.fromFile(File(shot)))
 
         override fun delete(shot: String) {
             val file = File(shot)

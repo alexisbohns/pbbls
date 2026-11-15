@@ -36,7 +36,7 @@ import app.pbbls.android.core.model.FormSnap
 /**
  * Step 0, the picture the flow starts from (D3; iOS `RecordPhotoStep`). Play's photo policy keeps a photo
  * grid out of the app, so the library opens as the system's modal picker from one calm tile that fills
- * the height where iOS draws the grid; the controls above it are [RecordPhotoControls].
+ * the height where iOS draws the grid; the controls under it are [RecordPhotoControls].
  *
  * Three states, one tile that always says what it does: no photo (the disc and "Library"); picking or
  * uploading, which covers the beat (the photo, if any, under a scrim and a spinner, with the uploading

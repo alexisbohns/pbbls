@@ -68,6 +68,9 @@ class EditMomentPhotoSwapTest {
         h.viewModel.onRemoveExistingSnap()
         h.viewModel.onPhotoPicked(Uri.parse("content://media/picked/1"))
         advanceUntilIdle()
+        // Done in the crop editor (#1659).
+        h.viewModel.onCropDone()
+        advanceUntilIdle()
         Snapshot.sendApplyNotifications()
         advanceUntilIdle()
         return h.snapRepo.uploaded.single()
