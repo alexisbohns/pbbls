@@ -107,9 +107,10 @@ Everything named and every refinement accepted (`complete: true` in the saved re
 - Sprite symbols with masks (carved solids) make the page about 1 MB; that is fine.
 - The review state key is a per-session random seed plus db rev; a reload keeps the maintainer's data, a republish never wipes it. Do not rename concepts or hands after a review started (keys are `concept/hand.idea`).
 - Quick Look renders `<use>` of symbols poorly: build sheets with nested `<svg>` per cell (what `contact-sheet.py` does).
+- **What the maintainer approves must be what the package ships.** The review shows each form as drawn, the package renders it from roles; any gap surfaces only at extraction, after the verdict. The 2026-11 wave hit two: the generator notched outlines where a carved detail met the edge (fixed in the generator, carve now inks a carved line outside the fill), and 15 marks drawn as `stroke="none"` dots that the package draws filled and stroked, 1.75 units wider (now a checker error; the 15 were shrunk at extraction, the maintainer kept one as drawn). When the package changes how it renders a form, port it into `review-build.py` and `check.py` before the next squad.
 
 ## Not done yet (decide with the maintainer)
 - **Extraction into the package** (the wave's `library.json` has every kept drawing; extraction was not started): kept drawings (names, forms) have to become `src/<name>.svg` with `data-role` markup, `icons.json` rows (wave, `candidate`), then `npm run format|lint|generate|check --workspace=@pbbls/icons` and the usual PR. Solid drawings in this wave are plain fills; the package generator derives its own carved solid from roles.
-- **Align the generator's carve with the preview**: the preview carves only details inside a body and lets connectors merge; the generator carves every line within half a stroke of a body. Port the connector rule before extracting, or real icons will show halos the preview does not.
-- Squads s5-status (families), s6-trust, s7-value, s8-meaning remain; the brief and checker are final for them unless a verdict says otherwise.
+- ~~Align the generator's carve with the preview~~: done (branch `fix/1653-carve-ink-outside`). Both already chose the same lines to carve; the generator now cuts a carved line only inside the fill and inks it outside, as the preview does.
+- All eight squads are drawn and reviewed (338 kept drawings).
 - The build journal pebble owed by `CLAUDE.md` at the end of each task (one was dropped when s1 to s4 were wrapped up; drop one per squad session that changes something).

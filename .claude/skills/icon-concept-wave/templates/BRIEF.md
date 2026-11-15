@@ -23,6 +23,7 @@ All three keep **every path of the regular exactly as drawn**. A variant changes
   - (b) add one filled dot (`fill="currentColor"`) whose centre lies **inside a closed shape** of the regular (a circle, a stone, a box). Its width is 2 to 6 units and under three quarters of its shape (best: between a third and a half), so it reads as a dot in a shape, never as the shape;
   - (c) a **tail dot**: a filled dot 2.5 to 5 units wide placed just after the end of an open line (centre within 3 units of the line's end), the way the shipped checkmark-dot puts its dot after the tick.
   A dot never flies around anywhere else, and is never the pen's tiny dot (smaller than the stroke). The mark must say something: a status, a count, a point of focus.
+  Like the solid, a mark **keeps its stroke** (never `stroke="none"`): the package draws a lit mark filled and stroked, so the dot you see is its path plus half a stroke all round. Draw the path that much smaller than the dot you want.
 - **skip**: when a solid or a marked makes no sense for this idea (a line-only drawing, a concept with no body to fill), do not force one: write the symbol with the usual root attributes, `data-skip="true"` and no paths, e.g. `<symbol id="flow-bold-solid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" data-skip="true"></symbol>`. Use it rarely and only when forcing it would be nonsense.
 
 ## The line (the DNA)

@@ -213,6 +213,8 @@ def check_symbol(sym, sid, variant, errs):
             errs.append(f"{sid}: fill-rule only as evenodd on a filled path")
         if variant == "solid" and (ch.getAttribute("stroke") == "none" or ch.getAttribute("fill-rule")):
             errs.append(f"{sid}: a solid keeps its stroke and its own path: no stroke=\"none\", no evenodd carving")
+        if variant == "marked" and ch.getAttribute("stroke") == "none":
+            errs.append(f"{sid}: a mark keeps its stroke: the package draws a lit mark filled and stroked, so a stroke=\"none\" dot ships 1.75 units wider than drawn")
         if ch.getAttribute("stroke") and (ch.getAttribute("stroke") != "none" or not fill):
             errs.append(f"{sid}: stroke=\"none\" only on a filled path")
         d = ch.getAttribute("d")
