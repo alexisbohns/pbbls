@@ -1,7 +1,7 @@
 # Verdict
 
-333 drawings kept under 102 concepts; 3 abandoned.
-121 finalists, 213 starred, 57 redrawn in a refinement round, 23 variants dropped.
+338 drawings kept under 105 concepts; 3 abandoned.
+124 finalists, 215 starred, 57 redrawn in a refinement round, 23 variants dropped.
 
 ## s1-delivery
 
@@ -119,6 +119,11 @@
 - **reward**: `gift-ribbon` (finalist), `stone-podium` (finalist)
 - **simplify**: `simplify` (finalist)
 - **variety**: `library-books` ★, `variety-scribble` ★, `variety-shapes` (finalist), `variety-stones` (finalist)
+## s8-meaning
+
+- **nostalgia**: `instant-photo` (finalist)
+- **saving**: `stack-jar` (finalist), `stones-jar` (finalist)
+- **self-actualization**: `abstract-butterfly` ★, `abstract-flower` ★
 
 Concepts with no finalist: delivery, changelog, flow, journal, log, ledger, record, commitment, data, database, api, architecture, agentic, view, inform, affordance, resolved, privacy.
 

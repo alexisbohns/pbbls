@@ -1,0 +1,196 @@
+{
+  "dec": {
+    "nostalgia/h43.classical": "keep",
+    "saving/h41.classical": "keep",
+    "saving/h43.bold": "keep",
+    "self-actualization/h41.bold": "keep",
+    "self-actualization/h43.bold": "keep"
+  },
+  "finals": {
+    "belonging": [],
+    "community": [],
+    "debt": [],
+    "heirloom": [],
+    "hope": [],
+    "legacy": [],
+    "money": [],
+    "motivation": [],
+    "nostalgia": [
+      "h43.classical"
+    ],
+    "saving": [
+      "h43.bold",
+      "h41.classical"
+    ],
+    "self-actualization": [],
+    "success": [],
+    "transcendence": []
+  },
+  "names": {
+    "nostalgia/h43.classical": "instant-photo",
+    "saving/h41.classical": "stack-jar",
+    "saving/h43.bold": "stones-jar",
+    "self-actualization/h41.bold": "abstract-flower",
+    "self-actualization/h43.bold": "abstract-butterfly"
+  },
+  "none": {
+    "nostalgia": false,
+    "saving": false
+  },
+  "note": {},
+  "ref": {},
+  "results": {
+    "app": "concept-icon-review",
+    "complete": true,
+    "concepts": [
+      {
+        "concept": "belonging",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "community",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "hope",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "nostalgia",
+        "finalists": [
+          "h43.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "heirloom",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "legacy",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "debt",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "transcendence",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "money",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "saving",
+        "finalists": [
+          "h43.bold",
+          "h41.classical"
+        ],
+        "none": false
+      },
+      {
+        "concept": "success",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "self-actualization",
+        "finalists": [],
+        "none": false
+      },
+      {
+        "concept": "motivation",
+        "finalists": [],
+        "none": false
+      }
+    ],
+    "drawings": [
+      {
+        "candidate": "h43.classical",
+        "concept": "nostalgia",
+        "decision": "keep",
+        "finalist": true,
+        "id": "nostalgia/h43.classical",
+        "name": "instant-photo",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "saving",
+        "decision": "keep",
+        "finalist": true,
+        "id": "saving/h43.bold",
+        "name": "stones-jar",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.classical",
+        "concept": "saving",
+        "decision": "keep",
+        "finalist": true,
+        "id": "saving/h41.classical",
+        "name": "stack-jar",
+        "nameOk": true,
+        "refine": null,
+        "starred": false,
+        "variants": {}
+      },
+      {
+        "candidate": "h43.bold",
+        "concept": "self-actualization",
+        "decision": "keep",
+        "finalist": false,
+        "id": "self-actualization/h43.bold",
+        "name": "abstract-butterfly",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      },
+      {
+        "candidate": "h41.bold",
+        "concept": "self-actualization",
+        "decision": "keep",
+        "finalist": false,
+        "id": "self-actualization/h41.bold",
+        "name": "abstract-flower",
+        "nameOk": true,
+        "refine": null,
+        "starred": true,
+        "variants": {}
+      }
+    ],
+    "exportedAt": "2026-11-15T11:54:53.231Z",
+    "refinements": [],
+    "stars": [
+      "self-actualization/h43.bold",
+      "self-actualization/h41.bold"
+    ],
+    "version": 1
+  },
+  "rev": 82,
+  "seed": 3591644223,
+  "stars": [
+    "self-actualization/h43.bold",
+    "self-actualization/h41.bold"
+  ],
+  "updatedAt": "2026-11-15T11:54:53.231Z",
+  "v": 1,
+  "vf": {}
+}
