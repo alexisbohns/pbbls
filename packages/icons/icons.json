@@ -9989,6 +9989,528 @@
       "status": "candidate",
       "migrated": [],
       "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "door-handle",
+      "meaning": "Door handle: a handle on a door.",
+      "tags": { "category": ["places"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "letter-underline",
+      "meaning": "Letter underline: a letter with a line beneath it.",
+      "tags": { "category": ["writing"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-pin",
+      "meaning": "Stone pin: a stone marking a place on a map.",
+      "tags": { "category": ["stones", "maps"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "sunset-chevron-down",
+      "meaning": "Sunset chevron down: a setting sun above a downward chevron.",
+      "tags": { "category": ["sky", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "accordion-collapsed",
+      "meaning": "Accordion collapsed: a closed accordion section.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "cairn-stack",
+      "meaning": "Cairn stack: stones stacked into a cairn.",
+      "tags": { "category": ["cairns"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-chevron-up",
+      "meaning": "Circle chevron up: an upward chevron in a circle.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "collapse",
+      "meaning": "Collapse: items folding inward into one.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "collapse-square",
+      "meaning": "Collapse square: a square with arrows folding inward.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-shrink",
+      "meaning": "Pebble shrink: a stone getting smaller.",
+      "tags": { "category": ["stones", "arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-half-quarter",
+      "meaning": "Circle half quarter: a circle with a quarter filled in.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "disabled",
+      "meaning": "Disabled: a control that cannot be used.",
+      "tags": { "category": ["actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "interrupter",
+      "meaning": "Interrupter: a switch that breaks a circuit.",
+      "tags": { "category": ["actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "rectangle-hash",
+      "meaning": "Rectangle hash: a rectangle with hash marks.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "sunset-sea",
+      "meaning": "Sunset sea: a sunset over the sea.",
+      "tags": { "category": ["sky", "water"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "toggle-disabled",
+      "meaning": "Toggle disabled: a switch that cannot be changed.",
+      "tags": { "category": ["actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "enabled",
+      "meaning": "Enabled: a control switched on and ready.",
+      "tags": { "category": ["actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "instant-picture",
+      "meaning": "Instant picture: a photo printed straight from a camera.",
+      "tags": { "category": ["devices"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-checkmark",
+      "meaning": "Stone checkmark: a stone marked with a tick.",
+      "tags": { "category": ["stones", "actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-shine-top",
+      "meaning": "Stone shine top: a stone lit from the top.",
+      "tags": { "category": ["stones", "fire"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "accordion-expanded",
+      "meaning": "Accordion expanded: an open accordion section.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "circle-chevron-down",
+      "meaning": "Circle chevron down: a downward chevron in a circle.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "expand-square",
+      "meaning": "Expand square: a square with arrows opening outward.",
+      "tags": { "category": ["arrows"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "ripples-2",
+      "meaning": "Ripples: rings spreading from a point.",
+      "tags": { "category": ["water"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "journey",
+      "meaning": "Journey: a route travelled from start to finish.",
+      "tags": { "category": ["paths"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stairs-stone",
+      "meaning": "Stairs stone: a stone staircase.",
+      "tags": { "category": ["stones", "paths"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "chart-shapes",
+      "meaning": "Chart shapes: shapes arranged on a chart.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "fibonacci",
+      "meaning": "Fibonacci: a pattern from the Fibonacci sequence.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "layout-3",
+      "meaning": "Layout: a page split into three panels.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-box",
+      "meaning": "Stones box: stones packed in a box.",
+      "tags": { "category": ["stones", "collections"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stones-messy",
+      "meaning": "Stones messy: stones scattered in a loose heap.",
+      "tags": { "category": ["stones"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "hash",
+      "meaning": "Hash: a hash sign.",
+      "tags": { "category": ["writing"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "matrix",
+      "meaning": "Matrix: values arranged in rows and columns.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "chart-square",
+      "meaning": "Chart square: a bar chart inside a square.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "overview",
+      "meaning": "Overview: a summary of the whole at a glance.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "file-text",
+      "meaning": "File text: a file with text on it.",
+      "tags": { "category": ["documents"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "hanging-note",
+      "meaning": "Hanging note: a note hung from a peg.",
+      "tags": { "category": ["documents"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "page-text",
+      "meaning": "Page text: a page with text on it.",
+      "tags": { "category": ["documents"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-text",
+      "meaning": "Pebble text: text written on a stone.",
+      "tags": { "category": ["stones", "writing"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "stone-text",
+      "meaning": "Stone text: text carved into a stone.",
+      "tags": { "category": ["stones", "writing"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "window-text",
+      "meaning": "Window text: a window showing text.",
+      "tags": { "category": ["documents"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "folder-text",
+      "meaning": "Folder text: a folder holding text.",
+      "tags": { "category": ["collections", "documents"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "layout-overlap",
+      "meaning": "Layout overlap: layout panels overlapping.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "layout-pane-text",
+      "meaning": "Layout pane text: a layout panel with text.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "layout-sidebar-text",
+      "meaning": "Layout sidebar text: a layout with a text sidebar.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "perspective",
+      "meaning": "Perspective: a view drawn with depth.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "copy-text",
+      "meaning": "Copy text: text copied to another place.",
+      "tags": { "category": ["transfer"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "dolmens-3",
+      "meaning": "Dolmens: stone tables set upright, like ancient monuments.",
+      "tags": { "category": ["cairns"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "screens",
+      "meaning": "Screens: several screens side by side.",
+      "tags": { "category": ["devices"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "squircles-4",
+      "meaning": "Squircles: rounded squares with smooth corners.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "triptych",
+      "meaning": "Triptych: three panels set side by side.",
+      "tags": { "category": ["charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "walls",
+      "meaning": "Walls: walls of stone blocks.",
+      "tags": { "category": ["cairns"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "cursor-menu",
+      "meaning": "Cursor menu: a menu opened at the cursor.",
+      "tags": { "category": ["actions"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "node-tooltip",
+      "meaning": "Node tooltip: a tooltip attached to a node.",
+      "tags": { "category": ["info", "web"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "pebble-chat-bubble",
+      "meaning": "Pebble chat bubble: a stone-shaped speech bubble.",
+      "tags": { "category": ["stones", "notifications"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "tooltip",
+      "meaning": "Tooltip: a small label appearing beside an item.",
+      "tags": { "category": ["info"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "tooltip-bubble",
+      "meaning": "Tooltip bubble: a speech bubble giving a short tip.",
+      "tags": { "category": ["info", "notifications"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
+    },
+    {
+      "name": "search-chart",
+      "meaning": "Search chart: a magnifying glass over a chart.",
+      "tags": { "category": ["maps", "charts"] },
+      "wave": "2026-11-concepts",
+      "status": "candidate",
+      "migrated": [],
+      "replaces": { "ios": [], "android": [], "web": [] }
     }
   ]
 }

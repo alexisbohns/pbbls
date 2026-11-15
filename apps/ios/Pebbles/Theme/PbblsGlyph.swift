@@ -2242,4 +2242,120 @@ enum PbblsGlyph: String, CaseIterable, Sendable {
     case eyeCheck = "eye-check"
     /// Search check: a magnifying glass with a tick.
     case searchCheck = "search-check"
+    /// Door handle: a handle on a door.
+    case doorHandle = "door-handle"
+    /// Letter underline: a letter with a line beneath it.
+    case letterUnderline = "letter-underline"
+    /// Stone pin: a stone marking a place on a map.
+    case stonePin = "stone-pin"
+    /// Sunset chevron down: a setting sun above a downward chevron.
+    case sunsetChevronDown = "sunset-chevron-down"
+    /// Accordion collapsed: a closed accordion section.
+    case accordionCollapsed = "accordion-collapsed"
+    /// Cairn stack: stones stacked into a cairn.
+    case cairnStack = "cairn-stack"
+    /// Circle chevron up: an upward chevron in a circle.
+    case circleChevronUp = "circle-chevron-up"
+    /// Collapse: items folding inward into one.
+    case collapse = "collapse"
+    /// Collapse square: a square with arrows folding inward.
+    case collapseSquare = "collapse-square"
+    /// Pebble shrink: a stone getting smaller.
+    case pebbleShrink = "pebble-shrink"
+    /// Circle half quarter: a circle with a quarter filled in.
+    case circleHalfQuarter = "circle-half-quarter"
+    /// Disabled: a control that cannot be used.
+    case disabled = "disabled"
+    /// Interrupter: a switch that breaks a circuit.
+    case interrupter = "interrupter"
+    /// Rectangle hash: a rectangle with hash marks.
+    case rectangleHash = "rectangle-hash"
+    /// Sunset sea: a sunset over the sea.
+    case sunsetSea = "sunset-sea"
+    /// Toggle disabled: a switch that cannot be changed.
+    case toggleDisabled = "toggle-disabled"
+    /// Enabled: a control switched on and ready.
+    case enabled = "enabled"
+    /// Instant picture: a photo printed straight from a camera.
+    case instantPicture = "instant-picture"
+    /// Stone checkmark: a stone marked with a tick.
+    case stoneCheckmark = "stone-checkmark"
+    /// Stone shine top: a stone lit from the top.
+    case stoneShineTop = "stone-shine-top"
+    /// Accordion expanded: an open accordion section.
+    case accordionExpanded = "accordion-expanded"
+    /// Circle chevron down: a downward chevron in a circle.
+    case circleChevronDown = "circle-chevron-down"
+    /// Expand square: a square with arrows opening outward.
+    case expandSquare = "expand-square"
+    /// Ripples: rings spreading from a point.
+    case ripples2 = "ripples-2"
+    /// Journey: a route travelled from start to finish.
+    case journey = "journey"
+    /// Stairs stone: a stone staircase.
+    case stairsStone = "stairs-stone"
+    /// Chart shapes: shapes arranged on a chart.
+    case chartShapes = "chart-shapes"
+    /// Fibonacci: a pattern from the Fibonacci sequence.
+    case fibonacci = "fibonacci"
+    /// Layout: a page split into three panels.
+    case layout3 = "layout-3"
+    /// Stones box: stones packed in a box.
+    case stonesBox = "stones-box"
+    /// Stones messy: stones scattered in a loose heap.
+    case stonesMessy = "stones-messy"
+    /// Hash: a hash sign.
+    case hash = "hash"
+    /// Matrix: values arranged in rows and columns.
+    case matrix = "matrix"
+    /// Chart square: a bar chart inside a square.
+    case chartSquare = "chart-square"
+    /// Overview: a summary of the whole at a glance.
+    case overview = "overview"
+    /// File text: a file with text on it.
+    case fileText = "file-text"
+    /// Hanging note: a note hung from a peg.
+    case hangingNote = "hanging-note"
+    /// Page text: a page with text on it.
+    case pageText = "page-text"
+    /// Pebble text: text written on a stone.
+    case pebbleText = "pebble-text"
+    /// Stone text: text carved into a stone.
+    case stoneText = "stone-text"
+    /// Window text: a window showing text.
+    case windowText = "window-text"
+    /// Folder text: a folder holding text.
+    case folderText = "folder-text"
+    /// Layout overlap: layout panels overlapping.
+    case layoutOverlap = "layout-overlap"
+    /// Layout pane text: a layout panel with text.
+    case layoutPaneText = "layout-pane-text"
+    /// Layout sidebar text: a layout with a text sidebar.
+    case layoutSidebarText = "layout-sidebar-text"
+    /// Perspective: a view drawn with depth.
+    case perspective = "perspective"
+    /// Copy text: text copied to another place.
+    case copyText = "copy-text"
+    /// Dolmens: stone tables set upright, like ancient monuments.
+    case dolmens3 = "dolmens-3"
+    /// Screens: several screens side by side.
+    case screens = "screens"
+    /// Squircles: rounded squares with smooth corners.
+    case squircles4 = "squircles-4"
+    /// Triptych: three panels set side by side.
+    case triptych = "triptych"
+    /// Walls: walls of stone blocks.
+    case walls = "walls"
+    /// Cursor menu: a menu opened at the cursor.
+    case cursorMenu = "cursor-menu"
+    /// Node tooltip: a tooltip attached to a node.
+    case nodeTooltip = "node-tooltip"
+    /// Pebble chat bubble: a stone-shaped speech bubble.
+    case pebbleChatBubble = "pebble-chat-bubble"
+    /// Tooltip: a small label appearing beside an item.
+    case tooltip = "tooltip"
+    /// Tooltip bubble: a speech bubble giving a short tip.
+    case tooltipBubble = "tooltip-bubble"
+    /// Search chart: a magnifying glass over a chart.
+    case searchChart = "search-chart"
 }

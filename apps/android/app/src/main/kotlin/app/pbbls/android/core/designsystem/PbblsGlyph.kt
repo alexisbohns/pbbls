@@ -3338,6 +3338,180 @@ enum class PbblsGlyph(
 
     /** Search check: a magnifying glass with a tick. */
     SEARCH_CHECK("search-check"),
+
+    /** Door handle: a handle on a door. */
+    DOOR_HANDLE("door-handle"),
+
+    /** Letter underline: a letter with a line beneath it. */
+    LETTER_UNDERLINE("letter-underline"),
+
+    /** Stone pin: a stone marking a place on a map. */
+    STONE_PIN("stone-pin"),
+
+    /** Sunset chevron down: a setting sun above a downward chevron. */
+    SUNSET_CHEVRON_DOWN("sunset-chevron-down"),
+
+    /** Accordion collapsed: a closed accordion section. */
+    ACCORDION_COLLAPSED("accordion-collapsed"),
+
+    /** Cairn stack: stones stacked into a cairn. */
+    CAIRN_STACK("cairn-stack"),
+
+    /** Circle chevron up: an upward chevron in a circle. */
+    CIRCLE_CHEVRON_UP("circle-chevron-up"),
+
+    /** Collapse: items folding inward into one. */
+    COLLAPSE("collapse"),
+
+    /** Collapse square: a square with arrows folding inward. */
+    COLLAPSE_SQUARE("collapse-square"),
+
+    /** Pebble shrink: a stone getting smaller. */
+    PEBBLE_SHRINK("pebble-shrink"),
+
+    /** Circle half quarter: a circle with a quarter filled in. */
+    CIRCLE_HALF_QUARTER("circle-half-quarter"),
+
+    /** Disabled: a control that cannot be used. */
+    DISABLED("disabled"),
+
+    /** Interrupter: a switch that breaks a circuit. */
+    INTERRUPTER("interrupter"),
+
+    /** Rectangle hash: a rectangle with hash marks. */
+    RECTANGLE_HASH("rectangle-hash"),
+
+    /** Sunset sea: a sunset over the sea. */
+    SUNSET_SEA("sunset-sea"),
+
+    /** Toggle disabled: a switch that cannot be changed. */
+    TOGGLE_DISABLED("toggle-disabled"),
+
+    /** Enabled: a control switched on and ready. */
+    ENABLED("enabled"),
+
+    /** Instant picture: a photo printed straight from a camera. */
+    INSTANT_PICTURE("instant-picture"),
+
+    /** Stone checkmark: a stone marked with a tick. */
+    STONE_CHECKMARK("stone-checkmark"),
+
+    /** Stone shine top: a stone lit from the top. */
+    STONE_SHINE_TOP("stone-shine-top"),
+
+    /** Accordion expanded: an open accordion section. */
+    ACCORDION_EXPANDED("accordion-expanded"),
+
+    /** Circle chevron down: a downward chevron in a circle. */
+    CIRCLE_CHEVRON_DOWN("circle-chevron-down"),
+
+    /** Expand square: a square with arrows opening outward. */
+    EXPAND_SQUARE("expand-square"),
+
+    /** Ripples: rings spreading from a point. */
+    RIPPLES_2("ripples-2"),
+
+    /** Journey: a route travelled from start to finish. */
+    JOURNEY("journey"),
+
+    /** Stairs stone: a stone staircase. */
+    STAIRS_STONE("stairs-stone"),
+
+    /** Chart shapes: shapes arranged on a chart. */
+    CHART_SHAPES("chart-shapes"),
+
+    /** Fibonacci: a pattern from the Fibonacci sequence. */
+    FIBONACCI("fibonacci"),
+
+    /** Layout: a page split into three panels. */
+    LAYOUT_3("layout-3"),
+
+    /** Stones box: stones packed in a box. */
+    STONES_BOX("stones-box"),
+
+    /** Stones messy: stones scattered in a loose heap. */
+    STONES_MESSY("stones-messy"),
+
+    /** Hash: a hash sign. */
+    HASH("hash"),
+
+    /** Matrix: values arranged in rows and columns. */
+    MATRIX("matrix"),
+
+    /** Chart square: a bar chart inside a square. */
+    CHART_SQUARE("chart-square"),
+
+    /** Overview: a summary of the whole at a glance. */
+    OVERVIEW("overview"),
+
+    /** File text: a file with text on it. */
+    FILE_TEXT("file-text"),
+
+    /** Hanging note: a note hung from a peg. */
+    HANGING_NOTE("hanging-note"),
+
+    /** Page text: a page with text on it. */
+    PAGE_TEXT("page-text"),
+
+    /** Pebble text: text written on a stone. */
+    PEBBLE_TEXT("pebble-text"),
+
+    /** Stone text: text carved into a stone. */
+    STONE_TEXT("stone-text"),
+
+    /** Window text: a window showing text. */
+    WINDOW_TEXT("window-text"),
+
+    /** Folder text: a folder holding text. */
+    FOLDER_TEXT("folder-text"),
+
+    /** Layout overlap: layout panels overlapping. */
+    LAYOUT_OVERLAP("layout-overlap"),
+
+    /** Layout pane text: a layout panel with text. */
+    LAYOUT_PANE_TEXT("layout-pane-text"),
+
+    /** Layout sidebar text: a layout with a text sidebar. */
+    LAYOUT_SIDEBAR_TEXT("layout-sidebar-text"),
+
+    /** Perspective: a view drawn with depth. */
+    PERSPECTIVE("perspective"),
+
+    /** Copy text: text copied to another place. */
+    COPY_TEXT("copy-text"),
+
+    /** Dolmens: stone tables set upright, like ancient monuments. */
+    DOLMENS_3("dolmens-3"),
+
+    /** Screens: several screens side by side. */
+    SCREENS("screens"),
+
+    /** Squircles: rounded squares with smooth corners. */
+    SQUIRCLES_4("squircles-4"),
+
+    /** Triptych: three panels set side by side. */
+    TRIPTYCH("triptych"),
+
+    /** Walls: walls of stone blocks. */
+    WALLS("walls"),
+
+    /** Cursor menu: a menu opened at the cursor. */
+    CURSOR_MENU("cursor-menu"),
+
+    /** Node tooltip: a tooltip attached to a node. */
+    NODE_TOOLTIP("node-tooltip"),
+
+    /** Pebble chat bubble: a stone-shaped speech bubble. */
+    PEBBLE_CHAT_BUBBLE("pebble-chat-bubble"),
+
+    /** Tooltip: a small label appearing beside an item. */
+    TOOLTIP("tooltip"),
+
+    /** Tooltip bubble: a speech bubble giving a short tip. */
+    TOOLTIP_BUBBLE("tooltip-bubble"),
+
+    /** Search chart: a magnifying glass over a chart. */
+    SEARCH_CHART("search-chart"),
     ;
 
     companion object {
