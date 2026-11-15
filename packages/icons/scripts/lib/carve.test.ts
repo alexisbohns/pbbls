@@ -98,6 +98,12 @@ describe("carveSolid", () => {
     expect(whole - area).toBeLessThan(0.6 * lone)
   })
 
+  it("cuts a line lying mostly deep inside the fill even when it reaches far out (a tick out of its box)", () => {
+    // 11 of 14 units more than half a stroke inside the square, the rest well past the edge.
+    const { keep } = carveSolid([SQUARE], ["M8 12 L22 12"])
+    expect(keep).toEqual([])
+  })
+
   it("keeps a line traced along the body's outline", () => {
     // A hand-drawn rim wavering over the top edge, as a bowl's lip: partly outside the fill, never deep inside.
     const { keep } = carveSolid([SQUARE], ["M4 3.6 L12 4.4 L20 3.6"])

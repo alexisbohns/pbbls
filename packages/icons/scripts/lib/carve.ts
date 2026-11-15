@@ -108,12 +108,13 @@ export function carveSolid(body: readonly string[], others: readonly string[], h
     return offset([toInt(s.points)], ClipperLib.JoinType.jtRound, end, HALF_STROKE)
   })
   const base = boolean(ClipperLib.ClipType.ctUnion, fill, band)
-  // A line inside the fill is cut. So is one standing on its edge (a door on the ground line):
-  // within half a stroke of the fill, with at least half of it deeper than half a stroke inside.
-  // A line traced along the outline (a bowl's rim) is mostly on the edge, so it stays stroked.
+  // A line inside the fill is cut. So is one with at least half of it deeper than half a stroke inside,
+  // whether it stands on the edge (a door on the ground line) or reaches out (a tick leaving its box): it is
+  // cut inside and inked outside. A line traced along the outline (a bowl's rim) is mostly on the edge, and
+  // a connector into a node is mostly outside, so they stay stroked.
   const reach = offset(fill, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon, HALF_STROKE)
   const core = offset(fill, ClipperLib.JoinType.jtRound, ClipperLib.EndType.etClosedPolygon, -HALF_STROKE)
-  const carves = (d: string) => inside(d, fill) || (inside(d, reach) && shareInside(d, core) >= 0.5)
+  const carves = (d: string) => inside(d, fill) || shareInside(d, core) >= 0.5
   const keep: number[] = []
   const lines: IntPath[] = []
   others.forEach((d, i) => {
