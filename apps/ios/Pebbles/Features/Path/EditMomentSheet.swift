@@ -19,6 +19,19 @@ struct EditMomentSheet: View {
     /// Built in `.task` so it has `supabase.client`; seeded with the saved photo.
     @State private var snaps: SnapUploadCoordinator?
     @State private var isPhotoPickerPresented = false
+    /// True from the picker's presentation until its `onDismiss`:
+    /// `isPhotoPickerPresented` goes false at the pick, while the sheet is
+    /// still animating away.
+    @State private var isPickerOnScreen = false
+    /// The photo open in the crop editor, cleared by Cancel or Done.
+    @State private var cropping: CropSession?
+    /// A loaded photo waiting for the picker sheet to be gone, so the editor's
+    /// cover never presents over it.
+    @State private var pendingCrop: CropSession?
+    /// Which pick the sheet is waiting on, from the tap until the coordinator
+    /// has it. While it holds one the photo counts as coming: Save and the
+    /// swipe-dismiss wait, and a later pick supersedes an earlier one.
+    @State private var pickGate = CropPickGate()
     @State private var isSaving = false
     @State private var saveError: String?
 
@@ -37,11 +50,13 @@ struct EditMomentSheet: View {
         if case .pending = snaps?.formSnap { return true }
         return false
     }
-    private var canSave: Bool { draft.canSave(hasSnap: hasSnap) && snaps?.isBlocking != true }
+    private var canSave: Bool {
+        draft.canSave(hasSnap: hasSnap) && snaps?.isBlocking != true && !pickGate.isActive
+    }
 
     /// Non-nil while the attached photo blocks saving.
     private var snapBlockedMessage: String? {
-        if snaps?.isUploading == true { return String(localized: "Photo is still uploading.") }
+        if snaps?.isUploading == true || pickGate.isActive { return String(localized: "Photo is still uploading.") }
         if snaps?.hasFailed == true { return String(localized: "Photo upload failed. Retry or remove it.") }
         return nil
     }
@@ -50,7 +65,7 @@ struct EditMomentSheet: View {
         NavigationStack {
             EditMomentForm(
                 draft: $draft,
-                hasSnap: hasSnap || snaps?.isProcessingPick == true,
+                hasSnap: hasSnap || snaps?.isProcessingPick == true || pickGate.isActive,
                 isSaving: isSaving,
                 saveError: saveError
             ) {
@@ -73,8 +88,19 @@ struct EditMomentSheet: View {
             }
             .pebblesScreen()
         }
-        .interactiveDismissDisabled(isSaving || hasPendingSnap || snaps?.isProcessingPick == true)
+        .interactiveDismissDisabled(
+            isSaving || hasPendingSnap || snaps?.isProcessingPick == true || pickGate.isActive
+        )
         .onDisappear {
+            // Presenting the crop editor's full-screen cover can fire the
+            // sheet's `onDisappear` although the sheet stays: cleaning up then
+            // would close the coordinator and reject the photo Done is about
+            // to ingest. The sheet itself going away has no editor open (Cancel
+            // and Done clear `cropping` first).
+            guard cropping == nil else { return }
+            // A photo still loading must open nothing once the sheet is gone.
+            pickGate.clear()
+            pendingCrop = nil
             // Safety net for any dismissal that skipped Cancel. Idempotent:
             // deletes only a pending photo, never the saved or committed one.
             guard let snaps, !snaps.isCommitted, let userId = currentUserId else { return }
@@ -90,13 +116,25 @@ struct EditMomentSheet: View {
                 initialSnap: existing
             )
         }
-        .sheet(isPresented: $isPhotoPickerPresented) {
+        .sheet(isPresented: $isPhotoPickerPresented, onDismiss: {
+            isPickerOnScreen = false
+            promotePendingCrop()
+        }, content: {
             PhotoPickerView { picked in
                 isPhotoPickerPresented = false
-                if let picked, let userId = currentUserId, let snaps {
-                    Task { await snaps.handlePicked(picked, userId: userId) }
-                }
+                guard let picked else { return }
+                beginCrop(picked)
             }
+        })
+        .fullScreenCover(item: $cropping) { session in
+            PhotoCropEditor(
+                source: session.source,
+                onCancel: {
+                    cropping = nil
+                    pickGate.release(session.token)
+                },
+                onDone: { image, date in finishCrop(session, image: image, captureDate: date) }
+            )
         }
     }
 
@@ -105,16 +143,19 @@ struct EditMomentSheet: View {
         Group {
             switch snaps?.formSnap {
             case .none:
-                Button { isPhotoPickerPresented = true } label: {
+                Button {
+                    isPickerOnScreen = true
+                    isPhotoPickerPresented = true
+                } label: {
                     HStack {
                         Label { Text("Add a photo") } icon: { PbblsGlyphView(.camera, .row) }
-                        if snaps?.isProcessingPick == true {
+                        if pickGate.isLoading || snaps?.isProcessingPick == true {
                             Spacer()
                             ProgressView()
                         }
                     }
                 }
-                .disabled(snaps?.isProcessingPick == true)
+                .disabled(pickGate.isActive || snaps?.isProcessingPick == true)
             case .existing(_, let storagePath):
                 ExistingSnapRow(
                     storagePath: storagePath,
@@ -138,8 +179,61 @@ struct EditMomentSheet: View {
         .pebblesListRow(position: .only)
     }
 
+    /// Nothing else is on screen to collide with the editor's cover.
+    private var canPresentCrop: Bool { cropping == nil && !isPickerOnScreen }
+
+    /// A pick: counts as coming from now, loads its bytes, and opens the
+    /// editor only if nothing superseded or closed it meanwhile, and only once
+    /// the picker sheet is gone.
+    private func beginCrop(_ picked: PhotoPickerView.PickedItem) {
+        let token = pickGate.begin()
+        Task {
+            let source = await CropSource.make(from: picked)
+            guard pickGate.finishLoading(token, opened: source != nil) else {
+                logger.notice("crop load dropped: superseded or closed while loading")
+                return
+            }
+            guard let source else { return }
+            pendingCrop = CropSession(source: source, token: token)
+            promotePendingCrop()
+        }
+    }
+
+    /// Opens the editor for the pending photo once nothing else is presented;
+    /// called when its load lands and when the picker sheet goes.
+    private func promotePendingCrop() {
+        switch pickGate.presentation(pendingToken: pendingCrop?.token, canPresent: canPresentCrop) {
+        case .none, .wait:
+            return
+        case .drop:
+            logger.notice("pending crop dropped: superseded or closed before it could present")
+            pendingCrop = nil
+        case .present:
+            cropping = pendingCrop
+            pendingCrop = nil
+        }
+    }
+
+    /// Done in the editor: the cropped image takes the coordinator's path. The
+    /// session's token stays held until the coordinator has finished with it,
+    /// so the photo keeps counting as coming through the gap before its own
+    /// in-flight count starts.
+    private func finishCrop(_ session: CropSession, image: CGImage, captureDate: Date?) {
+        cropping = nil
+        guard let userId = currentUserId, let snaps else {
+            pickGate.release(session.token)
+            return
+        }
+        Task {
+            await snaps.ingest(cropped: image, captureDate: captureDate, userId: userId)
+            pickGate.release(session.token)
+        }
+    }
+
     private func cancel() async {
         guard !isSaving else { return }
+        pickGate.clear()
+        pendingCrop = nil
         if let userId = currentUserId, let snaps {
             // Deletes only a newly picked photo's files; the saved one stays.
             await snaps.cancelAndCleanup(userId: userId)

@@ -1,6 +1,5 @@
 import CoreGraphics
 import Foundation
-import PhotosUI
 import SwiftUI
 import os
 
@@ -30,15 +29,16 @@ final class SnapUploadCoordinator {
     /// means the step falls back to now. Cleared alongside `processedForRetry`.
     private(set) var pickedCaptureDate: Date?
 
-    /// Picks between the tap and the end of their `ingest` (load, re-encode,
-    /// upload). During the load and re-encode — seconds for an iCloud or HEIC
-    /// original — `formSnap` is still nil or the previous photo, so a form
-    /// that read only `formSnap` would save or discard around the new one.
+    /// Ingests between their start and the end of their upload. During the
+    /// re-encode `formSnap` is still nil or the previous photo, so a form that
+    /// read only `formSnap` would save or discard around the new one. The
+    /// load and the crop editor come before the coordinator hears of a photo:
+    /// the flows cover them with a `CropPickGate`.
     private var picksInFlight = 0
 
-    /// Bumped by every pick at its tap. A pick applies only while it is still
-    /// the latest one, so a first pick that loads slower than a second never
-    /// lands over it.
+    /// Bumped by every ingest when it starts. An ingest applies only while it
+    /// is still the latest one, so a first that re-encodes slower than a
+    /// second never lands over it.
     private var pickGeneration = 0
 
     /// Where the form stands. While its save is in flight (`beginCommit`),
@@ -54,7 +54,7 @@ final class SnapUploadCoordinator {
 
     // MARK: - Derived state
 
-    /// True from a pick's tap until its upload finishes.
+    /// True from an ingest's start until its upload finishes.
     var isProcessingPick: Bool { picksInFlight > 0 }
 
     /// True while the photo is not ready to save: a pick is still being
@@ -102,7 +102,7 @@ final class SnapUploadCoordinator {
 
     #if DEBUG
     /// Test-only: seed `processedForRetry` directly so tests can exercise
-    /// the upload path without driving the real `handlePicked` flow.
+    /// the upload path without driving a real pick.
     func seedProcessedForRetry(_ processed: ProcessedImage) {
         self.processedForRetry = processed
     }
@@ -110,57 +110,10 @@ final class SnapUploadCoordinator {
 
     // MARK: - User-driven transitions
 
-    /// A pick from the sheet-presented `PHPicker` (`EditMomentSheet`), which
-    /// names the representation it hands over.
-    func handlePicked(_ picked: PhotoPickerView.PickedItem, userId: UUID) async {
-        Self.logger.notice("handlePicked: started uti=\(picked.uti, privacy: .public)")
-
-        await processPick(userId: userId) {
-            do {
-                let data = try await Self.loadData(from: picked.itemProvider, uti: picked.uti)
-                Self.logger.notice("handlePicked: loaded \(data.count, privacy: .public) bytes")
-                return (data, picked.uti)
-            } catch {
-                Self.logger.error("picker data load failed: \(error.localizedDescription, privacy: .private)")
-                return nil
-            }
-        }
-    }
-
-    /// A pick from the record flow's inline `PhotosPicker`. A
-    /// `PhotosPickerItem` carries no chosen representation, so the bytes come
-    /// first and the format is read back off them.
-    func handlePicked(_ item: PhotosPickerItem, userId: UUID) async {
-        let advertised = item.supportedContentTypes.map(\.identifier)
-        Self.logger.notice("handlePicked(item): started types=\(advertised, privacy: .public)")
-
-        await processPick(userId: userId) {
-            let data: Data
-            do {
-                guard let loaded = try await item.loadTransferable(type: Data.self) else {
-                    Self.logger.warning("picker item carried no data representation")
-                    return nil
-                }
-                data = loaded
-                Self.logger.notice("handlePicked(item): loaded \(data.count, privacy: .public) bytes")
-            } catch {
-                Self.logger.error("picker item load failed: \(error.localizedDescription, privacy: .private)")
-                return nil
-            }
-
-            // Sniffed first; the advertised list is only a fallback for bytes
-            // ImageIO cannot identify, and it still has to pass the same gate.
-            let candidate = ImageFormatValidator.uti(of: data) ?? advertised.first ?? ""
-            guard ImageFormatValidator.isSupported(candidate) else {
-                Self.logger.warning("unsupported picked format: \(candidate, privacy: .public)")
-                return nil
-            }
-            return (data, candidate)
-        }
-    }
-
-    /// A photo the camera just took (Home's camera moment). The bytes are in
-    /// hand, so they take `ingest`, the same path a library pick ends on.
+    /// A photo the camera just took for Home's camera moment, uploaded as
+    /// shot: that flow has no form and no crop editor. The bytes are in hand,
+    /// so they take `ingest`. Capture and Edit moment do not come through
+    /// here: their picks and shots end on `ingest(cropped:captureDate:userId:)`.
     func handleCaptured(_ data: Data, userId: UUID) async {
         let uti = ImageFormatValidator.uti(of: data) ?? "public.jpeg"
         Self.logger.notice("handleCaptured: \(data.count, privacy: .public) bytes uti=\(uti, privacy: .public)")
@@ -169,19 +122,6 @@ final class SnapUploadCoordinator {
             return
         }
         await ingest(data, uti: uti, userId: userId)
-    }
-
-    /// Both pickers' path: counts the pick as in flight from the tap, before
-    /// its bytes arrive, then hands them to `ingest`. `load` returns nil when
-    /// the pick cannot be used (already logged).
-    func processPick(userId: UUID, load: () async -> (data: Data, uti: String)?) async {
-        picksInFlight += 1
-        defer { picksInFlight -= 1 }
-        // Taken at the tap, so a later tap supersedes this pick even when its
-        // bytes arrive first.
-        let generation = nextPickGeneration()
-        guard let loaded = await load() else { return }
-        await ingest(loaded.data, uti: loaded.uti, userId: userId, generation: generation)
     }
 
     /// A pick whose bytes are already in hand; it supersedes any earlier one.
@@ -416,7 +356,7 @@ final class SnapUploadCoordinator {
 
     // MARK: - Private
 
-    /// Single upload path used by both `handlePicked` (initial attempt) and
+    /// Single upload path used by both `attach` (initial attempt) and
     /// `retryCurrent` (user-tapped retry). On first failure, sleeps for
     /// `retryDelay` and retries once. On second failure, transitions the
     /// snap to `.failed` and retains `processedForRetry`.
@@ -447,21 +387,5 @@ final class SnapUploadCoordinator {
         guard case .pending(var snap) = formSnap, snap.id == snapId else { return }
         snap.state = newState
         formSnap = .pending(snap)
-    }
-
-    /// Loads the bytes for a `PHPicker` selection. Bridges the callback-based
-    /// `loadDataRepresentation` API into async/await.
-    private static func loadData(from provider: NSItemProvider, uti: String) async throws -> Data {
-        try await withCheckedThrowingContinuation { continuation in
-            provider.loadDataRepresentation(forTypeIdentifier: uti) { data, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else if let data {
-                    continuation.resume(returning: data)
-                } else {
-                    continuation.resume(throwing: URLError(.cannotDecodeContentData))
-                }
-            }
-        }
     }
 }

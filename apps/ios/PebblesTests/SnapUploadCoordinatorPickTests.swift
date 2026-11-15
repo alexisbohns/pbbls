@@ -5,7 +5,7 @@ import UIKit
 import UniformTypeIdentifiers
 @testable import Pebbles
 
-/// A pick between its tap and the end of its upload: it blocks saving, a
+/// An ingest between its start and the end of its upload: it blocks saving, a
 /// later pick supersedes it, and once the form is saving, committed or closed
 /// it never lands on it.
 @MainActor
@@ -43,24 +43,20 @@ struct SnapUploadCoordinatorPickTests {
         return output as Data
     }
 
-    @Test("a pick still loading blocks saving before formSnap changes")
-    func pickInFlightBlocks() async {
+    @Test("an ingest still uploading blocks saving before its snap settles")
+    func ingestInFlightBlocks() async {
         let repo = SnapUploadCoordinatorTests.FakeRepo()
         let coordinator = SnapUploadCoordinator(repo: repo, retryDelay: .milliseconds(1))
         let gate = LoadGate()
+        repo.duringUpload = { await withCheckedContinuation { gate.continuation = $0 } }
+        let jpeg = makeJPEG()
 
-        let pick = Task {
-            await coordinator.processPick(userId: UUID()) {
-                await withCheckedContinuation { gate.continuation = $0 }
-                return nil
-            }
-        }
+        let pick = Task { await coordinator.ingest(jpeg, uti: "public.jpeg", userId: UUID()) }
         while gate.continuation == nil { await Task.yield() }
 
         #expect(coordinator.isProcessingPick)
         #expect(coordinator.isUploading)
         #expect(coordinator.isBlocking)
-        #expect(coordinator.formSnap == nil)
 
         gate.continuation?.resume()
         await pick.value
@@ -179,20 +175,9 @@ struct SnapUploadCoordinatorPickTests {
         let userId = UUID()
         let saved = AttachedSnap(id: UUID(), localThumb: Data([0xFF]), state: .uploaded)
         let coordinator = SnapUploadCoordinator(repo: repo, initialSnap: .pending(saved), retryDelay: .milliseconds(1))
-        let gate = LoadGate()
         let jpeg = makeJPEG()
 
-        let pick = Task {
-            await coordinator.processPick(userId: userId) {
-                await withCheckedContinuation { gate.continuation = $0 }
-                return (jpeg, "public.jpeg")
-            }
-        }
-        while gate.continuation == nil { await Task.yield() }
-
         coordinator.beginCommit()
-        gate.continuation?.resume()
-        await pick.value
         await coordinator.ingest(jpeg, uti: "public.jpeg", userId: userId)
         await coordinator.removePending(userId: userId)
         coordinator.markCommitted()
@@ -227,30 +212,26 @@ struct SnapUploadCoordinatorPickTests {
         #expect(picked.state == .uploaded)
     }
 
-    @Test("a first pick that loads slower than a second never replaces it")
+    @Test("a first pick that re-encodes slower than a second never replaces it")
     func slowerFirstPickIsSuperseded() async {
         let repo = SnapUploadCoordinatorTests.FakeRepo()
         let userId = UUID()
         let coordinator = SnapUploadCoordinator(repo: repo, retryDelay: .milliseconds(1))
-        let gate = LoadGate()
         let dated = makeJPEG(dateTimeOriginal: "2026:08:14 17:32:05")
         #expect(ExifCaptureDate.from(dated) != nil)
 
-        let first = Task {
-            await coordinator.processPick(userId: userId) {
-                await withCheckedContinuation { gate.continuation = $0 }
-                return (dated, "public.jpeg")
-            }
-        }
-        while gate.continuation == nil { await Task.yield() }
-
+        // Wait on the coordinator's own state, not on scheduling: once
+        // `isProcessingPick` is true the first ingest has started and taken its
+        // generation. Nothing can resume it before this test next suspends, so
+        // the second ingest always starts, and supersedes it, before the
+        // first can attach.
+        let first = Task { await coordinator.ingest(dated, uti: "public.jpeg", userId: userId) }
+        while !coordinator.isProcessingPick { await Task.yield() }
         let undated = makeJPEG()
-        await coordinator.processPick(userId: userId) { (undated, "public.jpeg") }
+        await coordinator.ingest(undated, uti: "public.jpeg", userId: userId)
         guard case .pending(let second) = coordinator.formSnap else {
             Issue.record("expected the second pick to attach"); return
         }
-
-        gate.continuation?.resume()
         await first.value
 
         guard case .pending(let kept) = coordinator.formSnap else {

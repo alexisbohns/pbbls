@@ -1,0 +1,80 @@
+import Foundation
+
+/// A loaded photo and the gate token it belongs to. It rides with the photo
+/// from the load, through waiting for a free screen, into the editor, so Done
+/// and Cancel release the pick they were opened for and no other.
+struct CropSession: Identifiable {
+    let source: CropSource
+    let token: UUID
+    var id: UUID { source.id }
+}
+
+/// What a flow does with a loaded photo that may be waiting for a free screen.
+enum CropPresentation: Equatable {
+    /// Nothing is waiting.
+    case none
+    /// Waiting for another presentation (picker sheet, camera, dialog) to go.
+    case wait
+    /// Nothing else is presented and the pick is current: open the editor.
+    case present
+    /// The pick was superseded or closed meanwhile: drop it.
+    case drop
+}
+
+/// Which photo a flow is waiting on, from the tap that picked or shot it
+/// until it has been handed to the coordinator.
+///
+/// The crop editor puts a load and a screen between the tap and the
+/// coordinator, so for that stretch the coordinator cannot tell the form a
+/// photo is coming. This gate does: while it holds a token the flow treats the
+/// photo as coming (save and close are blocked), a later pick supersedes an
+/// earlier one even when the earlier one's bytes arrive first, and a load that
+/// lands after Cancel, Discard or close opens nothing.
+struct CropPickGate: Equatable {
+    private(set) var token: UUID?
+    /// True from `begin` until the bytes are read (the veil / spinner).
+    private(set) var isLoading = false
+
+    /// A photo is loading, open in the editor, or being cropped and uploaded.
+    var isActive: Bool { token != nil }
+
+    /// Starts a pick or shot; supersedes whichever one came before.
+    mutating func begin() -> UUID {
+        let new = UUID()
+        token = new
+        isLoading = true
+        return new
+    }
+
+    /// The bytes for `token` were read. False when a later pick, or a close,
+    /// took over meanwhile: the caller drops what it loaded. When `opened` is
+    /// false (nothing usable came back) the gate releases for a current token.
+    mutating func finishLoading(_ token: UUID, opened: Bool) -> Bool {
+        guard self.token == token else { return false }
+        isLoading = false
+        if !opened { self.token = nil }
+        return true
+    }
+
+    /// Whether a loaded photo waiting under `pendingToken` may open the editor
+    /// now. `canPresent` is the flow's own "nothing else is on screen".
+    func presentation(pendingToken: UUID?, canPresent: Bool) -> CropPresentation {
+        guard let pendingToken else { return .none }
+        guard token == pendingToken else { return .drop }
+        return canPresent ? .present : .wait
+    }
+
+    /// The pick has reached the coordinator (or failed to). Ignored when a
+    /// newer pick holds the gate.
+    mutating func release(_ token: UUID) {
+        guard self.token == token else { return }
+        self.token = nil
+        isLoading = false
+    }
+
+    /// Cancel in the editor, Discard, close: whatever was coming is dropped.
+    mutating func clear() {
+        token = nil
+        isLoading = false
+    }
+}

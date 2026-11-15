@@ -41,7 +41,7 @@ struct RecordStepScaffold<Content: View>: View {
     /// and its own bottom bar, edge to edge: the Life step, whose souls strip
     /// and button sit in a tinted bar the scaffold's gutters would inset.
     var contentHasGutters: Bool = true
-    /// Drawn between the title and a `contentFillsHeight` content, never
+    /// Drawn under a `contentFillsHeight` content, in thumb reach, never
     /// scrolled. The photo step's two controls. With it set and `action` nil,
     /// nothing floats over the content.
     var fixedSlot: AnyView?
@@ -72,15 +72,17 @@ struct RecordStepScaffold<Content: View>: View {
 
             if contentFillsHeight {
                 VStack(spacing: Spacing.md) {
-                    if let fixedSlot {
-                        fixedSlot.padding(.horizontal, Spacing.lg)
-                    }
                     content()
                         .padding(.horizontal, contentHasGutters ? Spacing.lg : 0)
-                        .padding(.bottom, contentHasGutters ? Spacing.sm : 0)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .overlay(alignment: .bottom) { floatingAction }
+                    if let fixedSlot {
+                        fixedSlot
+                            .padding(.horizontal, Spacing.lg)
+                            .padding(.bottom, Spacing.sm)
+                    }
                 }
+                .padding(.bottom, fixedSlot == nil && contentHasGutters ? Spacing.sm : 0)
             } else {
                 scrollingContent
 
