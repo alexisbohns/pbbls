@@ -78,4 +78,36 @@ struct CropPickGateTests {
         gate.release(second)
         #expect(!gate.isActive)
     }
+
+    @Test("a loaded photo opens the editor only when nothing else is presented")
+    func presentsOnlyWhenFree() {
+        var gate = CropPickGate()
+        let token = gate.begin()
+        _ = gate.finishLoading(token, opened: true)
+        #expect(gate.presentation(pendingToken: token, canPresent: false) == .wait)
+        #expect(gate.presentation(pendingToken: token, canPresent: true) == .present)
+    }
+
+    @Test("nothing pending asks for nothing")
+    func nothingPending() {
+        var gate = CropPickGate()
+        _ = gate.begin()
+        #expect(gate.presentation(pendingToken: nil, canPresent: true) == .none)
+    }
+
+    @Test("a pending photo is dropped once a later pick or a discard took over")
+    func stalePendingIsDropped() {
+        var gate = CropPickGate()
+        let first = gate.begin()
+        _ = gate.finishLoading(first, opened: true)
+        _ = gate.begin()
+        #expect(gate.presentation(pendingToken: first, canPresent: true) == .drop)
+        #expect(gate.presentation(pendingToken: first, canPresent: false) == .drop)
+
+        var closed = CropPickGate()
+        let token = closed.begin()
+        _ = closed.finishLoading(token, opened: true)
+        closed.clear()
+        #expect(closed.presentation(pendingToken: token, canPresent: true) == .drop)
+    }
 }

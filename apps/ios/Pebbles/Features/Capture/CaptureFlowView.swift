@@ -30,9 +30,11 @@ struct CaptureFlowView: View {
     @State private var model: CaptureFlowModel
     @State private var snaps: SnapUploadCoordinator?
     @State private var pickedPhoto: PhotosPickerItem?
-    /// The photo waiting in the crop editor (spec D1): set once its bytes are
-    /// read, cleared by Cancel or Done.
-    @State private var cropping: CropSource?
+    /// The photo open in the crop editor (spec D1), cleared by Cancel or Done.
+    @State private var cropping: CropSession?
+    /// A loaded photo waiting for the screen to be free: the camera cover and
+    /// the close dialog must be gone before the editor can present over them.
+    @State private var pendingCrop: CropSession?
     /// Which pick or shot the flow is waiting on, from the tap until the
     /// coordinator has it. While it holds one the photo counts as coming, so
     /// save and close cannot race a slow load and a later pick supersedes an
@@ -40,6 +42,9 @@ struct CaptureFlowView: View {
     @State private var pickGate = CropPickGate()
     /// The in-flow camera (D3), presented over the photo step.
     @State private var showsCamera = false
+    /// True from the camera's presentation until its `onDismiss`: `showsCamera`
+    /// goes false at the shutter, while the cover is still animating away.
+    @State private var isCameraOnScreen = false
     @State private var isCloseConfirmPresented = false
     /// Drives the step transition direction so back slides back.
     @State private var isMovingBack = false
@@ -157,29 +162,39 @@ struct CaptureFlowView: View {
             // Last reliable moment before a process kill.
             if phase != .active { autosaver?.flush() }
         }
-        .fullScreenCover(isPresented: $showsCamera) {
+        .fullScreenCover(isPresented: $showsCamera, onDismiss: {
+            isCameraOnScreen = false
+            promotePendingCrop()
+        }, content: {
             CameraPicker(
                 onCapture: { image, shutter in
                     showsCamera = false
                     guard let data = image.jpegData(compressionQuality: 0.9) else { return }
-                    // The shutter is when, until the user says otherwise.
-                    model.applyCaptureDate(shutter)
-                    beginCrop { await CropSource.make(from: data) }
+                    // The shutter is when, unless the user says otherwise; it
+                    // reaches the form on Done, with a library photo's date.
+                    beginCrop {
+                        await CropSource.make(from: data).map {
+                            CropSource(image: $0.image, captureDate: $0.captureDate ?? shutter)
+                        }
+                    }
                 },
                 onCancel: { showsCamera = false }
             )
             .ignoresSafeArea()
-        }
-        .fullScreenCover(item: $cropping) { source in
+        })
+        .fullScreenCover(item: $cropping) { session in
             PhotoCropEditor(
-                source: source,
+                source: session.source,
                 onCancel: {
                     cropping = nil
-                    pickGate.clear()
+                    pickGate.release(session.token)
                     pickedPhoto = nil
                 },
-                onDone: { image, date in finishCrop(image, captureDate: date) }
+                onDone: { image, date in finishCrop(session, image: image, captureDate: date) }
             )
+        }
+        .onChange(of: isCloseConfirmPresented) { _, presented in
+            if !presented { promotePendingCrop() }
         }
         .confirmationDialog(
             "Keep this moment?",
@@ -203,7 +218,7 @@ struct CaptureFlowView: View {
             // The grid fills the space above the two controls; nothing floats.
             contentFillsHeight: model.step == .photo,
             fixedSlot: model.step == .photo
-                ? AnyView(RecordPhotoControls(onJustWrite: { model.advance() }, onCamera: { showsCamera = true }))
+                ? AnyView(RecordPhotoControls(onJustWrite: { model.advance() }, onCamera: openCamera))
                 : nil,
             secondaryAction: model.step == .moment && !chainsComplete
                 ? RecordStepSecondaryAction(
@@ -297,8 +312,10 @@ struct CaptureFlowView: View {
     /// deletes it by id like a fresh pick.
     private func discard() async {
         autosaver?.clear()
-        // A photo still loading must open nothing once the cover is gone.
+        // A photo still loading, or waiting for a free screen, must open
+        // nothing once the cover is gone.
         pickGate.clear()
+        pendingCrop = nil
         if let userId = currentUserId, let snaps {
             await snaps.cancelAndCleanup(userId: userId)
         }
@@ -355,9 +372,22 @@ struct CaptureFlowView: View {
 // MARK: - Crop
 
 extension CaptureFlowView {
+    /// Nothing else is on screen to collide with the editor's cover.
+    private var canPresentCrop: Bool {
+        cropping == nil && !isCameraOnScreen && !isCloseConfirmPresented
+    }
+
+    private func openCamera() {
+        guard !model.isSaving else { return }
+        isCameraOnScreen = true
+        showsCamera = true
+    }
+
     /// A pick or a shot: counts as coming from now, loads its bytes, and opens
-    /// the editor only if nothing superseded or closed it meanwhile.
+    /// the editor only if nothing superseded or closed it meanwhile, and only
+    /// once nothing else is presented.
     private func beginCrop(load: @escaping () async -> CropSource?) {
+        guard !model.isSaving else { return }
         let token = pickGate.begin()
         Task {
             let source = await load()
@@ -365,33 +395,47 @@ extension CaptureFlowView {
                 logger.notice("crop load dropped: superseded or closed while loading")
                 return
             }
-            if let source {
-                cropping = source
-            } else {
+            guard let source else {
                 // Unreadable or unsupported (logged by the source): the same
                 // pick can be tried again.
                 pickedPhoto = nil
+                return
             }
+            pendingCrop = CropSession(source: source, token: token)
+            promotePendingCrop()
+        }
+    }
+
+    /// Opens the editor for the pending photo once nothing else is presented;
+    /// called when its load lands and when the camera or the close dialog goes.
+    private func promotePendingCrop() {
+        switch pickGate.presentation(pendingToken: pendingCrop?.token, canPresent: canPresentCrop) {
+        case .none, .wait:
+            return
+        case .drop:
+            logger.notice("pending crop dropped: superseded or closed before it could present")
+            pendingCrop = nil
+        case .present:
+            cropping = pendingCrop
+            pendingCrop = nil
         }
     }
 
     /// Done in the editor: the cropped image takes the coordinator's path. The
-    /// gate stays held until the coordinator has finished with it, so the
-    /// photo keeps counting as coming through the gap before its own
+    /// session's token stays held until the coordinator has finished with it,
+    /// so the photo keeps counting as coming through the gap before its own
     /// in-flight count starts.
-    private func finishCrop(_ image: CGImage, captureDate: Date?) {
-        let token = pickGate.token
+    private func finishCrop(_ session: CropSession, image: CGImage, captureDate: Date?) {
         cropping = nil
-        guard let token else { return }
         guard let userId = currentUserId, let snaps else {
-            pickGate.release(token)
+            pickGate.release(session.token)
             return
         }
         // Never cancelled: once the cover closes or saves, the coordinator
         // rejects the pick and deletes what it uploaded.
         Task {
             await snaps.ingest(cropped: image, captureDate: captureDate, userId: userId)
-            pickGate.release(token)
+            pickGate.release(session.token)
         }
     }
 }
@@ -406,6 +450,7 @@ extension CaptureFlowView {
         model = CaptureFlowModel(startingAt: startsAtMomentPage ? .moment : .photo)
         pickedPhoto = nil
         cropping = nil
+        pendingCrop = nil
         pickGate.clear()
         snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
         savingThenComplete = false

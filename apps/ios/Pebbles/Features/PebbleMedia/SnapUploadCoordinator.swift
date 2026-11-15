@@ -110,8 +110,10 @@ final class SnapUploadCoordinator {
 
     // MARK: - User-driven transitions
 
-    /// A photo the camera just took (Home's camera moment). The bytes are in
-    /// hand, so they take `ingest`, the same path a library pick ends on.
+    /// A photo the camera just took for Home's camera moment, uploaded as
+    /// shot: that flow has no form and no crop editor. The bytes are in hand,
+    /// so they take `ingest`. Capture and Edit moment do not come through
+    /// here: their picks and shots end on `ingest(cropped:captureDate:userId:)`.
     func handleCaptured(_ data: Data, userId: UUID) async {
         let uti = ImageFormatValidator.uti(of: data) ?? "public.jpeg"
         Self.logger.notice("handleCaptured: \(data.count, privacy: .public) bytes uti=\(uti, privacy: .public)")

@@ -1,5 +1,26 @@
 import Foundation
 
+/// A loaded photo and the gate token it belongs to. It rides with the photo
+/// from the load, through waiting for a free screen, into the editor, so Done
+/// and Cancel release the pick they were opened for and no other.
+struct CropSession: Identifiable {
+    let source: CropSource
+    let token: UUID
+    var id: UUID { source.id }
+}
+
+/// What a flow does with a loaded photo that may be waiting for a free screen.
+enum CropPresentation: Equatable {
+    /// Nothing is waiting.
+    case none
+    /// Waiting for another presentation (picker sheet, camera, dialog) to go.
+    case wait
+    /// Nothing else is presented and the pick is current: open the editor.
+    case present
+    /// The pick was superseded or closed meanwhile: drop it.
+    case drop
+}
+
 /// Which photo a flow is waiting on, from the tap that picked or shot it
 /// until it has been handed to the coordinator.
 ///
@@ -33,6 +54,14 @@ struct CropPickGate: Equatable {
         isLoading = false
         if !opened { self.token = nil }
         return true
+    }
+
+    /// Whether a loaded photo waiting under `pendingToken` may open the editor
+    /// now. `canPresent` is the flow's own "nothing else is on screen".
+    func presentation(pendingToken: UUID?, canPresent: Bool) -> CropPresentation {
+        guard let pendingToken else { return .none }
+        guard token == pendingToken else { return .drop }
+        return canPresent ? .present : .wait
     }
 
     /// The pick has reached the coordinator (or failed to). Ignored when a
