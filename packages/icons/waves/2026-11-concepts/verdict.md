@@ -72,7 +72,7 @@
 - **quality-assurance**: `clipboard-check` (finalist), `shield-check` (finalist), `stamp-check` (finalist)
 - **reliability**: `pillar` ★, `stone-shake` ★
 - **solved**: `lock-open` ★, `puzzle-piece` ★
-- **verification**: `chermarks` (finalist), `eye-check` (finalist), `search-check` (finalist)
+- **verification**: `checkmarks` (finalist), `eye-check` (finalist), `search-check` (finalist)
 ## s5-status
 
 - **priority**: `arrow-node-up` ★, `stones-decrease` ★, `sunrise-arrow` (finalist)
