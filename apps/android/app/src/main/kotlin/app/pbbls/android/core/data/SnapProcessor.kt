@@ -2,6 +2,8 @@ package app.pbbls.android.core.data
 
 import android.content.Context
 import android.net.Uri
+import app.pbbls.android.core.model.crop.CropGeometry
+import app.pbbls.android.di.DefaultDispatcher
 import app.pbbls.android.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -29,6 +31,7 @@ class SnapProcessor
     @Inject
     constructor(
         @IoDispatcher private val io: CoroutineDispatcher,
+        @DefaultDispatcher private val default: CoroutineDispatcher,
     ) {
         /** The photo's EXIF capture date, or null — see [ExifCaptureDate.from]. */
         suspend fun captureDate(
@@ -41,4 +44,31 @@ class SnapProcessor
             context: Context,
             uri: Uri,
         ): ProcessedImage = withContext(io) { ImagePipeline.process(context, uri) }
+
+        /**
+         * The crop editor's working image and the EXIF date. The date is read from the original bytes
+         * first, since the decode keeps no metadata (#1659, spec D8). Throws when the photo does not decode.
+         */
+        suspend fun cropSource(
+            context: Context,
+            uri: Uri,
+        ): CropSource =
+            withContext(io) {
+                val date = ExifCaptureDate.from(context, uri)
+                CropSource(ImagePipeline.decodeUpright(context, uri, CropSource.WORKING_MAX_EDGE_PX), date)
+            }
+
+        /** Done in the editor: what the window shows, as both upload renditions. CPU work, so on Default. */
+        suspend fun processCropped(
+            source: CropSource,
+            geometry: CropGeometry,
+        ): ProcessedImage =
+            withContext(default) {
+                val cropped = PhotoCropRenderer.render(source.image, geometry)
+                try {
+                    ImagePipeline.process(cropped)
+                } finally {
+                    cropped.recycle()
+                }
+            }
     }
