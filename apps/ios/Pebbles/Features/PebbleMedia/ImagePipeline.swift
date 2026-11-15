@@ -82,15 +82,25 @@ enum ImagePipeline {
         return image
     }
 
-    /// Downscales into an opaque sRGB bitmap with its long edge at most
-    /// `maxEdge`; never upscales. Opaque either way, as `makeOpaque`.
+    /// The colour space an 8-bit opaque RGB bitmap of `image` is drawn in: its
+    /// own when that is RGB (a Display P3 photo keeps its gamut), else sRGB.
+    /// The same choice `makeOpaque` makes.
+    static func drawingColorSpace(for image: CGImage) -> CGColorSpace? {
+        if let source = image.colorSpace, source.model == .rgb {
+            return source
+        }
+        return CGColorSpace(name: CGColorSpace.sRGB)
+    }
+
+    /// Downscales into an opaque bitmap (in the image's own RGB space) with its
+    /// long edge at most `maxEdge`; never upscales. Opaque either way, as `makeOpaque`.
     static func resized(_ image: CGImage, maxEdge: CGFloat) -> CGImage {
         let longEdge = CGFloat(max(image.width, image.height))
         guard longEdge > maxEdge else { return makeOpaque(image) }
         let factor = maxEdge / longEdge
         let width = Int((CGFloat(image.width) * factor).rounded())
         let height = Int((CGFloat(image.height) * factor).rounded())
-        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+        guard let space = drawingColorSpace(for: image),
               let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8,
                                       bytesPerRow: 0, space: space,
                                       bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else {
