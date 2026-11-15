@@ -34,11 +34,11 @@
 - **graph**: `graph` (finalist)
 - **integration**: `chip-component` ★, `puzzle` (finalist)
 - **merge**: `git-merge` (finalist), `git-merge-down` (finalist), `stones-network` ★
-- **node**: `node-lines-2` (finalist), `node-lines-3` (finalist), `node-lines-5` ★, `stone-emmits-2` ★, `stone-node` ★
+- **node**: `node-lines-2` (finalist), `node-lines-3` (finalist), `node-lines-5` ★, `stone-emits-2` ★, `stone-node` ★
 - **node-add**: `cairn-stone-add` ★, `node-edge-x` ★, `node-node` ★, `node-plus` (finalist), `stone-node-plus` (finalist)
 - **node-new**: `alarm` ★, `bubbles` ★, `node-seed` ★, `node-spark` (finalist), `stone-shine-2` ★
 - **node-remove**: `circle-stones-3` ★, `node-edge-minus` (finalist), `node-minus` (finalist), `node-x` (finalist)
-- **server**: `ipod-station` ★, `rectangle-exchange` ★, `servers` (finalist), `stone-emmit-2` ★
+- **server**: `ipod-station` ★, `rectangle-exchange` ★, `servers` (finalist), `stone-emit-2` ★
 - **system**: `atoms` ★, `circle-network` ★, `system` (finalist)
 ## s3-surface
 
@@ -82,19 +82,19 @@
 - **priority-medium**: `bar-medium` (finalist), `cairn-medium` (finalist), `gauge-medium-2` ★, `slider-medium` (finalist)
 - **priority-undefined**: `bars-undefined` ★, `gauge-undefined` ★, `slider-undefined` (finalist), `stones-3` (finalist)
 - **status-approved**: `flag-check` (finalist), `square-checks` ★
-- **status-archived**: `circle-chevron-down-stop` ★, `pouch-stone` ★, `sqaure-archive` ★
+- **status-archived**: `circle-chevron-down-stop` ★, `pouch-stone` ★, `square-archive` ★
 - **status-backlog**: `square-hourglass` (finalist)
 - **status-blocked**: `circle-arrow-right-stop` ★, `square-lock` ★
 - **status-deprecated**: `circle-slash` ★, `flower-down-soil` ★, `square-sunset` ★, `stones-thought` ★
 - **status-development**: `circle-half` ★, `signal-nodes` ★, `sprout-soil` ★, `square-code` (finalist), `stone-hash` ★
 - **status-draft**: `circle-pen` ★, `flag-scribble` (finalist), `square-scribble` ★
 - **status-idea**: `spark-badge` ★, `square-bulb` (finalist)
-- **status-live**: `cairn-bowl` ★, `circle-stone` ★, `circle-stone-emmit` ★, `flower-soil` ★, `pebble-flow` ★, `square-play` ★
+- **status-live**: `cairn-bowl` ★, `circle-stone` ★, `circle-stone-emit` ★, `flower-soil` ★, `pebble-flow` ★, `square-play` ★
 - **status-rejected**: `circle-x` ★, `circle-x-olive` ★, `flag-x` (finalist), `nodes-edge-x` ★, `sprout-soil-inverted` ★, `square-arrow-down-left` ★
 - **status-release**: `circle-arrow-up` ★, `circle-arrow-up-right` ★, `sprout-bud-soil` ★, `square-plane` ★
-- **status-supersede**: `circle-arrow-bottom-left` ★, `node-segment-cut-down` ★, `sprout-soil-seed` ★, `square-rotate-clockwise` ★, `stone-divided-up` ★, `stone-to-stone` ★, `supersed` (finalist)
+- **status-supersede**: `circle-arrow-bottom-left` ★, `node-segment-cut-down` ★, `sprout-soil-seed` ★, `square-rotate-clockwise` ★, `stone-divided-up` ★, `stone-to-stone` ★, `supersede` (finalist)
 - **status-superseded**: `circle-arrow-up-right-2` ★, `node-segment-cut-up` ★, `square-rotate-backward` ★, `stone-divided` ★, `superseded` (finalist)
-- **status-warning**: `circle-exclamation` (finalist), `exlamation` ★, `square-zap` ★
+- **status-warning**: `circle-exclamation` (finalist), `exclamation` ★, `square-zap` ★
 ## s6-trust
 
 - **accessibility**: `accessibility` (finalist), `stone-outlined-quarters` (finalist)
