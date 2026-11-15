@@ -220,10 +220,13 @@ struct SnapUploadCoordinatorPickTests {
         let dated = makeJPEG(dateTimeOriginal: "2026:08:14 17:32:05")
         #expect(ExifCaptureDate.from(dated) != nil)
 
-        // The first suspends in its re-encode; the second starts, and so
-        // supersedes it, before the first can attach.
+        // Wait on the coordinator's own state, not on scheduling: once
+        // `isProcessingPick` is true the first ingest has started and taken its
+        // generation. Nothing can resume it before this test next suspends, so
+        // the second ingest always starts, and supersedes it, before the
+        // first can attach.
         let first = Task { await coordinator.ingest(dated, uti: "public.jpeg", userId: userId) }
-        await Task.yield()
+        while !coordinator.isProcessingPick { await Task.yield() }
         let undated = makeJPEG()
         await coordinator.ingest(undated, uti: "public.jpeg", userId: userId)
         guard case .pending(let second) = coordinator.formSnap else {
