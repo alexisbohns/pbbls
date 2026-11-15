@@ -31,6 +31,7 @@ import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.PebbleDraft
 import app.pbbls.android.features.path.create.PebbleForm
+import app.pbbls.android.features.path.crop.PhotoCropEditor
 
 /**
  * Edit moment (R5): when, name, description and photo, saved with
@@ -68,23 +69,35 @@ fun EditMomentScreen(
         }
 
     val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
-    NavigationBackHandler(state = backState) { viewModel.dismiss() }
+    NavigationBackHandler(state = backState) { viewModel.onSystemBack() }
 
-    EditMomentContent(
-        uiState = uiState,
-        onDraftChange = viewModel::onDraftChange,
-        onCancel = viewModel::dismiss,
-        onSave = viewModel::save,
-        onRetry = viewModel::retry,
-        onAddPhoto = {
-            photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-        },
-        onRetryPhoto = viewModel::onRetryPhoto,
-        onRemovePhoto = viewModel::onRemovePhoto,
-        onRemoveExistingSnap = viewModel::onRemoveExistingSnap,
-        hapticsOn = { viewModel.hapticsOn },
-        modifier = modifier,
-    )
+    Box(modifier.fillMaxSize()) {
+        EditMomentContent(
+            uiState = uiState,
+            onDraftChange = viewModel::onDraftChange,
+            onCancel = viewModel::dismiss,
+            onSave = viewModel::save,
+            onRetry = viewModel::retry,
+            onAddPhoto = {
+                photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
+            onRetryPhoto = viewModel::onRetryPhoto,
+            onRemovePhoto = viewModel::onRemovePhoto,
+            onRemoveExistingSnap = viewModel::onRemoveExistingSnap,
+            hapticsOn = { viewModel.hapticsOn },
+            modifier = Modifier.fillMaxSize(),
+        )
+
+        // Over the form, never under a sheet: the picker is another activity and has returned by now.
+        (uiState as? EditMomentUiState.Content)?.cropping?.let { session ->
+            PhotoCropEditor(
+                session = session,
+                onCancel = viewModel::onCropCancelled,
+                onDone = viewModel::onCropDone,
+                hapticsOn = { viewModel.hapticsOn },
+            )
+        }
+    }
 }
 
 /**

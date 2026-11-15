@@ -55,8 +55,8 @@ sealed interface RecordStepAction {
 }
 
 /**
- * Shared geometry for every step: a title, an optional fixed slot, a scrolling content slot, and one
- * optional button beneath it — ports iOS `RecordStepScaffold`.
+ * Shared geometry for every step: a title, a scrolling content slot, an optional fixed slot under it, and one
+ * optional button beneath them — ports iOS `RecordStepScaffold`.
  *
  * Steps supply content and a button role and never their own layout, so the
  * title baseline and button position do not drift between screens as the user
@@ -84,7 +84,7 @@ fun RecordStepScaffold(
      * scrolls throws at measure time.
      */
     contentScrolls: Boolean = true,
-    /** A row held between the title and the content, that does not scroll with it (the photo step's controls). */
+    /** A row held under the content, in thumb reach, that does not scroll with it (the photo step's controls, #1659). */
     fixedSlot: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
@@ -114,10 +114,6 @@ fun RecordStepScaffold(
             }
         }
 
-        if (fixedSlot != null) {
-            Box(modifier = Modifier.fillMaxWidth().padding(top = Spacing.lg).padding(horizontal = Spacing.lg)) { fixedSlot() }
-        }
-
         val scrollState = rememberScrollState()
         Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
             Column(
@@ -135,6 +131,9 @@ fun RecordStepScaffold(
                 EdgeFade(top = true, modifier = Modifier.align(Alignment.TopCenter))
                 EdgeFade(top = false, modifier = Modifier.align(Alignment.BottomCenter))
             }
+        }
+        if (fixedSlot != null) {
+            Box(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.lg)) { fixedSlot() }
         }
         Spacer(Modifier.height(Spacing.lg))
 

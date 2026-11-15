@@ -12,6 +12,7 @@ import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.AchievementsServicing
 import app.pbbls.android.core.data.CameraPhotos
+import app.pbbls.android.core.data.CropSource
 import app.pbbls.android.core.data.HapticsPreference
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.ProcessedImage
@@ -28,6 +29,9 @@ import app.pbbls.android.core.model.PebbleSnapPayload
 import app.pbbls.android.core.ui.momentWriteErrorRes
 import app.pbbls.android.features.path.ComposerMedia
 import app.pbbls.android.features.path.PathFocusRequests
+import app.pbbls.android.features.path.crop.CropPickGate
+import app.pbbls.android.features.path.crop.CropPresentation
+import app.pbbls.android.features.path.crop.CropSession
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -97,6 +101,8 @@ data class CaptureFlowUiState(
     val isPicking: Boolean = false,
     /** Whether a camera app answers; false hides the camera button (D3). Read once, at construction. */
     val cameraAvailable: Boolean = false,
+    /** The photo open in the crop editor (#1659), drawn over the flow; null when the editor is closed. */
+    val cropping: CropSession? = null,
 ) {
     /**
      * Both saves on the moment page: a trimmed name or an uploaded photo, and
@@ -202,17 +208,34 @@ class CaptureFlowViewModel
         private var advanceJob: Job? = null
 
         /**
-         * A pick from the moment it is chosen until its upload settles. Before the
-         * coordinator has a snap for it, this is the only sign of it: it counts as
-         * something to keep (R2) and blocks the save like an upload (iOS).
+         * A cropped photo from Done until its upload settles. Before the coordinator has a snap for it,
+         * this and [cropGate] are the only sign of it: it counts as something to keep (R2) and blocks the
+         * save like an upload (iOS).
          */
         private var pickCount = 0
             set(value) {
                 field = value
-                _uiState.update { it.copy(isPicking = isPicking, snapBlockedMessageRes = blockedBySnap()) }
+                publishPick()
             }
 
-        private val isPicking: Boolean get() = pickCount > 0
+        /**
+         * Which pick or shot the flow is waiting on, from its tap until Done has handed it over (#1659): a
+         * later pick supersedes an earlier one, and a load that lands after Cancel or Discard opens nothing.
+         */
+        private val cropGate = CropPickGate()
+
+        /** A loaded photo waiting for the close dialog to go before its editor opens. */
+        private var pendingCrop: CropSession? = null
+
+        /** The latest pick's or shot's read, held so a discard can stop it. */
+        private var loadJob: Job? = null
+
+        /** The library tile's busy state: a photo being read, or cropped and handed over. */
+        private val isPicking: Boolean get() = pickCount > 0 || cropGate.isLoading
+
+        private fun publishPick() {
+            _uiState.update { it.copy(isPicking = isPicking, snapBlockedMessageRes = blockedBySnap()) }
+        }
 
         init {
             viewModelScope.launch {
@@ -280,13 +303,11 @@ class CaptureFlowViewModel
             }
         }
 
+        /** A library pick: read for the crop editor, which opens once the bytes are in (#1659). */
         fun onPhotoPicked(uri: Uri) {
             if (model.isFrozen) return
-            attachPhoto {
-                // EXIF first: the re-encode writes no metadata (M58 D7).
-                model.applyCaptureDate(media.captureDate(uri))
-                media.process(uri)
-            }
+            // The EXIF date is read before the decode, which writes no metadata (M58 D7).
+            beginCrop { media.cropSource(uri) }
         }
 
         /**
@@ -328,10 +349,9 @@ class CaptureFlowViewModel
                 photos.delete(shot)
                 return
             }
-            attachPhoto(cleanup = { photos.delete(shot) }) {
-                model.applyCaptureDate(OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS))
-                photos.process(shot)
-            }
+            // The shutter is when, not the camera's EXIF.
+            val shutter = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+            beginCrop(cleanup = { photos.delete(shot) }) { photos.cropSource(shot).copy(captureDate = shutter) }
         }
 
         /** Back in front with a shot that never got its answer: it is dropped, so the camera is never locked out. */
@@ -346,10 +366,92 @@ class CaptureFlowViewModel
         }
 
         /**
-         * One pick, from the library or the camera: [prepare] reads it, and only once it has bytes does it cancel the pick
-         * before it and [SnapUploadCoordinator.attach] it, which deletes the photo it replaces. A pick that cannot be
-         * read therefore leaves the photo that was there exactly as it was, uploading or not. [cleanup] always runs.
-         * ATOMIC, so a job cancelled before it starts still reaches its `finally`, and a camera shot is never left behind.
+         * A pick or a shot (#1659, iOS `beginCrop`): counts as coming from now, reads its bytes with [load],
+         * and opens the editor only if nothing superseded or closed it meanwhile, and only once nothing else
+         * is on screen. A photo that does not decode releases the gate, so the same one can be picked again.
+         * [cleanup] always runs once the bytes are read: the camera's file is no longer needed then.
+         */
+        private fun beginCrop(
+            cleanup: () -> Unit = {},
+            load: suspend () -> CropSource,
+        ) {
+            val token = cropGate.begin()
+            publishPick()
+            // A later pick supersedes this one's read: its result would be dropped anyway.
+            loadJob?.cancel()
+            loadJob =
+                viewModelScope.launch(start = CoroutineStart.ATOMIC) {
+                    try {
+                        val source =
+                            runCatchingCancellable { load() }
+                                .onFailure { Log.e(TAG, "photo could not be read for the crop editor", it) }
+                                .getOrNull()
+                        val current = cropGate.finishLoading(token, opened = source != null)
+                        publishPick()
+                        if (!current) {
+                            Log.i(TAG, "crop load dropped: superseded or closed while loading")
+                        } else if (source != null) {
+                            pendingCrop = CropSession(source, token)
+                            promotePendingCrop()
+                        }
+                    } finally {
+                        cleanup()
+                    }
+                }
+        }
+
+        /** Opens the editor for the waiting photo once the close dialog is gone; called when its read lands and when the dialog goes. */
+        private fun promotePendingCrop() {
+            val state = _uiState.value
+            val canPresent = !state.isCloseConfirmPresented && state.cropping == null
+            when (cropGate.presentation(pendingCrop?.token, canPresent)) {
+                CropPresentation.NONE, CropPresentation.WAIT -> Unit
+                CropPresentation.DROP -> {
+                    Log.i(TAG, "pending crop dropped: superseded or closed before it could open")
+                    pendingCrop = null
+                }
+                CropPresentation.PRESENT -> {
+                    _uiState.update { it.copy(cropping = pendingCrop) }
+                    pendingCrop = null
+                }
+            }
+        }
+
+        /** Cancel in the editor, or back: nothing is attached, and the picker is there to try again. */
+        fun onCropCancelled() {
+            val session = _uiState.value.cropping ?: return
+            cropGate.release(session.token)
+            _uiState.update { it.copy(cropping = null) }
+            publishPick()
+        }
+
+        /**
+         * Done in the editor: what the window shows is rendered, processed and attached. The session's token
+         * is held until the coordinator has it, so the photo keeps counting as coming through that gap.
+         */
+        fun onCropDone() {
+            val session = _uiState.value.cropping ?: return
+            _uiState.update { it.copy(cropping = null) }
+            if (model.isFrozen) {
+                cropGate.release(session.token)
+                publishPick()
+                return
+            }
+            val geometry = session.state.geometry.normalized()
+            attachPhoto(cleanup = {
+                cropGate.release(session.token)
+                publishPick()
+            }) {
+                model.applyCaptureDate(session.source.captureDate)
+                media.processCropped(session.source, geometry)
+            }
+        }
+
+        /**
+         * One cropped photo: [prepare] renders and processes it, and only once it has bytes does it cancel the pick
+         * before it and [SnapUploadCoordinator.attach] it, which deletes the photo it replaces. A photo that cannot be
+         * processed therefore leaves the photo that was there exactly as it was, uploading or not. [cleanup] always
+         * runs: ATOMIC, so a job cancelled before it starts still reaches its `finally` and releases its gate token.
          */
         private fun attachPhoto(
             cleanup: () -> Unit = {},
@@ -464,7 +566,7 @@ class CaptureFlowViewModel
         @StringRes
         private fun blockedBySnap(): Int? =
             when {
-                isPicking || snaps.isUploading -> R.string.pebble_save_error_photo_uploading
+                isPicking || cropGate.isActive || snaps.isUploading -> R.string.pebble_save_error_photo_uploading
                 snaps.hasFailed -> R.string.pebble_save_error_photo_failed
                 else -> null
             }
@@ -477,7 +579,7 @@ class CaptureFlowViewModel
         fun onCloseRequested() {
             if (model.isFrozen) return
             val state = model.state.value
-            if (state.hasInput || isPicking) {
+            if (state.hasInput || isPicking || cropGate.isActive) {
                 val offersSave = state.canSave && blockedBySnap() == null
                 _uiState.update { it.copy(isCloseConfirmPresented = true, closeOffersSave = offersSave) }
             } else {
@@ -485,7 +587,11 @@ class CaptureFlowViewModel
             }
         }
 
-        fun onKeepGoing() = _uiState.update { it.copy(isCloseConfirmPresented = false) }
+        fun onKeepGoing() {
+            _uiState.update { it.copy(isCloseConfirmPresented = false) }
+            // A photo that loaded while the dialog was up opens now.
+            promotePendingCrop()
+        }
 
         fun onSaveFromClose() {
             _uiState.update { it.copy(isCloseConfirmPresented = false) }
@@ -502,6 +608,12 @@ class CaptureFlowViewModel
             advanceJob?.cancel()
             dropShot()
             clearDraft()
+            // A photo still loading, waiting or open in the editor opens nothing once the flow is gone.
+            cropGate.clear()
+            pendingCrop = null
+            loadJob?.cancel()
+            _uiState.update { it.copy(cropping = null) }
+            publishPick()
             viewModelScope.launch {
                 // An upload finishing after the cleanup would leave its files behind.
                 photoJob?.cancelAndJoin()
@@ -527,6 +639,7 @@ class CaptureFlowViewModel
         /** Back walks the steps; on the first one reachable it is ✕ (R2). */
         fun onSystemBack() {
             when {
+                _uiState.value.cropping != null -> onCropCancelled()
                 model.isFrozen -> Unit
                 model.step.previous != null && !_uiState.value.startsAtMomentPage -> model.back()
                 else -> onCloseRequested()

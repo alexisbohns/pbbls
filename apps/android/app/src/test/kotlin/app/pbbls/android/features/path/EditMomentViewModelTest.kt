@@ -9,6 +9,7 @@ import app.pbbls.android.core.data.ProcessedImage
 import app.pbbls.android.core.model.MomentSavePayload
 import app.pbbls.android.core.model.MomentSnap
 import app.pbbls.android.core.model.PebbleSnapPayload
+import app.pbbls.android.core.model.crop.CropRatio
 import app.pbbls.android.testing.FakeComposerMedia
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
@@ -26,6 +27,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -315,7 +317,7 @@ class EditMomentViewModelTest {
     }
 
     @Test
-    fun `a pick still being read when the save goes out never deletes the saved photo`() =
+    fun `a pick still being read blocks the save and never deletes the attached photo`() =
         runTest {
             val h = Harness()
             h.media.processed = ProcessedImage(original = byteArrayOf(1), thumb = byteArrayOf(2))
@@ -325,23 +327,89 @@ class EditMomentViewModelTest {
             val uri = Uri.parse("content://media/picked/1")
             h.viewModel.onPhotoPicked(uri)
             advanceUntilIdle()
+            h.viewModel.onCropDone()
+            advanceUntilIdle()
             val a = h.snapRepo.uploaded.single()
             // Change photo: pick B, whose read is held, then Save.
             val gate = CompletableDeferred<Unit>()
-            h.media.processGate = gate
+            h.media.loadGate = gate
             h.viewModel.onPhotoPicked(uri)
             runCurrent()
             h.viewModel.save()
             runCurrent()
+            assertEquals(R.string.pebble_save_error_photo_uploading, (h.viewModel.uiState.value as EditMomentUiState.Content).saveErrorRes)
+            assertTrue(h.writes.saved.isEmpty())
             gate.complete(Unit)
             advanceUntilIdle()
-            assertEquals(
-                listOf(PebbleSnapPayload(a, "user-1/$a", 0)),
-                h.writes.saved
-                    .single()
-                    .snaps,
-            )
-            assertTrue("A's files were deleted under the saved moment", h.snapRepo.deletedSnapIds.isEmpty())
+            assertTrue("A's files were deleted while B was only being read", h.snapRepo.deletedSnapIds.isEmpty())
+            assertEquals(listOf(a), h.snapRepo.uploaded)
+        }
+
+    @Test
+    fun `a pick opens the crop editor, and Cancel attaches nothing`() =
+        runTest {
+            val h = Harness()
+            h.media.processed = ProcessedImage(original = byteArrayOf(1), thumb = byteArrayOf(2))
+            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail())
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            h.viewModel.onPhotoPicked(Uri.parse("content://media/picked/1"))
+            advanceUntilIdle()
+            val content = h.viewModel.uiState.value as EditMomentUiState.Content
+            assertTrue("the editor opened", content.cropping != null)
+            assertTrue("nothing uploads before Done", h.snapRepo.uploaded.isEmpty())
+            h.viewModel.onCropCancelled()
+            advanceUntilIdle()
+            assertNull((h.viewModel.uiState.value as EditMomentUiState.Content).cropping)
+            assertTrue(h.snapRepo.uploaded.isEmpty())
+            // Nothing is coming any more: the save goes out.
+            h.viewModel.onDraftChange(content.draft.copy(name = "Renamed"))
+            h.viewModel.save()
+            advanceUntilIdle()
+            assertEquals(1, h.writes.saved.size)
+        }
+
+    @Test
+    fun `back closes the editor first, and a read landing after a dismissal opens nothing`() =
+        runTest {
+            val h = Harness()
+            h.media.processed = ProcessedImage(original = byteArrayOf(1), thumb = byteArrayOf(2))
+            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail())
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            h.viewModel.onPhotoPicked(Uri.parse("content://media/picked/1"))
+            advanceUntilIdle()
+            h.viewModel.onSystemBack()
+            assertNull((h.viewModel.uiState.value as EditMomentUiState.Content).cropping)
+            val gate = CompletableDeferred<Unit>()
+            h.media.loadGate = gate
+            h.viewModel.onPhotoPicked(Uri.parse("content://media/picked/2"))
+            runCurrent()
+            h.viewModel.dismiss()
+            gate.complete(Unit)
+            advanceUntilIdle()
+            assertNull((h.viewModel.uiState.value as EditMomentUiState.Content).cropping)
+            assertTrue(h.snapRepo.uploaded.isEmpty())
+        }
+
+    @Test
+    fun `Done uploads what the window shows`() =
+        runTest {
+            val h = Harness()
+            h.media.processed = ProcessedImage(original = byteArrayOf(1), thumb = byteArrayOf(2))
+            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail())
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            h.viewModel.onPhotoPicked(Uri.parse("content://media/picked/1"))
+            advanceUntilIdle()
+            val session = (h.viewModel.uiState.value as EditMomentUiState.Content).cropping!!
+            session.state.select(CropRatio.SQUARE)
+            session.state.setAngle(12.0)
+            h.viewModel.onCropDone()
+            advanceUntilIdle()
+            val rendered = h.media.renderedGeometries.single()
+            assertEquals(CropRatio.SQUARE, rendered.ratio)
+            assertEquals(12.0, rendered.angle, 0.0)
             assertEquals(1, h.snapRepo.uploaded.size)
         }
 }

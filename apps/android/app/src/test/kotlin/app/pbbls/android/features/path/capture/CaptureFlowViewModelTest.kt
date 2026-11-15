@@ -11,6 +11,7 @@ import app.pbbls.android.core.model.AttachedSnap
 import app.pbbls.android.core.model.FormSnap
 import app.pbbls.android.core.model.MomentSavePayload
 import app.pbbls.android.core.model.PebbleSnapPayload
+import app.pbbls.android.core.model.crop.CropRatio
 import app.pbbls.android.features.path.PathFocusRequests
 import app.pbbls.android.testing.FakeAchievementsService
 import app.pbbls.android.testing.FakeCameraPhotos
@@ -74,6 +75,20 @@ class CaptureFlowViewModelTest {
     }
 
     private val pick: Uri = Uri.parse("content://media/picked/1")
+
+    /** A library pick through the crop editor (#1659): read, then Done on the framing it opened with. */
+    private fun TestScope.pickAndCrop(viewModel: CaptureFlowViewModel) {
+        viewModel.onPhotoPicked(pick)
+        runCurrent()
+        viewModel.onCropDone()
+    }
+
+    /** A shot through the crop editor: read, then Done. */
+    private fun TestScope.shootAndCrop(viewModel: CaptureFlowViewModel) {
+        viewModel.onCameraResult(taken = true)
+        runCurrent()
+        viewModel.onCropDone()
+    }
 
     /** The coordinator's photo state reaches the flow through `snapshotFlow`, which waits for an apply. */
     private fun TestScope.settle() {
@@ -216,7 +231,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             h.media.captureDateResult = OffsetDateTime.parse("2026-10-11T18:05:27Z")
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             val state = h.viewModel.uiState.value
             assertEquals(OffsetDateTime.parse("2026-10-11T18:05:27Z"), state.flow.draft.happenedAt)
@@ -228,7 +243,7 @@ class CaptureFlowViewModelTest {
     fun `a photo-only moment sends its uploaded snap and no name`() =
         runTest {
             val h = Harness()
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.save(thenComplete = false)
@@ -245,7 +260,7 @@ class CaptureFlowViewModelTest {
     fun `a failed save keeps the uploaded files for the retry`() =
         runTest {
             val h = Harness()
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.writes.failNext = postgrestException("media_quota_exceeded")
             h.viewModel.machine().goTo(CaptureStep.MOMENT)
@@ -260,7 +275,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             val effects = recordEffects(h.viewModel.effects)
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.viewModel.onCloseRequested()
             assertTrue(h.viewModel.uiState.value.isCloseConfirmPresented)
@@ -314,7 +329,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             h.snapRepo.uploadGate = CompletableDeferred()
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.viewModel.onCloseRequested()
             assertTrue(h.viewModel.uiState.value.isCloseConfirmPresented)
@@ -352,7 +367,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             h.snapRepo.uploadGate = CompletableDeferred()
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.machine().setName("Walk")
@@ -368,7 +383,7 @@ class CaptureFlowViewModelTest {
             val h = Harness()
             val gate = CompletableDeferred<Unit>()
             h.snapRepo.uploadGate = gate
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.viewModel.machine().goTo(CaptureStep.MOMENT)
             settle()
@@ -383,7 +398,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             h.snapRepo.failNext = IllegalStateException("upload refused")
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             // The coordinator retries once after a pause; that one fails too.
             h.snapRepo.failNext = IllegalStateException("upload refused again")
@@ -414,7 +429,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             h.snapRepo.uploadGate = CompletableDeferred()
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.viewModel.machine().goTo(CaptureStep.PHOTO)
             h.viewModel.save(thenComplete = false)
@@ -440,7 +455,7 @@ class CaptureFlowViewModelTest {
             h.viewModel.onCloseRequested()
             h.viewModel.onSystemBack()
             h.viewModel.machine().back()
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             advanceUntilIdle()
             settle()
 
@@ -459,7 +474,7 @@ class CaptureFlowViewModelTest {
             val effects = recordEffects(h.viewModel.effects)
             val gate = CompletableDeferred<Unit>()
             h.snapRepo.uploadGate = gate
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.viewModel.onCloseRequested()
             h.viewModel.onDiscard()
@@ -481,7 +496,7 @@ class CaptureFlowViewModelTest {
             val effects = recordEffects(h.viewModel.effects)
             val read = CompletableDeferred<Unit>()
             h.media.processGate = read
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.viewModel.onCloseRequested()
             assertTrue(h.viewModel.uiState.value.isCloseConfirmPresented)
@@ -504,7 +519,7 @@ class CaptureFlowViewModelTest {
             h.media.processGate = CompletableDeferred()
             h.viewModel.machine().goTo(CaptureStep.MOMENT)
             h.viewModel.machine().setName("Walk")
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             assertEquals(R.string.pebble_save_error_photo_uploading, h.viewModel.uiState.value.snapBlockedMessageRes)
             assertFalse(h.viewModel.uiState.value.canSaveNow)
@@ -548,7 +563,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val handle = SavedStateHandle()
             val first = Harness(handle)
-            first.viewModel.onPhotoPicked(pick)
+            pickAndCrop(first.viewModel)
             settle()
             val snapId = first.snapRepo.uploaded.single()
             assertEquals(snapId, handle.get<String>("capture-snap-id"))
@@ -570,7 +585,7 @@ class CaptureFlowViewModelTest {
             val handle = SavedStateHandle()
             val h = Harness(handle)
             h.snapRepo.uploadGate = CompletableDeferred()
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             assertNull(handle.get<String>("capture-snap-id"))
         }
@@ -722,7 +737,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val handle = SavedStateHandle()
             val first = Harness(handle)
-            first.viewModel.onPhotoPicked(pick)
+            pickAndCrop(first.viewModel)
             settle()
             val snapId = first.snapRepo.uploaded.single()
 
@@ -741,7 +756,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val handle = SavedStateHandle()
             val h = Harness(handle)
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.viewModel.machine().setName("Walk")
             h.writes.failNext = postgrestException("moment_empty")
@@ -761,7 +776,7 @@ class CaptureFlowViewModelTest {
     fun `once saved, the screen keeps the photo it showed`() =
         runTest {
             val h = Harness()
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.viewModel.save(thenComplete = false)
             advanceUntilIdle()
@@ -775,7 +790,7 @@ class CaptureFlowViewModelTest {
     fun `a new pick advances to the page after the beat`() =
         runTest {
             val h = Harness()
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             assertEquals(CaptureStep.PHOTO, h.viewModel.machine().step)
             advanceTimeBy(399)
@@ -792,7 +807,7 @@ class CaptureFlowViewModelTest {
             val h = Harness()
             val gate = CompletableDeferred<Unit>()
             h.snapRepo.uploadGate = gate
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             gate.complete(Unit)
             settle()
@@ -818,7 +833,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             h.snapRepo.failNext = RuntimeException("offline")
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             advanceUntilIdle()
             settle()
@@ -833,7 +848,7 @@ class CaptureFlowViewModelTest {
             runCurrent()
             assertEquals("FAILED to UPLOADED is the same snap", CaptureStep.PHOTO, h.viewModel.machine().step)
             val first = (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             advanceUntilIdle()
             settle()
             advanceTimeBy(1_000)
@@ -847,7 +862,7 @@ class CaptureFlowViewModelTest {
     fun `leaving the step during the beat cancels the advance`() =
         runTest {
             val h = Harness()
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.viewModel.machine().advance() // Just write, within the beat
             settle()
@@ -863,7 +878,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val h = Harness()
             h.viewModel.machine().goTo(CaptureStep.PHOTO)
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.viewModel.machine().beginSave()
             advanceTimeBy(1_000)
@@ -877,7 +892,7 @@ class CaptureFlowViewModelTest {
             val handle = SavedStateHandle()
             val h = Harness(handle)
             val effects = recordEffects(h.viewModel.effects)
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             h.viewModel.onCloseRequested()
             h.viewModel.onDiscard()
@@ -919,9 +934,11 @@ class CaptureFlowViewModelTest {
             val handle = SavedStateHandle()
             val h = Harness(handle)
             h.viewModel.onCameraRequested()
-            h.viewModel.onCameraResult(taken = true)
+            shootAndCrop(h.viewModel)
             advanceUntilIdle()
             settle()
+            // The page takes over after the beat.
+            advanceUntilIdle()
             val state = h.viewModel.uiState.value
             assertTrue(state.flow.hasSnap)
             assertEquals(WhenSource.PHOTO, state.flow.whenSource)
@@ -952,7 +969,7 @@ class CaptureFlowViewModelTest {
             val h = Harness()
             h.photos.processed = null
             h.viewModel.onCameraRequested()
-            h.viewModel.onCameraResult(taken = true)
+            shootAndCrop(h.viewModel)
             advanceUntilIdle()
             settle()
             assertEquals(listOf("/cache/camera/shot-1.jpg"), h.photos.deleted)
@@ -967,7 +984,7 @@ class CaptureFlowViewModelTest {
             Harness(handle).viewModel.onCameraRequested()
             // The process dies with the camera in front; the registry hands the answer to the new one.
             val second = Harness(handle)
-            second.viewModel.onCameraResult(taken = true)
+            shootAndCrop(second.viewModel)
             advanceUntilIdle()
             settle()
             assertTrue(second.viewModel.uiState.value.flow.hasSnap)
@@ -980,7 +997,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val handle = SavedStateHandle()
             val h = Harness(handle)
-            h.viewModel.onCameraResult(taken = true)
+            shootAndCrop(h.viewModel)
             advanceUntilIdle()
             assertFalse(h.viewModel.uiState.value.flow.hasSnap)
             assertTrue(h.photos.deleted.isEmpty())
@@ -1010,7 +1027,7 @@ class CaptureFlowViewModelTest {
             val gate = CompletableDeferred<Unit>()
             h.photos.processGate = gate
             h.viewModel.onCameraRequested()
-            h.viewModel.onCameraResult(taken = true)
+            shootAndCrop(h.viewModel)
             settle()
             h.viewModel.onCloseRequested()
             h.viewModel.onDiscard()
@@ -1029,7 +1046,7 @@ class CaptureFlowViewModelTest {
             val h = Harness()
             h.viewModel.onCameraRequested()
             h.viewModel.machine().beginSave()
-            h.viewModel.onCameraResult(taken = true)
+            shootAndCrop(h.viewModel)
             advanceUntilIdle()
             assertEquals(listOf("/cache/camera/shot-1.jpg"), h.photos.deleted)
             assertNull(h.viewModel.onCameraRequested())
@@ -1041,11 +1058,11 @@ class CaptureFlowViewModelTest {
             val h = Harness()
             val gate = CompletableDeferred<Unit>()
             h.snapRepo.uploadGate = gate
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             val first = (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id
             h.snapRepo.uploadGate = null
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             advanceUntilIdle()
             settle()
             val now = (h.viewModel.uiState.value.snap as FormSnap.Pending).snap
@@ -1062,12 +1079,12 @@ class CaptureFlowViewModelTest {
             val h = Harness()
             val gate = CompletableDeferred<Unit>()
             h.snapRepo.uploadGate = gate
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             val first = (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id
             // The next pick is a corrupt image.
             h.media.processed = null
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             advanceUntilIdle()
             settle()
             assertEquals(first, (h.viewModel.uiState.value.snap as FormSnap.Pending).snap.id)
@@ -1089,7 +1106,7 @@ class CaptureFlowViewModelTest {
             val h = Harness()
             val read = CompletableDeferred<Unit>()
             h.media.processGate = read
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             assertTrue(h.viewModel.uiState.value.isPicking)
             read.complete(Unit)
@@ -1097,7 +1114,7 @@ class CaptureFlowViewModelTest {
             settle()
             assertFalse(h.viewModel.uiState.value.isPicking)
             h.viewModel.onCameraRequested()
-            h.viewModel.onCameraResult(taken = true)
+            shootAndCrop(h.viewModel)
             advanceUntilIdle()
             assertEquals(0, h.viewModel.uiState.value.flow.draft.happenedAt.nano)
         }
@@ -1110,9 +1127,9 @@ class CaptureFlowViewModelTest {
             val b = CompletableDeferred<Unit>()
             val c = CompletableDeferred<Unit>()
             h.media.processGates.addAll(listOf(a, b, c))
-            h.viewModel.onPhotoPicked(pick)
-            h.viewModel.onPhotoPicked(pick)
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
+            pickAndCrop(h.viewModel)
+            pickAndCrop(h.viewModel)
             settle()
             c.complete(Unit)
             advanceUntilIdle()
@@ -1134,7 +1151,7 @@ class CaptureFlowViewModelTest {
             val h = Harness()
             val gates = List(3) { CompletableDeferred<Unit>() }
             h.media.processGates.addAll(gates)
-            repeat(3) { h.viewModel.onPhotoPicked(pick) }
+            repeat(3) { pickAndCrop(h.viewModel) }
             settle()
             h.viewModel.onCloseRequested()
             h.viewModel.onDiscard()
@@ -1151,7 +1168,7 @@ class CaptureFlowViewModelTest {
         runTest {
             val handle = SavedStateHandle()
             val h = Harness(handle)
-            h.viewModel.onPhotoPicked(pick)
+            pickAndCrop(h.viewModel)
             settle()
             val id = handle.get<String>("capture-snap-id")
             assertTrue(id != null)
@@ -1170,5 +1187,166 @@ class CaptureFlowViewModelTest {
             settle()
             assertNull(handle.get<String>("capture-snap-id"))
             assertTrue(h.snapRepo.deletedSnapIds.isEmpty())
+        }
+
+    // The crop editor (#1659)
+
+    @Test
+    fun `a pick opens the editor, nothing uploads before Done, and Cancel attaches nothing`() =
+        runTest {
+            val h = Harness()
+            h.viewModel.onPhotoPicked(pick)
+            runCurrent()
+            assertTrue("the editor opened", h.viewModel.uiState.value.cropping != null)
+            assertTrue(h.snapRepo.uploaded.isEmpty())
+            // In the editor the photo is still coming: saving waits, and closing asks.
+            assertEquals(R.string.pebble_save_error_photo_uploading, h.viewModel.uiState.value.snapBlockedMessageRes)
+            h.viewModel.onCropCancelled()
+            advanceUntilIdle()
+            settle()
+            val state = h.viewModel.uiState.value
+            assertNull(state.cropping)
+            assertNull(state.snapBlockedMessageRes)
+            assertFalse(state.isPicking)
+            assertFalse(state.flow.hasSnap)
+            assertEquals(CaptureStep.PHOTO, h.viewModel.machine().step)
+            assertTrue(h.snapRepo.uploaded.isEmpty())
+            // The same photo can be picked again.
+            h.viewModel.onPhotoPicked(pick)
+            runCurrent()
+            assertTrue(h.viewModel.uiState.value.cropping != null)
+        }
+
+    @Test
+    fun `back in the editor is its Cancel, and the flow stays where it was`() =
+        runTest {
+            val h = Harness()
+            h.viewModel.onPhotoPicked(pick)
+            runCurrent()
+            h.viewModel.onSystemBack()
+            advanceUntilIdle()
+            assertNull(h.viewModel.uiState.value.cropping)
+            assertFalse(h.viewModel.uiState.value.isCloseConfirmPresented)
+        }
+
+    @Test
+    fun `Done crops what the window shows and seeds the date from the original`() =
+        runTest {
+            val h = Harness()
+            h.media.captureDateResult = OffsetDateTime.parse("2026-10-11T18:05:27+02:00")
+            h.viewModel.onPhotoPicked(pick)
+            runCurrent()
+            val session = h.viewModel.uiState.value.cropping!!
+            session.state.select(CropRatio.FOUR_FIVE)
+            session.state.turnQuarter()
+            h.viewModel.onCropDone()
+            advanceUntilIdle()
+            settle()
+            val rendered = h.media.renderedGeometries.single()
+            assertEquals(CropRatio.FIVE_FOUR, rendered.ratio)
+            assertEquals(1, rendered.quarterTurns)
+            assertEquals(1, h.snapRepo.uploaded.size)
+            assertEquals(WhenSource.PHOTO, h.viewModel.uiState.value.flow.whenSource)
+        }
+
+    @Test
+    fun `while a pick is read the save waits and closing asks`() =
+        runTest {
+            val h = Harness()
+            h.media.loadGate = CompletableDeferred()
+            h.viewModel.onPhotoPicked(pick)
+            runCurrent()
+            val state = h.viewModel.uiState.value
+            assertTrue(state.isPicking)
+            assertEquals(R.string.pebble_save_error_photo_uploading, state.snapBlockedMessageRes)
+            h.viewModel.onCloseRequested()
+            assertTrue(h.viewModel.uiState.value.isCloseConfirmPresented)
+        }
+
+    @Test
+    fun `only the latest pick opens the editor, even when an earlier one is read last`() =
+        runTest {
+            val h = Harness()
+            val first = CompletableDeferred<Unit>()
+            val second = CompletableDeferred<Unit>()
+            h.media.loadGates += first
+            h.media.loadGates += second
+            h.viewModel.onPhotoPicked(pick)
+            runCurrent()
+            h.viewModel.onPhotoPicked(pick)
+            runCurrent()
+            second.complete(Unit)
+            runCurrent()
+            val opened = h.viewModel.uiState.value.cropping
+            assertTrue(opened != null)
+            first.complete(Unit)
+            advanceUntilIdle()
+            assertTrue("a superseded read replaced the editor", h.viewModel.uiState.value.cropping === opened)
+        }
+
+    @Test
+    fun `a read that lands under the close dialog waits for it - Keep going opens the editor`() =
+        runTest {
+            val h = Harness()
+            val gate = CompletableDeferred<Unit>()
+            h.media.loadGate = gate
+            h.viewModel.onPhotoPicked(pick)
+            runCurrent()
+            h.viewModel.onCloseRequested()
+            gate.complete(Unit)
+            advanceUntilIdle()
+            assertNull("the editor opened over the dialog", h.viewModel.uiState.value.cropping)
+            h.viewModel.onKeepGoing()
+            assertTrue(h.viewModel.uiState.value.cropping != null)
+        }
+
+    @Test
+    fun `a read that lands after Discard opens nothing and uploads nothing`() =
+        runTest {
+            val h = Harness()
+            val effects = recordEffects(h.viewModel.effects)
+            val gate = CompletableDeferred<Unit>()
+            h.media.loadGate = gate
+            h.viewModel.onPhotoPicked(pick)
+            runCurrent()
+            h.viewModel.onCloseRequested()
+            h.viewModel.onDiscard()
+            gate.complete(Unit)
+            advanceUntilIdle()
+            assertNull(h.viewModel.uiState.value.cropping)
+            assertTrue(h.snapRepo.uploaded.isEmpty())
+            assertTrue(effects.values.contains(CaptureFlowEffect.Dismiss))
+            effects.stop()
+        }
+
+    @Test
+    fun `a photo that cannot be read releases the gate`() =
+        runTest {
+            val h = Harness()
+            h.media.failNextRead = IllegalStateException("not an image")
+            h.viewModel.onPhotoPicked(pick)
+            advanceUntilIdle()
+            val state = h.viewModel.uiState.value
+            assertNull(state.cropping)
+            assertFalse(state.isPicking)
+            assertNull(state.snapBlockedMessageRes)
+        }
+
+    @Test
+    fun `a shot opens the editor, its file goes once read, and Cancel keeps the date`() =
+        runTest {
+            val handle = SavedStateHandle()
+            val h = Harness(handle)
+            h.viewModel.onCameraRequested()
+            h.viewModel.onCameraResult(taken = true)
+            runCurrent()
+            assertTrue(h.viewModel.uiState.value.cropping != null)
+            assertEquals(listOf("/cache/camera/shot-1.jpg"), h.photos.deleted)
+            h.viewModel.onCropCancelled()
+            advanceUntilIdle()
+            settle()
+            assertFalse(h.viewModel.uiState.value.flow.hasSnap)
+            assertTrue(h.snapRepo.uploaded.isEmpty())
+            assertEquals(WhenSource.NOW, h.viewModel.uiState.value.flow.whenSource)
         }
 }

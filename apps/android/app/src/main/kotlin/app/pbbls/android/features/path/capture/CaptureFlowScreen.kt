@@ -16,6 +16,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,6 +46,7 @@ import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.ui.onboardingPromptForSlug
+import app.pbbls.android.features.path.crop.PhotoCropEditor
 import app.pbbls.android.features.path.flow.RecordFlowChrome
 import app.pbbls.android.features.path.flow.RecordStepAction
 import app.pbbls.android.features.path.flow.RecordStepScaffold
@@ -117,32 +119,45 @@ fun CaptureFlowScreen(
         onPauseOrDispose {}
     }
 
-    CaptureFlowContent(
-        uiState = uiState,
-        model = viewModel.machine(),
-        onPickPhoto = {
-            photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-        },
-        onTakePhoto = {
-            viewModel.onCameraRequested()?.let { uri ->
-                try {
-                    camera.launch(uri)
-                } catch (e: ActivityNotFoundException) {
-                    Log.w(TAG, "no camera app answered", e)
-                    viewModel.onCameraLaunchFailed()
+    Box(modifier.fillMaxSize()) {
+        CaptureFlowContent(
+            uiState = uiState,
+            model = viewModel.machine(),
+            onPickPhoto = {
+                photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
+            onTakePhoto = {
+                viewModel.onCameraRequested()?.let { uri ->
+                    try {
+                        camera.launch(uri)
+                    } catch (e: ActivityNotFoundException) {
+                        Log.w(TAG, "no camera app answered", e)
+                        viewModel.onCameraLaunchFailed()
+                    }
                 }
-            }
-        },
-        onRetryPhoto = viewModel::onRetryPhoto,
-        onRemovePhoto = viewModel::onRemovePhoto,
-        onSave = { viewModel.save(thenComplete = false) },
-        onSaveThenComplete = { viewModel.save(thenComplete = true) },
-        onClose = viewModel::onCloseRequested,
-        onSaveFromClose = viewModel::onSaveFromClose,
-        onKeepGoing = viewModel::onKeepGoing,
-        onDiscard = viewModel::onDiscard,
-        modifier = modifier,
-    )
+            },
+            onRetryPhoto = viewModel::onRetryPhoto,
+            onRemovePhoto = viewModel::onRemovePhoto,
+            onSave = { viewModel.save(thenComplete = false) },
+            onSaveThenComplete = { viewModel.save(thenComplete = true) },
+            onClose = viewModel::onCloseRequested,
+            onSaveFromClose = viewModel::onSaveFromClose,
+            onKeepGoing = viewModel::onKeepGoing,
+            onDiscard = viewModel::onDiscard,
+            modifier = Modifier.fillMaxSize(),
+        )
+
+        // Over the flow: the picker and the camera are other activities and have returned by now; the close
+        // dialog holds it back (the ViewModel opens it only once that dialog is gone).
+        uiState.cropping?.let { session ->
+            PhotoCropEditor(
+                session = session,
+                onCancel = viewModel::onCropCancelled,
+                onDone = viewModel::onCropDone,
+                hapticsOn = { viewModel.hapticsOn },
+            )
+        }
+    }
 }
 
 /** Stateless, so the previews render every step and the close dialog without a ViewModel. */
