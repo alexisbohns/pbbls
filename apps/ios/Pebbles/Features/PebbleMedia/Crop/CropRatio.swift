@@ -2,8 +2,8 @@ import CoreGraphics
 import Foundation
 
 /// The five crop formats (spec D3). No free crop: a moment's photo is always
-/// one of these shapes. Raw values are the labels the chips never show (the
-/// chip draws the shape) but logs and references use.
+/// one of these shapes. Raw values are the ratio the chip writes inside its
+/// shape, and what logs and references use.
 enum CropRatio: String, CaseIterable, Identifiable, Equatable {
     case fourFive = "4:5"
     case threeFour = "3:4"
