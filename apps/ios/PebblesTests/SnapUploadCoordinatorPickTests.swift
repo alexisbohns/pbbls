@@ -286,4 +286,84 @@ struct SnapUploadCoordinatorPickTests {
         #expect(!repo.calls.contains(.deleteFilesBySnapId(snapId: latest, userId: userId)))
         #expect(repo.deletesInCancelledTask.isEmpty)
     }
+
+    @Test("a cropped image attaches, uploads and keeps the date read before the crop")
+    func croppedIngest() async throws {
+        let repo = SnapUploadCoordinatorTests.FakeRepo()
+        let coordinator = SnapUploadCoordinator(repo: repo, retryDelay: .milliseconds(1))
+        let image = try ImagePipelineCroppedTests.solid(width: 800, height: 1000)
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+
+        await coordinator.ingest(cropped: image, captureDate: date, userId: UUID())
+
+        guard case .pending(let snap) = coordinator.formSnap else {
+            Issue.record("expected a pending snap, got \(String(describing: coordinator.formSnap))"); return
+        }
+        #expect(snap.state == .uploaded)
+        #expect(coordinator.pickedCaptureDate == date)
+        #expect(!coordinator.isBlocking)
+    }
+
+    @Test("a cropped image landing after close attaches and uploads nothing")
+    func croppedAfterClose() async throws {
+        let repo = SnapUploadCoordinatorTests.FakeRepo()
+        let coordinator = SnapUploadCoordinator(repo: repo, retryDelay: .milliseconds(1))
+        await coordinator.cancelAndCleanup(userId: UUID())
+        await coordinator.ingest(cropped: try ImagePipelineCroppedTests.solid(width: 100, height: 100),
+                                 captureDate: nil, userId: UUID())
+        #expect(coordinator.formSnap == nil)
+        #expect(repo.calls.isEmpty)
+    }
+
+    @Test("a cropped image counts as a pick in flight until its upload ends")
+    func croppedBlocksWhileUploading() async throws {
+        let repo = SnapUploadCoordinatorTests.FakeRepo()
+        let coordinator = SnapUploadCoordinator(repo: repo, retryDelay: .milliseconds(1))
+        let gate = LoadGate()
+        repo.duringUpload = { await withCheckedContinuation { gate.continuation = $0 } }
+        let image = try ImagePipelineCroppedTests.solid(width: 400, height: 500)
+
+        let ingest = Task { await coordinator.ingest(cropped: image, captureDate: nil, userId: UUID()) }
+        while gate.continuation == nil { await Task.yield() }
+
+        #expect(coordinator.isProcessingPick)
+        #expect(coordinator.isBlocking)
+
+        gate.continuation?.resume()
+        await ingest.value
+
+        #expect(!coordinator.isProcessingPick)
+        #expect(!coordinator.isBlocking)
+    }
+
+    @Test("a second cropped image supersedes the first and the first's files go")
+    func croppedSupersedes() async throws {
+        let repo = SnapUploadCoordinatorTests.FakeRepo()
+        let userId = UUID()
+        let coordinator = SnapUploadCoordinator(repo: repo, retryDelay: .milliseconds(1))
+        let gate = LoadGate()
+        var uploads = 0
+        repo.duringUpload = {
+            uploads += 1
+            if uploads == 1 { await withCheckedContinuation { gate.continuation = $0 } }
+        }
+        let image = try ImagePipelineCroppedTests.solid(width: 400, height: 500)
+
+        let first = Task { await coordinator.ingest(cropped: image, captureDate: nil, userId: userId) }
+        while gate.continuation == nil { await Task.yield() }
+        await coordinator.ingest(cropped: image, captureDate: nil, userId: userId)
+        gate.continuation?.resume()
+        await first.value
+
+        let uploaded = repo.calls.compactMap { call -> UUID? in
+            if case .upload(let snapId, _) = call { snapId } else { nil }
+        }
+        #expect(uploaded.count == 2)
+        guard case .pending(let kept) = coordinator.formSnap else {
+            Issue.record("expected the second snap to stay"); return
+        }
+        #expect(kept.id == uploaded[1])
+        #expect(repo.calls.contains(.deleteFilesBySnapId(snapId: uploaded[0], userId: userId)))
+        #expect(!repo.calls.contains(.deleteFilesBySnapId(snapId: uploaded[1], userId: userId)))
+    }
 }

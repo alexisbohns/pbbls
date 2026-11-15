@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import PhotosUI
 import SwiftUI
@@ -214,6 +215,30 @@ final class SnapUploadCoordinator {
             return
         }
 
+        await attach(processed, captureDate: captureDate, userId: userId, generation: generation)
+    }
+
+    /// The crop editor's Done (spec "Pipeline"): the image is already upright
+    /// and cropped, and its date was read from the original bytes beforehand.
+    func ingest(cropped image: CGImage, captureDate: Date?, userId: UUID) async {
+        let generation = nextPickGeneration()
+        picksInFlight += 1
+        defer { picksInFlight -= 1 }
+        guard accepts(generation) else { return }
+        let processed: ProcessedImage
+        do {
+            processed = try await Task.detached(priority: .userInitiated) {
+                try ImagePipeline.process(image)
+            }.value
+        } catch {
+            Self.logger.error("cropped pipeline failed: \(String(describing: error), privacy: .public)")
+            return
+        }
+        await attach(processed, captureDate: captureDate, userId: userId, generation: generation)
+    }
+
+    /// Attach → replace → upload, shared by every ingest once its bytes are processed.
+    private func attach(_ processed: ProcessedImage, captureDate: Date?, userId: UUID, generation: Int) async {
         // The form closed or is saving, or a later pick superseded this one,
         // while it was being read: nothing is attached, replaced or deleted.
         guard accepts(generation) else { return }
