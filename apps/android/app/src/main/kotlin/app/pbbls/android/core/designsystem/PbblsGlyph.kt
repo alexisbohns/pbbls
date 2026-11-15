@@ -3512,6 +3512,234 @@ enum class PbblsGlyph(
 
     /** Search chart: a magnifying glass over a chart. */
     SEARCH_CHART("search-chart"),
+
+    /** Arrow node up: a node with an arrow pointing up. */
+    ARROW_NODE_UP("arrow-node-up"),
+
+    /** Stones decrease: stones getting fewer. */
+    STONES_DECREASE("stones-decrease"),
+
+    /** Sunrise arrow: a rising sun with an upward arrow. */
+    SUNRISE_ARROW("sunrise-arrow"),
+
+    /** Gauge high: a gauge reading high. */
+    GAUGE_HIGH_2("gauge-high-2"),
+
+    /** Square exclamation: an exclamation mark in a square. */
+    SQUARE_EXCLAMATION("square-exclamation"),
+
+    /** Triangles upward: triangles pointing up. */
+    TRIANGLES_UPWARD("triangles-upward"),
+
+    /** Bars high: bars rising high on a chart. */
+    BARS_HIGH("bars-high"),
+
+    /** Cairn high: a tall cairn of stones. */
+    CAIRN_HIGH("cairn-high"),
+
+    /** Slider high: a slider set near the top. */
+    SLIDER_HIGH("slider-high"),
+
+    /** Triangle up: a triangle pointing up. */
+    TRIANGLE_UP("triangle-up"),
+
+    /** Bars low: short bars on a chart. */
+    BARS_LOW("bars-low"),
+
+    /** Cairn low: a short cairn of stones. */
+    CAIRN_LOW("cairn-low"),
+
+    /** Gauge low: a gauge reading low. */
+    GAUGE_LOW_2("gauge-low-2"),
+
+    /** Slider low: a slider set near the bottom. */
+    SLIDER_LOW("slider-low"),
+
+    /** Triangle down: a triangle pointing down. */
+    TRIANGLE_DOWN("triangle-down"),
+
+    /** Bar medium: a bar set at a middling level. */
+    BAR_MEDIUM("bar-medium"),
+
+    /** Cairn medium: a cairn of middling height. */
+    CAIRN_MEDIUM("cairn-medium"),
+
+    /** Gauge medium: a gauge reading the middle. */
+    GAUGE_MEDIUM_2("gauge-medium-2"),
+
+    /** Slider medium: a slider set to the middle. */
+    SLIDER_MEDIUM("slider-medium"),
+
+    /** Bars undefined: bars with no value shown. */
+    BARS_UNDEFINED("bars-undefined"),
+
+    /** Gauge undefined: a gauge with no reading. */
+    GAUGE_UNDEFINED("gauge-undefined"),
+
+    /** Slider undefined: a slider with no set value. */
+    SLIDER_UNDEFINED("slider-undefined"),
+
+    /** Stones: a small group of stones. */
+    STONES_3("stones-3"),
+
+    /** Flag check: a flag marked with a tick. */
+    FLAG_CHECK("flag-check"),
+
+    /** Square checks: several ticked squares. */
+    SQUARE_CHECKS("square-checks"),
+
+    /** Circle chevron down stop: a downward chevron in a circle, ending in a stop. */
+    CIRCLE_CHEVRON_DOWN_STOP("circle-chevron-down-stop"),
+
+    /** Pouch stone: a stone kept in a pouch. */
+    POUCH_STONE("pouch-stone"),
+
+    /** Square archive: a square box put away in an archive. */
+    SQUARE_ARCHIVE("square-archive"),
+
+    /** Square hourglass: an hourglass inside a square. */
+    SQUARE_HOURGLASS("square-hourglass"),
+
+    /** Circle arrow right stop: a right arrow in a circle, ending in a stop. */
+    CIRCLE_ARROW_RIGHT_STOP("circle-arrow-right-stop"),
+
+    /** Square lock: a padlock inside a square. */
+    SQUARE_LOCK("square-lock"),
+
+    /** Circle slash: a circle with a line through it. */
+    CIRCLE_SLASH("circle-slash"),
+
+    /** Flower down soil: a flower rooted down in soil. */
+    FLOWER_DOWN_SOIL("flower-down-soil"),
+
+    /** Square sunset: a sunset framed in a square. */
+    SQUARE_SUNSET("square-sunset"),
+
+    /** Stones thought: stones shown as a thought. */
+    STONES_THOUGHT("stones-thought"),
+
+    /** Circle half: a circle with half filled in. */
+    CIRCLE_HALF("circle-half"),
+
+    /** Signal nodes: signal waves linked by nodes. */
+    SIGNAL_NODES("signal-nodes"),
+
+    /** Sprout soil: a sprout growing from soil. */
+    SPROUT_SOIL("sprout-soil"),
+
+    /** Square code: code brackets inside a square. */
+    SQUARE_CODE("square-code"),
+
+    /** Stone hash: a hash sign marked on a stone. */
+    STONE_HASH("stone-hash"),
+
+    /** Circle pen: a pen writing inside a circle. */
+    CIRCLE_PEN("circle-pen"),
+
+    /** Flag scribble: a flag with a scribbled line. */
+    FLAG_SCRIBBLE("flag-scribble"),
+
+    /** Square scribble: a scribbled line inside a square. */
+    SQUARE_SCRIBBLE("square-scribble"),
+
+    /** Spark badge: a badge with a spark on it. */
+    SPARK_BADGE("spark-badge"),
+
+    /** Square bulb: a light bulb inside a square. */
+    SQUARE_BULB("square-bulb"),
+
+    /** Cairn bowl: a bowl of stones arranged as a cairn. */
+    CAIRN_BOWL("cairn-bowl"),
+
+    /** Circle stone: a stone within a circle. */
+    CIRCLE_STONE("circle-stone"),
+
+    /** Circle stone emit: a stone in a circle sending out marks. */
+    CIRCLE_STONE_EMIT("circle-stone-emit"),
+
+    /** Flower soil: a flower growing from soil. */
+    FLOWER_SOIL("flower-soil"),
+
+    /** Pebble flow: stones flowing along a path. */
+    PEBBLE_FLOW("pebble-flow"),
+
+    /** Square play: a play symbol inside a square. */
+    SQUARE_PLAY("square-play"),
+
+    /** Circle x: a cross inside a circle. */
+    CIRCLE_X("circle-x"),
+
+    /** Circle x olive: a cross in a circle, one arm ending in an olive-shaped tip. */
+    CIRCLE_X_OLIVE("circle-x-olive"),
+
+    /** Flag x: a flag marked with a cross. */
+    FLAG_X("flag-x"),
+
+    /** Nodes edge x: nodes linked by an edge that is cut. */
+    NODES_EDGE_X("nodes-edge-x"),
+
+    /** Sprout soil inverted: a sprout growing downward from soil. */
+    SPROUT_SOIL_INVERTED("sprout-soil-inverted"),
+
+    /** Square arrow down left: an arrow pointing down-left in a square. */
+    SQUARE_ARROW_DOWN_LEFT("square-arrow-down-left"),
+
+    /** Circle arrow up: an upward arrow in a circle. */
+    CIRCLE_ARROW_UP("circle-arrow-up"),
+
+    /** Circle arrow up right: a short arrow pointing up and right in a circle. */
+    CIRCLE_ARROW_UP_RIGHT("circle-arrow-up-right"),
+
+    /** Sprout bud soil: a bud sprouting from soil. */
+    SPROUT_BUD_SOIL("sprout-bud-soil"),
+
+    /** Square plane: a paper plane inside a square. */
+    SQUARE_PLANE("square-plane"),
+
+    /** Circle arrow bottom left: an arrow pointing down-left in a circle. */
+    CIRCLE_ARROW_BOTTOM_LEFT("circle-arrow-bottom-left"),
+
+    /** Node segment cut down: a node line cut downward. */
+    NODE_SEGMENT_CUT_DOWN("node-segment-cut-down"),
+
+    /** Sprout soil seed: a seed sprouting from soil. */
+    SPROUT_SOIL_SEED("sprout-soil-seed"),
+
+    /** Square rotate clockwise: a square turning clockwise. */
+    SQUARE_ROTATE_CLOCKWISE("square-rotate-clockwise"),
+
+    /** Stone divided up: a stone split upward. */
+    STONE_DIVIDED_UP("stone-divided-up"),
+
+    /** Stone to stone: a stone passing its shape to another. */
+    STONE_TO_STONE("stone-to-stone"),
+
+    /** Supersede: a new stone taking the place of an old one. */
+    SUPERSEDE("supersede"),
+
+    /** Circle arrow up right: a long arrow crossing the circle up and right. */
+    CIRCLE_ARROW_UP_RIGHT_2("circle-arrow-up-right-2"),
+
+    /** Node segment cut up: a node line cut upward. */
+    NODE_SEGMENT_CUT_UP("node-segment-cut-up"),
+
+    /** Square rotate backward: a square turning backward. */
+    SQUARE_ROTATE_BACKWARD("square-rotate-backward"),
+
+    /** Stone divided: a stone split in two. */
+    STONE_DIVIDED("stone-divided"),
+
+    /** Superseded: replaced by something newer. */
+    SUPERSEDED("superseded"),
+
+    /** Circle exclamation: an exclamation mark in a circle. */
+    CIRCLE_EXCLAMATION("circle-exclamation"),
+
+    /** Exclamation: an exclamation mark for attention. */
+    EXCLAMATION("exclamation"),
+
+    /** Square zap: a lightning bolt inside a square. */
+    SQUARE_ZAP("square-zap"),
     ;
 
     companion object {

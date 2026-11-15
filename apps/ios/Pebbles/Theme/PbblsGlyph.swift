@@ -2358,4 +2358,156 @@ enum PbblsGlyph: String, CaseIterable, Sendable {
     case tooltipBubble = "tooltip-bubble"
     /// Search chart: a magnifying glass over a chart.
     case searchChart = "search-chart"
+    /// Arrow node up: a node with an arrow pointing up.
+    case arrowNodeUp = "arrow-node-up"
+    /// Stones decrease: stones getting fewer.
+    case stonesDecrease = "stones-decrease"
+    /// Sunrise arrow: a rising sun with an upward arrow.
+    case sunriseArrow = "sunrise-arrow"
+    /// Gauge high: a gauge reading high.
+    case gaugeHigh2 = "gauge-high-2"
+    /// Square exclamation: an exclamation mark in a square.
+    case squareExclamation = "square-exclamation"
+    /// Triangles upward: triangles pointing up.
+    case trianglesUpward = "triangles-upward"
+    /// Bars high: bars rising high on a chart.
+    case barsHigh = "bars-high"
+    /// Cairn high: a tall cairn of stones.
+    case cairnHigh = "cairn-high"
+    /// Slider high: a slider set near the top.
+    case sliderHigh = "slider-high"
+    /// Triangle up: a triangle pointing up.
+    case triangleUp = "triangle-up"
+    /// Bars low: short bars on a chart.
+    case barsLow = "bars-low"
+    /// Cairn low: a short cairn of stones.
+    case cairnLow = "cairn-low"
+    /// Gauge low: a gauge reading low.
+    case gaugeLow2 = "gauge-low-2"
+    /// Slider low: a slider set near the bottom.
+    case sliderLow = "slider-low"
+    /// Triangle down: a triangle pointing down.
+    case triangleDown = "triangle-down"
+    /// Bar medium: a bar set at a middling level.
+    case barMedium = "bar-medium"
+    /// Cairn medium: a cairn of middling height.
+    case cairnMedium = "cairn-medium"
+    /// Gauge medium: a gauge reading the middle.
+    case gaugeMedium2 = "gauge-medium-2"
+    /// Slider medium: a slider set to the middle.
+    case sliderMedium = "slider-medium"
+    /// Bars undefined: bars with no value shown.
+    case barsUndefined = "bars-undefined"
+    /// Gauge undefined: a gauge with no reading.
+    case gaugeUndefined = "gauge-undefined"
+    /// Slider undefined: a slider with no set value.
+    case sliderUndefined = "slider-undefined"
+    /// Stones: a small group of stones.
+    case stones3 = "stones-3"
+    /// Flag check: a flag marked with a tick.
+    case flagCheck = "flag-check"
+    /// Square checks: several ticked squares.
+    case squareChecks = "square-checks"
+    /// Circle chevron down stop: a downward chevron in a circle, ending in a stop.
+    case circleChevronDownStop = "circle-chevron-down-stop"
+    /// Pouch stone: a stone kept in a pouch.
+    case pouchStone = "pouch-stone"
+    /// Square archive: a square box put away in an archive.
+    case squareArchive = "square-archive"
+    /// Square hourglass: an hourglass inside a square.
+    case squareHourglass = "square-hourglass"
+    /// Circle arrow right stop: a right arrow in a circle, ending in a stop.
+    case circleArrowRightStop = "circle-arrow-right-stop"
+    /// Square lock: a padlock inside a square.
+    case squareLock = "square-lock"
+    /// Circle slash: a circle with a line through it.
+    case circleSlash = "circle-slash"
+    /// Flower down soil: a flower rooted down in soil.
+    case flowerDownSoil = "flower-down-soil"
+    /// Square sunset: a sunset framed in a square.
+    case squareSunset = "square-sunset"
+    /// Stones thought: stones shown as a thought.
+    case stonesThought = "stones-thought"
+    /// Circle half: a circle with half filled in.
+    case circleHalf = "circle-half"
+    /// Signal nodes: signal waves linked by nodes.
+    case signalNodes = "signal-nodes"
+    /// Sprout soil: a sprout growing from soil.
+    case sproutSoil = "sprout-soil"
+    /// Square code: code brackets inside a square.
+    case squareCode = "square-code"
+    /// Stone hash: a hash sign marked on a stone.
+    case stoneHash = "stone-hash"
+    /// Circle pen: a pen writing inside a circle.
+    case circlePen = "circle-pen"
+    /// Flag scribble: a flag with a scribbled line.
+    case flagScribble = "flag-scribble"
+    /// Square scribble: a scribbled line inside a square.
+    case squareScribble = "square-scribble"
+    /// Spark badge: a badge with a spark on it.
+    case sparkBadge = "spark-badge"
+    /// Square bulb: a light bulb inside a square.
+    case squareBulb = "square-bulb"
+    /// Cairn bowl: a bowl of stones arranged as a cairn.
+    case cairnBowl = "cairn-bowl"
+    /// Circle stone: a stone within a circle.
+    case circleStone = "circle-stone"
+    /// Circle stone emit: a stone in a circle sending out marks.
+    case circleStoneEmit = "circle-stone-emit"
+    /// Flower soil: a flower growing from soil.
+    case flowerSoil = "flower-soil"
+    /// Pebble flow: stones flowing along a path.
+    case pebbleFlow = "pebble-flow"
+    /// Square play: a play symbol inside a square.
+    case squarePlay = "square-play"
+    /// Circle x: a cross inside a circle.
+    case circleX = "circle-x"
+    /// Circle x olive: a cross in a circle, one arm ending in an olive-shaped tip.
+    case circleXOlive = "circle-x-olive"
+    /// Flag x: a flag marked with a cross.
+    case flagX = "flag-x"
+    /// Nodes edge x: nodes linked by an edge that is cut.
+    case nodesEdgeX = "nodes-edge-x"
+    /// Sprout soil inverted: a sprout growing downward from soil.
+    case sproutSoilInverted = "sprout-soil-inverted"
+    /// Square arrow down left: an arrow pointing down-left in a square.
+    case squareArrowDownLeft = "square-arrow-down-left"
+    /// Circle arrow up: an upward arrow in a circle.
+    case circleArrowUp = "circle-arrow-up"
+    /// Circle arrow up right: a short arrow pointing up and right in a circle.
+    case circleArrowUpRight = "circle-arrow-up-right"
+    /// Sprout bud soil: a bud sprouting from soil.
+    case sproutBudSoil = "sprout-bud-soil"
+    /// Square plane: a paper plane inside a square.
+    case squarePlane = "square-plane"
+    /// Circle arrow bottom left: an arrow pointing down-left in a circle.
+    case circleArrowBottomLeft = "circle-arrow-bottom-left"
+    /// Node segment cut down: a node line cut downward.
+    case nodeSegmentCutDown = "node-segment-cut-down"
+    /// Sprout soil seed: a seed sprouting from soil.
+    case sproutSoilSeed = "sprout-soil-seed"
+    /// Square rotate clockwise: a square turning clockwise.
+    case squareRotateClockwise = "square-rotate-clockwise"
+    /// Stone divided up: a stone split upward.
+    case stoneDividedUp = "stone-divided-up"
+    /// Stone to stone: a stone passing its shape to another.
+    case stoneToStone = "stone-to-stone"
+    /// Supersede: a new stone taking the place of an old one.
+    case supersede = "supersede"
+    /// Circle arrow up right: a long arrow crossing the circle up and right.
+    case circleArrowUpRight2 = "circle-arrow-up-right-2"
+    /// Node segment cut up: a node line cut upward.
+    case nodeSegmentCutUp = "node-segment-cut-up"
+    /// Square rotate backward: a square turning backward.
+    case squareRotateBackward = "square-rotate-backward"
+    /// Stone divided: a stone split in two.
+    case stoneDivided = "stone-divided"
+    /// Superseded: replaced by something newer.
+    case superseded = "superseded"
+    /// Circle exclamation: an exclamation mark in a circle.
+    case circleExclamation = "circle-exclamation"
+    /// Exclamation: an exclamation mark for attention.
+    case exclamation = "exclamation"
+    /// Square zap: a lightning bolt inside a square.
+    case squareZap = "square-zap"
 }
