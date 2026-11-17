@@ -14,6 +14,21 @@ struct LabLook: Codable, Identifiable, Equatable, Sendable {
     /// Vision's aesthetics score of this look's render; nil before iOS 18.
     var aesthetics: Double?
 
+    private enum CodingKeys: String, CodingKey {
+        case id, name, createdAt, params, aesthetics
+    }
+
+    /// `aesthetics` is written as an explicit null when absent, so every look in
+    /// `looks.json` has the same keys for the analysis.
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(params, forKey: .params)
+        try container.encode(aesthetics, forKey: .aesthetics)
+    }
+
     /// Whole seconds: the narrowest precision every reader accepts, so a reload compares equal.
     static func timestamp(_ date: Date = .now) -> Date {
         Date(timeIntervalSince1970: date.timeIntervalSince1970.rounded(.down))
@@ -71,8 +86,15 @@ final class FilterLabStore {
     func add(_ image: CGImage, measures photoMeasures: PhotoMeasures) throws -> LabPhoto {
         let id = UUID()
         let file = "photos/\(id.uuidString).jpg"
-        try FileManager.default.createDirectory(at: root.appending(path: "photos"), withIntermediateDirectories: true)
-        try Self.writeJPEG(image, to: root.appending(path: file))
+        do {
+            try prepareRoot()
+            try FileManager.default.createDirectory(at: root.appending(path: "photos"),
+                                                    withIntermediateDirectories: true)
+            try Self.writeJPEG(image, to: root.appending(path: file))
+        } catch {
+            Self.logger.error("could not add a photo: \(error.localizedDescription, privacy: .public)")
+            throw error
+        }
         let photo = LabPhoto(id: id, file: file, width: image.width, height: image.height, looks: [])
         document.photos.append(photo)
         measures.measures[id.uuidString] = photoMeasures
@@ -107,26 +129,61 @@ final class FilterLabStore {
 
     func deletePhoto(_ photoID: UUID) throws {
         guard let photo = document.photos.first(where: { $0.id == photoID }) else { return }
-        try FileManager.default.removeItem(at: root.appending(path: photo.file))
+        // The documents go first: a crash in between leaves an orphan jpg, never a
+        // photo the session lists but cannot show.
         document.photos.removeAll { $0.id == photoID }
         measures.measures[photoID.uuidString] = nil
         try persist()
+        do {
+            try FileManager.default.removeItem(at: root.appending(path: photo.file))
+        } catch CocoaError.fileNoSuchFile {
+            Self.logger.debug("photo file already gone: \(photo.file, privacy: .public)")
+        } catch {
+            let reason = error.localizedDescription
+            Self.logger.error("could not remove \(photo.file, privacy: .public): \(reason, privacy: .public)")
+            throw error
+        }
     }
 
     /// Deletes the whole session.
     func reset() throws {
-        if FileManager.default.fileExists(atPath: root.path()) {
-            try FileManager.default.removeItem(at: root)
+        if FileManager.default.fileExists(atPath: root.path(percentEncoded: false)) {
+            do {
+                try FileManager.default.removeItem(at: root)
+            } catch {
+                Self.logger.error("could not reset the session: \(error.localizedDescription, privacy: .public)")
+                throw error
+            }
         }
         document = LabDocument()
         measures = LabMeasuresDocument()
     }
 
-    private func persist() throws {
+    /// Creates the root and keeps it out of iCloud and device backups: the photos
+    /// are the maintainer's own and must not leave the device except by the export.
+    private func prepareRoot() throws {
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-        let encoder = Self.makeEncoder()
-        try encoder.encode(document).write(to: root.appending(path: "looks.json"), options: .atomic)
-        try encoder.encode(measures).write(to: root.appending(path: "measures.json"), options: .atomic)
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+        var url = root
+        do {
+            try url.setResourceValues(values)
+        } catch {
+            Self.logger.error("could not exclude the lab from backups: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// Measures first: a photo with measures and no look is harmless, the reverse is a lookup miss.
+    private func persist() throws {
+        do {
+            try prepareRoot()
+            let encoder = Self.makeEncoder()
+            try encoder.encode(measures).write(to: root.appending(path: "measures.json"), options: .atomic)
+            try encoder.encode(document).write(to: root.appending(path: "looks.json"), options: .atomic)
+        } catch {
+            Self.logger.error("could not save the session: \(error.localizedDescription, privacy: .public)")
+            throw error
+        }
     }
 
     nonisolated static func makeEncoder() -> JSONEncoder {
@@ -137,7 +194,7 @@ final class FilterLabStore {
     }
 
     nonisolated static func read<T: Decodable>(_ type: T.Type, at url: URL) -> T? {
-        guard FileManager.default.fileExists(atPath: url.path()) else { return nil }
+        guard FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) else { return nil }
         do {
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
@@ -146,7 +203,22 @@ final class FilterLabStore {
             let name = url.lastPathComponent
             let reason = error.localizedDescription
             logger.error("lab file unreadable \(name, privacy: .public): \(reason, privacy: .public)")
+            setAside(url)
             return nil
+        }
+    }
+
+    /// Moves an unreadable file to `<name>.bad`, so the next save cannot silently destroy the old session.
+    nonisolated private static func setAside(_ url: URL) {
+        let fm = FileManager.default
+        let bad = url.appendingPathExtension("bad")
+        do {
+            if fm.fileExists(atPath: bad.path(percentEncoded: false)) { try fm.removeItem(at: bad) }
+            try fm.moveItem(at: url, to: bad)
+        } catch {
+            let name = url.lastPathComponent
+            let reason = error.localizedDescription
+            logger.error("could not set \(name, privacy: .public) aside: \(reason, privacy: .public)")
         }
     }
 

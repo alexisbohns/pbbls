@@ -53,7 +53,53 @@ struct FilterLabStoreTests {
         try store.deletePhoto(photo.id)
         #expect(store.document.photos.isEmpty)
         #expect(store.measures.measures.isEmpty)
-        #expect(!FileManager.default.fileExists(atPath: root.appending(path: photo.file).path()))
+        #expect(!FileManager.default.fileExists(atPath: root.appending(path: photo.file).path(percentEncoded: false)))
+    }
+
+    @Test("the session root is kept out of backups")
+    func excludedFromBackup() throws {
+        let root = Self.tempRoot()
+        let store = FilterLabStore(root: root)
+        _ = try store.add(Img.ramp(size: 32), measures: Self.measures)
+        let values = try root.resourceValues(forKeys: [.isExcludedFromBackupKey])
+        #expect(values.isExcludedFromBackup == true)
+    }
+
+    @Test("a look without an aesthetics score writes an explicit null")
+    func explicitNull() throws {
+        let root = Self.tempRoot()
+        let store = FilterLabStore(root: root)
+        let photo = try store.add(Img.ramp(size: 32), measures: Self.measures)
+        let look = LabLook(id: UUID(), name: "plain", createdAt: LabLook.timestamp(), params: .neutral, aesthetics: nil)
+        try store.save(look, in: photo.id)
+        let json = try String(contentsOf: root.appending(path: "looks.json"), encoding: .utf8)
+        #expect(json.contains("\"aesthetics\" : null"))
+    }
+
+    @Test("deleting a photo whose file is already gone still succeeds")
+    func deleteMissingFile() throws {
+        let root = Self.tempRoot()
+        let store = FilterLabStore(root: root)
+        let photo = try store.add(Img.ramp(size: 32), measures: Self.measures)
+        try FileManager.default.removeItem(at: root.appending(path: photo.file))
+        try store.deletePhoto(photo.id)
+        #expect(store.document.photos.isEmpty)
+        #expect(FilterLabStore(root: root).document.photos.isEmpty)
+    }
+
+    @Test("an unreadable looks file is set aside, not overwritten")
+    func unreadableSetAside() throws {
+        let root = Self.tempRoot()
+        let store = FilterLabStore(root: root)
+        _ = try store.add(Img.ramp(size: 32), measures: Self.measures)
+        let looksURL = root.appending(path: "looks.json")
+        try Data("{ not json".utf8).write(to: looksURL)
+
+        let reloaded = FilterLabStore(root: root)
+        #expect(reloaded.document.photos.isEmpty)
+        let bad = root.appending(path: "looks.json.bad")
+        #expect(try String(contentsOf: bad, encoding: .utf8) == "{ not json")
+        #expect(!FileManager.default.fileExists(atPath: looksURL.path(percentEncoded: false)))
     }
 }
 #endif
