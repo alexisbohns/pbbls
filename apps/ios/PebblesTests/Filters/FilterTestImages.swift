@@ -7,6 +7,12 @@ import Testing
 enum FilterTestImages {
     static let sRGB = CGColorSpace(name: CGColorSpace.sRGB)!
 
+    /// `CGColor(red:green:blue:alpha:)` is Generic RGB, which shifts every value
+    /// when drawn into an sRGB context; the tests want the numbers they write.
+    static func srgb(_ red: CGFloat, _ green: CGFloat, _ blue: CGFloat) -> CGColor {
+        CGColor(colorSpace: sRGB, components: [red, green, blue, 1])! // fixed component count, cannot fail
+    }
+
     static func context(width: Int, height: Int) -> CGContext {
         CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4,
                   space: sRGB, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)!
@@ -15,11 +21,11 @@ enum FilterTestImages {
     /// A diagonal colour ramp with a white square, the same picture at any size.
     static func ramp(size: Int) -> CGImage {
         let ctx = context(width: size, height: size)
-        let colours = [CGColor(red: 0.15, green: 0.25, blue: 0.35, alpha: 1),
-                       CGColor(red: 0.85, green: 0.75, blue: 0.65, alpha: 1)] as CFArray
+        let colours = [srgb(0.15, 0.25, 0.35),
+                       srgb(0.85, 0.75, 0.65)] as CFArray
         let gradient = CGGradient(colorsSpace: sRGB, colors: colours, locations: [0, 1])!
         ctx.drawLinearGradient(gradient, start: .zero, end: CGPoint(x: size, y: size), options: [])
-        ctx.setFillColor(CGColor(red: 1, green: 1, blue: 1, alpha: 1))
+        ctx.setFillColor(srgb(1, 1, 1))
         let s = CGFloat(size)
         ctx.fill(CGRect(x: s * 0.4, y: s * 0.4, width: s * 0.2, height: s * 0.2))
         return ctx.makeImage()!
@@ -27,7 +33,7 @@ enum FilterTestImages {
 
     static func flat(red: CGFloat, green: CGFloat, blue: CGFloat, size: Int = 64) -> CGImage {
         let ctx = context(width: size, height: size)
-        ctx.setFillColor(CGColor(red: red, green: green, blue: blue, alpha: 1))
+        ctx.setFillColor(srgb(red, green, blue))
         ctx.fill(CGRect(x: 0, y: 0, width: size, height: size))
         return ctx.makeImage()!
     }
@@ -37,7 +43,7 @@ enum FilterTestImages {
         let ctx = context(width: 256, height: 4)
         for x in 0..<256 {
             let v = CGFloat(x) / 255
-            ctx.setFillColor(CGColor(red: v, green: v, blue: v, alpha: 1))
+            ctx.setFillColor(srgb(v, v, v))
             ctx.fill(CGRect(x: x, y: 0, width: 1, height: 4))
         }
         return ctx.makeImage()!
