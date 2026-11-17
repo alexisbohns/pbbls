@@ -10,6 +10,9 @@ enum FilterPipeline {
     static let referenceEdge: CGFloat = 1024
 
     /// One context for the app's lifetime: creating one per render is the expensive part.
+    /// The default context works in linear extended sRGB, so the curve points, the
+    /// contrast pivot and the soft-light neutral act on linear values. The macOS
+    /// analysis wrapper must use a default `CIContext()` too, or it measures another look.
     static let sharedContext = CIContext()
 
     static func apply(_ p: FilterParams, to input: CIImage, masks: FilterMasks = .none) -> CIImage {
@@ -125,7 +128,8 @@ enum FilterPipeline {
     /// Blurs everything but the subject. No mask, no refocus.
     static func refocus(_ image: CIImage, _ v: Double, mask: CIImage?, unit: CGFloat) -> CIImage {
         guard v != 0, let mask else { return image }
-        return maskedBlur(image, mask: mask.applyingFilter("CIColorInvert"), radius: 20 * v * unit)
+        let fitted = fit(mask, to: image.extent)
+        return maskedBlur(image, mask: fitted.applyingFilter("CIColorInvert"), radius: 20 * v * unit)
     }
 
     static func vignette(_ image: CIImage, _ v: Double, extent: CGRect) -> CIImage {
@@ -154,7 +158,9 @@ enum FilterPipeline {
     /// Luminance-only noise, soft-light blended: 0.5 grey is neutral in soft light,
     /// so the strength scales the noise around it. The generator is deterministic.
     static func grain(_ image: CIImage, _ v: Double, extent: CGRect, unit: CGFloat) -> CIImage {
-        guard v != 0, let random = CIFilter.randomGenerator().outputImage else { return image }
+        guard v != 0, let noise = CIFilter.randomGenerator().outputImage else { return image }
+        // The generator's alpha is noise too; fixing it at 1 keeps the matrix output opaque.
+        let random = noise.settingAlphaOne(in: .infinite)
         let k = CGFloat(0.25 * v), bias = 0.5 - 0.5 * k
         let grey = random.applyingFilter("CIColorMatrix", parameters: [
             "inputRVector": CIVector(x: k, y: 0, z: 0, w: 0),
@@ -169,6 +175,17 @@ enum FilterPipeline {
         f.inputImage = grey
         f.backgroundImage = image
         return f.outputImage ?? image
+    }
+
+    /// Scales a mask to the picture's extent, so a preview rendered at another
+    /// size still lines up with the mask computed at the photo's own.
+    private static func fit(_ mask: CIImage, to extent: CGRect) -> CIImage {
+        let source = mask.extent
+        guard source != extent, source.width > 0, source.height > 0 else { return mask }
+        let transform = CGAffineTransform(translationX: -source.minX, y: -source.minY)
+            .concatenating(CGAffineTransform(scaleX: extent.width / source.width, y: extent.height / source.height))
+            .concatenating(CGAffineTransform(translationX: extent.minX, y: extent.minY))
+        return mask.transformed(by: transform).cropped(to: extent)
     }
 
     private static func curve(_ image: CIImage, quarter: Double, half: Double, threeQuarter: Double) -> CIImage {
