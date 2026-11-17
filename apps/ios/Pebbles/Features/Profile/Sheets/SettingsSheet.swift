@@ -42,6 +42,7 @@ struct SettingsSheet: View {
     @State private var isPresentingStoneLab = false
     @State private var isPresentingSpineLab = false
     @State private var isPresentingIconLab = false
+    @State private var isPresentingFilterLab = false
     #endif
     /// Delete account: its dialogs, recent sign-in and the edge-function call (#1533).
     @State private var deletion = AccountDeletion()
@@ -198,6 +199,9 @@ struct SettingsSheet: View {
             }
             .fullScreenCover(isPresented: $isPresentingIconLab) {
                 IconLabView()
+            }
+            .fullScreenCover(isPresented: $isPresentingFilterLab) {
+                FilterLabView()
             }
             #endif
             .accountDeletion(
@@ -523,6 +527,17 @@ struct SettingsSheet: View {
                     Text(verbatim: "Icon lab")
                 } icon: {
                     PbblsGlyphView(.sparkles, .row)
+                }
+            }
+            .buttonStyle(.plain)
+            .pebblesListRow(position: .middle)
+            Button {
+                isPresentingFilterLab = true
+            } label: {
+                Label {
+                    Text(verbatim: "Filter lab")
+                } icon: {
+                    PbblsGlyphView(.filterBox, .row)
                 }
             }
             .buttonStyle(.plain)
