@@ -1,5 +1,6 @@
 import CoreGraphics
 import CoreImage
+import CoreVideo
 import Testing
 @testable import Pebbles
 
@@ -29,6 +30,35 @@ enum FilterTestImages {
         let s = CGFloat(size)
         ctx.fill(CGRect(x: s * 0.4, y: s * 0.4, width: s * 0.2, height: s * 0.2))
         return ctx.makeImage()!
+    }
+
+    /// Vertical dark and light stripes, `size / 32` px per half period so the same
+    /// picture reads at any size. A high-frequency picture for blur and sharpen tests.
+    static func stripes(size: Int) -> CGImage {
+        let ctx = context(width: size, height: size)
+        let width = max(size / 32, 1)
+        for x in stride(from: 0, to: size, by: width) {
+            let light = (x / width) % 2 == 0
+            ctx.setFillColor(srgb(light ? 0.7 : 0.3, light ? 0.7 : 0.3, light ? 0.7 : 0.3))
+            ctx.fill(CGRect(x: x, y: 0, width: width, height: size))
+        }
+        return ctx.makeImage()!
+    }
+
+    /// A subject mask the way Vision hands it over: a one-component 8-bit pixel
+    /// buffer (left half 255, right half 0) read without colour management.
+    static func subjectMask(width: Int, height: Int) throws -> CIImage {
+        var buffer: CVPixelBuffer?
+        CVPixelBufferCreate(nil, width, height, kCVPixelFormatType_OneComponent8, nil, &buffer)
+        let pixels = try #require(buffer)
+        CVPixelBufferLockBaseAddress(pixels, [])
+        defer { CVPixelBufferUnlockBaseAddress(pixels, []) }
+        let base = try #require(CVPixelBufferGetBaseAddress(pixels)).assumingMemoryBound(to: UInt8.self)
+        let stride = CVPixelBufferGetBytesPerRow(pixels)
+        for y in 0..<height {
+            for x in 0..<width { base[y * stride + x] = x < width / 2 ? 255 : 0 }
+        }
+        return CIImage(cvPixelBuffer: pixels, options: [.colorSpace: NSNull()])
     }
 
     static func flat(red: CGFloat, green: CGFloat, blue: CGFloat, size: Int = 64) -> CGImage {
@@ -82,10 +112,16 @@ enum FilterTestImages {
 
     static func luma(_ rgb: [Double]) -> Double { 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2] }
 
-    static func lumaStdDev(_ image: CGImage) throws -> Double {
+    /// Standard deviation of luma over a region given y-down from the top-left.
+    static func lumaStdDev(_ image: CGImage, x: Range<Int>? = nil, y: Range<Int>? = nil) throws -> Double {
         let rgba = try bytes(image)
-        let lumas = stride(from: 0, to: rgba.count, by: 4).map { i in
-            luma([Double(rgba[i]) / 255, Double(rgba[i + 1]) / 255, Double(rgba[i + 2]) / 255])
+        let xs = x ?? 0..<image.width, ys = y ?? 0..<image.height
+        var lumas: [Double] = []
+        for row in ys {
+            for col in xs {
+                let i = (row * image.width + col) * 4
+                lumas.append(luma([Double(rgba[i]) / 255, Double(rgba[i + 1]) / 255, Double(rgba[i + 2]) / 255]))
+            }
         }
         let mean = lumas.reduce(0, +) / Double(lumas.count)
         return (lumas.map { ($0 - mean) * ($0 - mean) }.reduce(0, +) / Double(lumas.count)).squareRoot()

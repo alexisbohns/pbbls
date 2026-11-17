@@ -101,15 +101,120 @@ struct FilterPipelineTests {
         #expect(try T.bytes(T.render(params, on: source)) == T.bytes(T.render(.neutral, on: source)))
     }
 
-    @Test("a 512 px and a 1024 px render match once downscaled")
+    @Test("a 512 px and a 1024 px render match once downscaled, and both differ from neutral")
     func resolutionIndependent() throws {
         var params = FilterParams.neutral
         params.exposure = 0.3
         params.sharpness = 0.5
         params.vignette = 0.5
-        params.blurVignette = 0.5
-        let small = try T.render(params, on: T.ramp(size: 512))
-        let large = T.downscaled(try T.render(params, on: T.ramp(size: 1024)), to: 512)
-        #expect(try T.meanAbsDifference(small, large) < 0.02)
+        params.blurVignette = 1
+        let source512 = T.stripes(size: 512)
+        let small = try T.render(params, on: source512)
+        let large = T.downscaled(try T.render(params, on: T.stripes(size: 1024)), to: 512)
+        let difference = try T.meanAbsDifference(small, large)
+        let effect = try T.meanAbsDifference(small, T.render(.neutral, on: source512))
+        #expect(difference < 0.01) // measured 0.0046
+        #expect(effect > 0.02)
+    }
+
+    // MARK: Masks
+
+    @Test("refocus keeps the subject sharp and blurs the rest, with a one-channel Vision-style mask")
+    func refocusPolarity() throws {
+        let source = T.stripes(size: 256)
+        var params = FilterParams.neutral; params.refocus = 1
+        let mask = try T.subjectMask(width: 256, height: 256)
+        let out = try T.render(params, on: source, masks: FilterMasks(subject: mask, autoEnhance: []))
+        let kept = try T.lumaStdDev(out, x: 8..<112), lost = try T.lumaStdDev(out, x: 144..<248)
+        let original = try T.lumaStdDev(source, x: 8..<112)
+        #expect(kept > original * 0.8)
+        #expect(lost < original * 0.5)
+    }
+
+    @Test("refocus lines up a mask built at another size")
+    func refocusMaskAtOtherSize() throws {
+        let source = T.stripes(size: 256)
+        var params = FilterParams.neutral; params.refocus = 1
+        let mask = try T.subjectMask(width: 128, height: 128)
+        let out = try T.render(params, on: source, masks: FilterMasks(subject: mask, autoEnhance: []))
+        let kept = try T.lumaStdDev(out, x: 8..<112), lost = try T.lumaStdDev(out, x: 144..<248)
+        let original = try T.lumaStdDev(source, x: 8..<112)
+        #expect(kept > original * 0.8)
+        #expect(lost < original * 0.5)
+    }
+
+    @Test("blur vignette keeps the centre sharp and blurs the edges")
+    func blurVignetteCentre() throws {
+        let source = T.stripes(size: 256)
+        var params = FilterParams.neutral; params.blurVignette = 1
+        let out = try T.render(params, on: source)
+        let original = try T.lumaStdDev(source, x: 8..<248, y: 118..<138)
+        let centre = try T.lumaStdDev(out, x: 108..<148, y: 108..<148)
+        let edge = try T.lumaStdDev(out, x: 0..<40, y: 0..<40)
+        #expect(centre > original * 0.8)
+        #expect(edge < original * 0.75) // radius 12 px at 1024 is soft against 32 px stripes
+    }
+
+    @Test("auto-enhance runs the photo's own chain, on a copy of each filter")
+    func autoEnhanceRuns() throws {
+        let grey = T.flat(red: 0.4, green: 0.4, blue: 0.4)
+        let filter = CIFilter.exposureAdjust()
+        filter.ev = 1
+        var params = FilterParams.neutral; params.autoEnhance = true
+        let masks = FilterMasks(subject: nil, autoEnhance: [filter])
+        let base = T.luma(try T.means(T.render(.neutral, on: grey)))
+        #expect(T.luma(try T.means(T.render(params, on: grey, masks: masks))) > base + 0.1)
+        #expect(filter.value(forKey: kCIInputImageKey) == nil)
+    }
+
+    // MARK: Directions
+
+    @Test("highlights down darkens a bright grey, up brightens it")
+    func highlightsDirection() throws {
+        let grey = T.flat(red: 0.85, green: 0.85, blue: 0.85)
+        let base = T.luma(try T.means(T.render(.neutral, on: grey)))
+        var down = FilterParams.neutral; down.highlights = -0.5
+        var up = FilterParams.neutral; up.highlights = 0.5
+        let d = T.luma(try T.means(T.render(down, on: grey))), u = T.luma(try T.means(T.render(up, on: grey)))
+        #expect(d < base - 0.01)
+        #expect(u > base + 0.01)
+    }
+
+    @Test("shadows up brightens a dark grey, down darkens it")
+    func shadowsDirection() throws {
+        let grey = T.flat(red: 0.15, green: 0.15, blue: 0.15)
+        let base = T.luma(try T.means(T.render(.neutral, on: grey)))
+        var up = FilterParams.neutral; up.shadows = 0.5
+        var down = FilterParams.neutral; down.shadows = -0.5
+        let u = T.luma(try T.means(T.render(up, on: grey))), d = T.luma(try T.means(T.render(down, on: grey)))
+        #expect(u > base + 0.01)
+        #expect(d < base - 0.01)
+    }
+
+    @Test("vibrance up raises chroma on a muted colour")
+    func vibranceRaisesChroma() throws {
+        let muted = T.flat(red: 0.55, green: 0.5, blue: 0.45)
+        var params = FilterParams.neutral; params.vibrance = 1
+        func chroma(_ rgb: [Double]) -> Double { (rgb.max() ?? 0) - (rgb.min() ?? 0) }
+        let base = chroma(try T.means(T.render(.neutral, on: muted)))
+        let out = chroma(try T.means(T.render(params, on: muted)))
+        #expect(out > base + 0.01)
+    }
+
+    @Test("sharpness up raises local contrast on stripes")
+    func sharpnessRaisesContrast() throws {
+        let source = T.stripes(size: 256)
+        var params = FilterParams.neutral; params.sharpness = 1
+        let base = try T.lumaStdDev(T.render(.neutral, on: source))
+        let out = try T.lumaStdDev(T.render(params, on: source))
+        #expect(out > base + 0.005)
+    }
+
+    @Test("grain at full strength stays within a plausible band")
+    func grainBand() throws {
+        let grey = T.flat(red: 0.5, green: 0.5, blue: 0.5, size: 128)
+        var params = FilterParams.neutral; params.grain = 1
+        let deviation = try T.lumaStdDev(T.render(params, on: grey))
+        #expect(deviation > 0.01 && deviation < 0.15)
     }
 }
