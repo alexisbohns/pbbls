@@ -25,19 +25,19 @@ The Filters tab should offer a handful of presets with very few tweaks (an inten
 |---|---|---|---|
 | Exposure | −1…1 | `CIExposureAdjust` | ±2 EV |
 | Brilliance | −1…1 | `CIHighlightShadowAdjust` + `CIToneCurve` | Lifts shadows and pulls highlights while steepening the midtones. Apple does not publish its own; this is an approximation |
-| Highlights | −1…1 | `CIHighlightShadowAdjust` (negative), `CIToneCurve` top points (positive) | −1 is `highlightAmount` 0; +1 lifts the 75 % and 100 % curve points |
+| Highlights | −1…1 | `CIHighlightShadowAdjust` (negative), `CIToneCurve` top points (positive) | −1 is `highlightAmount` 0; +1 lifts the 50 % and 75 % curve points |
 | Shadows (lowlight) | −1…1 | `CIHighlightShadowAdjust.shadowAmount` | The value as is |
 | Contrast | −1…1 | `CIColorControls.contrast` | 1 ± 0.5 |
 | Saturation | −1…1 | `CIColorControls.saturation` | 0…2 |
 | Vibrance | −1…1 | `CIVibrance` | The value as is |
-| Tone (warmth) | −1…1 | `CITemperatureAndTint` | ±2000 K around 6500 K, positive is warmer |
-| Tint | −1…1 | `CITemperatureAndTint` | Positive is magenta, negative green |
+| Tone (warmth) | −1…1 | `CITemperatureAndTint` | Target 6500 − 2000 × tone K (a lower target warms, checked 2026-11-17) |
+| Tint | −1…1 | `CITemperatureAndTint` | Target tint −30 × tint (a positive target greens, so positive tint is magenta) |
 | Sharpness | 0…1 | `CISharpenLuminance` | Sharpness 0…0.8, radius scaled to the long edge |
 | Vignette | −1…1 | `CIVignetteEffect` | Negative lightens the edges |
 | Blur vignette | 0…1 | `CIMaskedVariableBlur` with a radial mask | Clear centre, blurred edges |
 | Grain | 0…1 | `CIRandomGenerator`, luminance-only, blended | Overlay strength 0…0.25, grain size scaled to the long edge |
 | Auto-enhance | on/off | `CIImage.autoAdjustmentFilters([.enhance, .redEye])` | Applied first; the filters Apple picks are recorded too |
-| Refocus | 0…1 | `CIDepthBlurEffect` when the photo carries depth, else `CIMaskedVariableBlur` through a Vision mask | Person mask (`VNGeneratePersonSegmentationRequest`) when a face is found, subject mask (`VNGenerateForegroundInstanceMaskRequest`) otherwise; no mask found means the control is disabled for that photo |
+| Refocus | 0…1 | `CIMaskedVariableBlur` through a Vision mask | Person mask (`VNGeneratePersonSegmentationRequest`) when a face is found, subject mask (`VNGenerateForegroundInstanceMaskRequest`) otherwise; no mask found means the control is disabled for that photo. Depth data is recorded as a measure but not used: the crop editor decodes the photo without it |
 
 **Order is fixed:** auto-enhance → exposure → brilliance → highlights/shadows → contrast/saturation → vibrance → tone/tint → sharpness → refocus → vignette → blur vignette → grain.
 
@@ -49,9 +49,9 @@ New code under `apps/ios/Pebbles/Features/PebbleMedia/Filters/` (lasting) and `.
 |---|---|---|
 | `FilterParams` | `Codable` value: the thirteen controls plus auto-enhance and refocus. `.neutral` is the identity | — |
 | `FilterPipeline` | Pure: `(CIImage, FilterParams, FilterMasks) → CIImage`, in the fixed order. No UIKit, no logging. Compiles on macOS too | Core Image |
-| `FilterMasks` | The subject mask, depth data, and Apple's auto-enhance filters for one photo, computed once | Vision, Core Image |
+| `FilterMasks` | The subject mask and Apple's auto-enhance filters for one photo, computed once | Vision, Core Image |
 | `PhotoMeasures` | `Codable` facts about one photo: luminance percentiles (5/25/50/75/95), mean saturation, colour cast (mean a\*/b\*), face count, top five scene tags with confidence (`VNClassifyImageRequest`), has depth, aesthetics score (iOS 18+, else null), auto-enhance's chosen filters and values | Vision, Core Image |
-| `FilterLabStore` | One session on disk in the app's `Documents/FilterLab/<session>/`: cropped photos and `looks.json`. Survives relaunches | FileManager |
+| `FilterLabStore` | One session on disk in the app's `Documents/FilterLab/current/`: cropped photos and `looks.json`. Survives relaunches | FileManager |
 | `FilterLabView` | Photo grid, import (photo picker → crop editor), share-sheet export | store, crop editor |
 | `FilterLookEditor` | Live preview (press and hold for the original), the sliders and extras, the aesthetics score before and after, save look with a name, the photo's looks, duplicate and delete a look | pipeline, store |
 | `FilterLabExport` | Builds `filter-lab-<yyyy-MM-dd>.zip` | store, pipeline |
@@ -64,7 +64,7 @@ The preview renders through one shared `CIContext` at screen size, coalescing sl
 
 - `photos/<photoId>.jpg`: the cropped 1024 px input.
 - `renders/<photoId>/<lookId>.jpg`: each look as the phone rendered it, the reference for the Mac render.
-- `looks.json`: `{ "version": 1, "photos": [ { "id", "file", "width", "height", "looks": [ { "id", "name", "createdAt", "params": { … } } ] } ] }`. Timestamps are ISO 8601 in whole seconds.
+- `looks.json`: `{ "version": 1, "photos": [ { "id", "file", "width", "height", "looks": [ { "id", "name", "createdAt", "params": { … }, "aesthetics" } ] } ] }`. Timestamps are ISO 8601 in whole seconds.
 - `measures.json`: `{ "version": 1, "measures": { "<photoId>": { … } } }`.
 
 ## The analysis (on the Mac, never committed)
