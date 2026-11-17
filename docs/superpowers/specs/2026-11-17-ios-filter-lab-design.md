@@ -50,7 +50,7 @@ New code under `apps/ios/Pebbles/Features/PebbleMedia/Filters/` (lasting) and `.
 | `FilterParams` | `Codable` value: the thirteen controls plus auto-enhance and refocus. `.neutral` is the identity | — |
 | `FilterPipeline` | Pure: `(CIImage, FilterParams, FilterMasks) → CIImage`, in the fixed order. No UIKit, no logging. Compiles on macOS too | Core Image |
 | `FilterMasks` | The subject mask and Apple's auto-enhance filters for one photo, computed once | Vision, Core Image |
-| `PhotoMeasures` | `Codable` facts about one photo: luminance percentiles (5/25/50/75/95), mean saturation, colour cast (mean a\*/b\*), face count, top five scene tags with confidence (`VNClassifyImageRequest`), has depth, aesthetics score (iOS 18+, else null), auto-enhance's chosen filters and values | Vision, Core Image |
+| `PhotoMeasures` | `Codable` facts about one photo: luminance percentiles (5/25/50/75/95), mean saturation, colour cast (mean red − green and mean (red + green) / 2 − blue, in clipped sRGB: cheap and enough to rank photos, not perceptual), face count, top five scene tags with confidence (`VNClassifyImageRequest`), has depth, aesthetics score (iOS 18+, else null), auto-enhance's chosen filters and values | Vision, Core Image |
 | `FilterLabStore` | One session on disk in the app's `Documents/FilterLab/current/`: cropped photos and `looks.json`. Survives relaunches | FileManager |
 | `FilterLabView` | Photo grid, import (photo picker → crop editor), share-sheet export | store, crop editor |
 | `FilterLookEditor` | Live preview (press and hold for the original), the sliders and extras, the aesthetics score before and after, save look with a name, the photo's looks, duplicate and delete a look | pipeline, store |
