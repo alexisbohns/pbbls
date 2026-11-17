@@ -25,7 +25,9 @@ struct FilterMasks: @unchecked Sendable {
         CIImage(cgImage: image).autoAdjustmentFilters(options: [.enhance: true, .redEye: true])
     }
 
-    /// Faces present → the person mask; otherwise the general foreground mask.
+    /// Faces present → the person mask; otherwise (or when the person request
+    /// finds nobody, since a face count can be a poster) the general foreground mask.
+    /// The mask is read raw, not colour-managed: its grey values are coverage.
     static func subjectMask(for image: CGImage, faceCount: Int) -> CIImage? {
         let handler = VNImageRequestHandler(cgImage: image)
         let extent = CGRect(x: 0, y: 0, width: image.width, height: image.height)
@@ -35,14 +37,18 @@ struct FilterMasks: @unchecked Sendable {
                 request.qualityLevel = .accurate
                 request.outputPixelFormat = kCVPixelFormatType_OneComponent8
                 try handler.perform([request])
-                guard let buffer = request.results?.first?.pixelBuffer else { return nil }
-                return fitted(CIImage(cvPixelBuffer: buffer), to: extent)
+                if let buffer = request.results?.first?.pixelBuffer {
+                    return fitted(CIImage(cvPixelBuffer: buffer, options: [.colorSpace: NSNull()]), to: extent)
+                }
             }
             let request = VNGenerateForegroundInstanceMaskRequest()
             try handler.perform([request])
-            guard let result = request.results?.first else { return nil }
+            guard let result = request.results?.first, !result.allInstances.isEmpty else {
+                logger.debug("no subject found")
+                return nil
+            }
             let buffer = try result.generateScaledMaskForImage(forInstances: result.allInstances, from: handler)
-            return fitted(CIImage(cvPixelBuffer: buffer), to: extent)
+            return fitted(CIImage(cvPixelBuffer: buffer, options: [.colorSpace: NSNull()]), to: extent)
         } catch {
             logger.error("subject mask failed: \(error.localizedDescription, privacy: .public)")
             return nil
