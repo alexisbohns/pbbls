@@ -6,11 +6,11 @@ import Testing
 
 @Suite("PhotoMeasures")
 struct PhotoMeasuresTests {
-    typealias T = FilterTestImages
+    typealias Img = FilterTestImages
 
     @Test("luminance percentiles of a grey ramp")
     func greyRampPercentiles() throws {
-        let stats = try #require(ToneStats(T.greyRamp()))
+        let stats = try #require(ToneStats(Img.greyRamp()))
         let expected = [0.05, 0.25, 0.5, 0.75, 0.95]
         for (got, want) in zip(stats.luminance, expected) {
             #expect(abs(got - want) < 0.01, "got \(got), wanted about \(want)")
@@ -21,7 +21,7 @@ struct PhotoMeasuresTests {
 
     @Test("a pure red picture reads as a red cast")
     func redCast() throws {
-        let stats = try #require(ToneStats(T.flat(red: 1, green: 0, blue: 0)))
+        let stats = try #require(ToneStats(Img.flat(red: 1, green: 0, blue: 0)))
         #expect(abs(stats.castRedGreen - 1) < 0.01)
         #expect(abs(stats.castYellowBlue - 0.5) < 0.01)
         #expect(abs(stats.meanSaturation - 1) < 0.01)
@@ -39,14 +39,14 @@ struct PhotoMeasuresTests {
 
     @Test("a picture over 256 px is downscaled and still reads the same tone")
     func largePicture() throws {
-        let stats = try #require(ToneStats(T.flat(red: 0.5, green: 0.5, blue: 0.5, size: 1024)))
+        let stats = try #require(ToneStats(Img.flat(red: 0.5, green: 0.5, blue: 0.5, size: 1024)))
         for value in stats.luminance { #expect(abs(value - 0.5) < 0.01, "got \(value)") }
         #expect(abs(stats.castRedGreen) < 0.001 && abs(stats.castYellowBlue) < 0.001)
     }
 
     @Test("a pure blue picture reads as a blue cast")
     func blueCast() throws {
-        let stats = try #require(ToneStats(T.flat(red: 0, green: 0, blue: 1)))
+        let stats = try #require(ToneStats(Img.flat(red: 0, green: 0, blue: 1)))
         #expect(abs(stats.castYellowBlue + 1) < 0.01)
         #expect(abs(stats.castRedGreen) < 0.01)
     }
