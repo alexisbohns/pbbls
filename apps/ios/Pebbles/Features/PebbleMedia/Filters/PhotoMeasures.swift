@@ -31,6 +31,26 @@ struct PhotoMeasures: Codable, Equatable, Sendable {
     /// Vision's overall aesthetics score, −1…1; nil before iOS 18.
     var aesthetics: Double?
     var autoEnhance: [AutoEnhanceStep]
+
+    private enum CodingKeys: String, CodingKey {
+        case luminance, meanSaturation, castRedGreen, castYellowBlue, faceCount
+        case scenes, hasDepth, aesthetics, autoEnhance
+    }
+
+    /// Every field is written, `aesthetics` as an explicit null when absent,
+    /// so each exported photo has the same keys for the analysis.
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(luminance, forKey: .luminance)
+        try container.encode(meanSaturation, forKey: .meanSaturation)
+        try container.encode(castRedGreen, forKey: .castRedGreen)
+        try container.encode(castYellowBlue, forKey: .castYellowBlue)
+        try container.encode(faceCount, forKey: .faceCount)
+        try container.encode(scenes, forKey: .scenes)
+        try container.encode(hasDepth, forKey: .hasDepth)
+        try container.encode(aesthetics, forKey: .aesthetics)
+        try container.encode(autoEnhance, forKey: .autoEnhance)
+    }
 }
 
 /// The tone half of the measures, pure so it can be tested on synthetic pictures.
@@ -44,7 +64,8 @@ struct ToneStats: Equatable {
 }
 
 extension ToneStats {
-    /// Samples the photo at no more than 256 px on its long edge, in sRGB.
+    /// Samples the photo at no more than 256 px on its long edge, in sRGB. The
+    /// stats are of the clipped sRGB picture: out-of-gamut values are clamped.
     init?(_ image: CGImage) {
         let scale = min(1, 256 / CGFloat(max(image.width, image.height)))
         let w = max(1, Int((CGFloat(image.width) * scale).rounded()))
@@ -52,7 +73,7 @@ extension ToneStats {
         guard let space = CGColorSpace(name: CGColorSpace.sRGB),
               let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
                                   space: space, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { return nil }
-        ctx.interpolationQuality = .medium
+        ctx.interpolationQuality = .high
         ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
         guard let base = ctx.data else { return nil }
         let px = base.bindMemory(to: UInt8.self, capacity: w * h * 4)
@@ -115,7 +136,7 @@ extension PhotoMeasures {
         return (request.results ?? [])
             .sorted { $0.confidence > $1.confidence }
             .prefix(5)
-            .map { Scene(identifier: $0.identifier, confidence: Double($0.confidence)) }
+            .map { Scene(identifier: $0.identifier, confidence: rounded(Double($0.confidence))) }
     }
 
     static func aesthetics(of image: CGImage) -> Double? {
@@ -127,24 +148,34 @@ extension PhotoMeasures {
             logger.error("aesthetics score failed: \(error.localizedDescription, privacy: .public)")
             return nil
         }
-        return request.results?.first.map { Double($0.overallScore) }
+        return request.results?.first.map { rounded(Double($0.overallScore)) }
     }
 
     /// Read from the original bytes: the crop editor's working image carries no depth.
     static func hasDepth(_ data: Data) -> Bool {
-        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { return false }
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
+            logger.error("depth check: could not read \(data.count) bytes as an image")
+            return false
+        }
         return [kCGImageAuxiliaryDataTypeDisparity, kCGImageAuxiliaryDataTypeDepth].contains { type in
             CGImageSourceCopyAuxiliaryDataInfoAtIndex(source, 0, type) != nil
         }
     }
 
+    /// Four decimals: enough for the analysis, and the export JSON stays short.
+    private static func rounded(_ value: Double) -> Double { (value * 10_000).rounded() / 10_000 }
+
     static func step(_ filter: CIFilter) -> AutoEnhanceStep {
         var values: [String: [Double]] = [:]
         for key in filter.inputKeys where key != kCIInputImageKey {
             switch filter.value(forKey: key) {
-            case let number as NSNumber: values[key] = [number.doubleValue]
-            case let vector as CIVector: values[key] = (0..<vector.count).map { Double(vector.value(at: $0)) }
-            default: break
+            case let number as NSNumber:
+                if number.doubleValue.isFinite { values[key] = [rounded(number.doubleValue)] }
+            case let vector as CIVector:
+                let components = (0..<vector.count).map { Double(vector.value(at: $0)) }
+                if components.allSatisfy(\.isFinite) { values[key] = components.map(rounded) }
+            default:
+                logger.debug("auto-enhance input \(key, privacy: .public) is not numeric, left out")
             }
         }
         return AutoEnhanceStep(filter: filter.name, values: values)
