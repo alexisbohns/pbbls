@@ -45,12 +45,14 @@ struct FilterLabView: View {
                         NavigationLink(value: photo.id) {
                             FilterLabThumbnail(url: store.root.appending(path: photo.file), looks: photo.looks.count)
                         }
+                        .buttonStyle(.plain)
                         .contextMenu {
                             Button { deletePhoto(photo) } label: { Text(verbatim: "Remove photo") }
                         }
                     }
                 }
                 .padding(16)
+                .allowsHitTesting(!isWorking)
             }
             .navigationTitle(Text(verbatim: "Filter lab"))
             .navigationDestination(for: UUID.self) { destination($0) }
@@ -96,19 +98,14 @@ struct FilterLabView: View {
         }
     }
 
-    @ViewBuilder
     private func destination(_ id: UUID) -> some View {
-        if let photo = store.document.photos.first(where: { $0.id == id }), let image = store.image(for: photo) {
-            FilterLookEditor(photo: photo, source: image,
-                             measures: store.measures.measures[id.uuidString], store: store)
-        } else {
-            Text(verbatim: "This photo is missing.")
-        }
+        FilterLookEditor(photoID: id, measures: store.measures.measures[id.uuidString], store: store)
     }
 
     private func beginImport(_ item: PhotosPickerItem) async {
         do {
             guard let data = try await item.loadTransferable(type: Data.self) else {
+                logger.warning("lab import: the picked photo carried no data")
                 status = "That photo carried no data."
                 return
             }
@@ -180,24 +177,25 @@ private struct FilterLabThumbnail: View {
     @State private var image: CGImage?
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            Group {
+        Color.clear
+            .aspectRatio(1, contentMode: .fit)
+            .overlay {
                 if let image {
                     Image(decorative: image, scale: 1).resizable().scaledToFill()
                 } else {
                     ProgressView()
                 }
             }
-            .frame(width: 104, height: 104)
             .clipped()
-            Text(verbatim: "\(looks)")
-                .font(.caption.monospacedDigit())
-                .padding(4)
-                .background(.thinMaterial)
-                .padding(4)
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(verbatim: "Photo with \(looks) looks"))
+            .overlay(alignment: .bottomTrailing) {
+                Text(verbatim: "\(looks)")
+                    .font(.caption.monospacedDigit())
+                    .padding(4)
+                    .background(.thinMaterial)
+                    .padding(4)
+            }
+            .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: looks == 1 ? "Photo, 1 look" : "Photo, \(looks) looks"))
         .task(id: url) {
             let url = self.url
             image = await Task.detached(priority: .utility) { () -> CGImage? in

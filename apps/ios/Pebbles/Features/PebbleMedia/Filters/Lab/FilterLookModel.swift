@@ -78,10 +78,31 @@ final class FilterLookModel {
         guard !isSaving else { return }
         isSaving = true
         defer { isSaving = false }
-        let score = await renderOffMain().flatMap { PhotoMeasures.aesthetics(of: $0) }
-        let existing = asNew ? nil : store.looks(of: photo.id).first { $0.id == editingLookID }
+        // Everything the look is made of is captured before the first await, so a slider
+        // moved during the scoring cannot make the saved values differ from the saved score.
+        let params = self.params, masks = self.masks, source = self.source, space = colorSpace
+        let logger = self.logger
+        let score = await Task.detached(priority: .userInitiated) { () -> Double? in
+            guard let space,
+                  let image = FilterPipeline.render(FilterPipeline.apply(params, to: CIImage(cgImage: source),
+                                                                         masks: masks),
+                                                    context: FilterPipeline.sharedContext, colorSpace: space) else {
+                logger.error("look scoring render failed")
+                return nil
+            }
+            return PhotoMeasures.aesthetics(of: image)
+        }.value
+        let looks = store.looks(of: photo.id)
+        let existing = asNew ? nil : looks.first { $0.id == editingLookID }
         let trimmed = lookName.trimmingCharacters(in: .whitespaces)
-        let name = trimmed.isEmpty ? "Look \(store.looks(of: photo.id).count + 1)" : trimmed
+        let name: String
+        if !trimmed.isEmpty {
+            name = trimmed
+        } else if let existing {
+            name = existing.name
+        } else {
+            name = Self.defaultName(avoiding: looks.map(\.name))
+        }
         let look = LabLook(id: existing?.id ?? UUID(), name: name,
                            createdAt: existing?.createdAt ?? LabLook.timestamp(), params: params, aesthetics: score)
         do {
@@ -99,11 +120,21 @@ final class FilterLookModel {
     func delete(_ look: LabLook, from store: FilterLabStore) {
         do {
             try store.deleteLook(look.id, in: photo.id)
-            if editingLookID == look.id { editingLookID = nil }
+            if editingLookID == look.id {
+                editingLookID = nil
+                lastAesthetics = nil
+            }
         } catch {
             logger.error("look delete failed: \(error.localizedDescription, privacy: .public)")
             errorMessage = "Could not delete the look."
         }
+    }
+
+    /// "Look N" with the smallest N past the count that no existing look already uses.
+    private static func defaultName(avoiding names: [String]) -> String {
+        var n = names.count + 1
+        while names.contains("Look \(n)") { n += 1 }
+        return "Look \(n)"
     }
 
     private func scheduleRender() {
