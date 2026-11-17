@@ -10,6 +10,7 @@ struct FilterLookEditor: View {
     let store: FilterLabStore
     @State private var model: FilterLookModel?
     @State private var failed = false
+    @Environment(\.dismiss) private var dismiss
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "filter-lab-editor")
 
     var body: some View {
@@ -24,6 +25,14 @@ struct FilterLookEditor: View {
         }
         .navigationTitle(Text(verbatim: "Tune"))
         .navigationBarTitleDisplayMode(.inline)
+        // Hiding the system back button turns off the swipe back, which iOS 26 starts from
+        // anywhere on the screen: every slider drag was popping the editor.
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button { dismiss() } label: { Text(verbatim: "Photos") }
+            }
+        }
         .task { await load() }
     }
 
@@ -60,7 +69,7 @@ private struct FilterLookEditorContent: View {
                     ForEach(FilterControl.allCases) { slider(for: $0) }
                     Toggle(isOn: $model.params.autoEnhance) { Text(verbatim: "Auto-enhance + red-eye") }
                 } header: {
-                    Text(verbatim: "Controls (double-tap a name to reset it)")
+                    Text(verbatim: "Controls (double-tap a slider to reset it)")
                 }
                 Section { looksList } header: { Text(verbatim: "Looks") }
                 Section { lookActions }
@@ -111,13 +120,18 @@ private struct FilterLookEditorContent: View {
             .onTapGesture(count: 2) { value.wrappedValue = 0 }
             Slider(value: value, in: control.range)
                 .disabled(blocked)
+                // Simultaneous, so the double-tap resets without stealing the drag.
+                .simultaneousGesture(TapGesture(count: 2).onEnded { value.wrappedValue = 0 })
                 .accessibilityLabel(Text(verbatim: control.label))
+                .accessibilityAction(named: Text(verbatim: "Reset")) { value.wrappedValue = 0 }
             if blocked {
                 Text(verbatim: model.masksReady ? "No subject found in this photo." : "Finding the subject…")
                     .font(.caption)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
             }
         }
+        // Wider than the list's default inset, so a drag never starts at the screen edge.
+        .listRowInsets(EdgeInsets(top: 8, leading: 36, bottom: 8, trailing: 36))
     }
 
     @ViewBuilder
