@@ -22,7 +22,8 @@ struct MarginLadderTests {
     func emotionsAndDomains() throws {
         let page = try Self.design()
         let bars = MarginLadders.emotions(try #require(page.emotions))
-        #expect(bars.map(\.fill) == [5.0 / 6, 1, 3.0 / 6, 1.0 / 5, 1.0 / 4, 4.0 / 6, 6.0 / 8])
+        let fills: [Double] = [5.0 / 6, 1, 3.0 / 6, 1.0 / 5, 1.0 / 4, 4.0 / 6, 6.0 / 8]
+        #expect(bars.map(\.fill) == fills)
         #expect(bars.map(\.done) == [false, true, false, false, false, false, false], "pride: every seat met")
         #expect(MarginLadders.domains(try #require(page.domains)) == Self.bar(14.0 / 18))
     }
