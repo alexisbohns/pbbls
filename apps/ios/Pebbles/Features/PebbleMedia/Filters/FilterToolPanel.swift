@@ -9,20 +9,25 @@ struct FilterToolPanel: View {
     private static let radius: CGFloat = 12
 
     var body: some View {
-        VStack(spacing: Spacing.md) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: Spacing.sm) {
-                    tile(nil)
-                    ForEach(FilterPreset.allCases) { tile($0) }
+        // Scrolls only when larger text makes the sliders outgrow the panel.
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: Spacing.md) {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: Spacing.sm) {
+                        tile(nil)
+                        ForEach(FilterPreset.allCases) { tile($0) }
+                    }
+                }
+                LookSlider(label: "Intensity", value: $model.look.intensity, range: 0...1, defaultValue: 1,
+                           readout: .percent, isEnabled: model.look.preset != nil)
+                ForEach(PhotoLook.Extra.allCases, id: \.self) { extra in
+                    LookSlider(label: extra.label, value: binding(for: extra), range: 0...1,
+                               defaultValue: model.look.preset == nil ? 0 : extra.defaultValue, readout: .percent)
                 }
             }
-            LookSlider(label: "Intensity", value: $model.look.intensity, range: 0...1, defaultValue: 1,
-                       readout: .percent, isEnabled: model.look.preset != nil)
-            ForEach(PhotoLook.Extra.allCases, id: \.self) { extra in
-                LookSlider(label: extra.label, value: binding(for: extra), range: 0...1,
-                           defaultValue: model.look.preset == nil ? 0 : extra.defaultValue, readout: .percent)
-            }
+            .padding(.vertical, Spacing.sm)
         }
+        .scrollBounceBehavior(.basedOnSize)
     }
 
     private func binding(for extra: PhotoLook.Extra) -> Binding<Double> {

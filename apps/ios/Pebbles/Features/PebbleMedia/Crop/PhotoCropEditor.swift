@@ -195,7 +195,7 @@ struct PhotoCropEditor: View {
 private extension CropTool {
     var showsLook: Bool { self == .filter }
     /// The crop tools fit one row; the filter needs its preset row and four sliders.
-    var panelHeight: CGFloat { showsLook ? 300 : 96 }
+    var panelHeight: CGFloat { showsLook ? 360 : 96 }
 }
 
 #Preview {
