@@ -6,33 +6,33 @@ import SwiftUI
 struct AdjustToolPanel: View {
     @Bindable var model: PhotoLookModel
 
-    /// Wide enough for the longest name ("Highlights", « Hautes lumières » shrinks to fit).
-    private static let knobWidth: CGFloat = 80
-
     var body: some View {
         VStack(spacing: Spacing.xs) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 0) {
-                    ForEach(AdjustControl.allCases) { control in
-                        LookKnob(label: control.label, value: binding(for: control), range: control.range,
-                                 defaultValue: 0, isEnabled: isEnabled(control))
-                            .frame(width: Self.knobWidth)
-                    }
-                }
-                .padding(.vertical, Spacing.sm)
-                .scrollTargetLayout()
-            }
-            // Snaps so a knob, not half of one, sits on the inset.
-            .scrollTargetBehavior(.viewAligned)
-            // Edge to edge, so the whole strip scrolls; the first knob lines up with the inset.
-            .contentMargins(.horizontal, Spacing.lg, for: .scrollContent)
-            .padding(.horizontal, -Spacing.lg)
+            // Above the row, so it never moves the knobs.
             if let note = refocusNote {
                 Text(note)
                     .pebblesFont(.captionEmphasized)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(alignment: .top, spacing: 0) {
+                    ForEach(AdjustControl.allCases) { control in
+                        LookKnob(label: control.label, value: binding(for: control), range: control.range,
+                                 defaultValue: 0, isEnabled: isEnabled(control))
+                            // A quarter of the row, as on Filter: the two tools' knobs
+                            // sit in the same four places, and a page is four knobs.
+                            .containerRelativeFrame(.horizontal, count: 4, spacing: 0)
+                    }
+                }
+                .padding(.vertical, Spacing.sm)
+                .scrollTargetLayout()
+            }
+            // Snaps so a knob, not part of one, sits on the inset.
+            .scrollTargetBehavior(.viewAligned)
+            // Edge to edge, so the whole strip scrolls; the first knob lines up with the inset.
+            .contentMargins(.horizontal, Spacing.lg, for: .scrollContent)
+            .padding(.horizontal, -Spacing.lg)
         }
         // Chrome, not content: it stops growing before the knobs outgrow the panel.
         .dynamicTypeSize(...DynamicTypeSize.xxxLarge)

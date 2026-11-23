@@ -10,6 +10,8 @@ struct PhotoCropEditor: View {
     @State private var look: PhotoLookModel
     @State private var isRendering = false
     @State private var renderTask: Task<Void, Never>?
+    /// The panel's height, which follows the tool in an update of its own (see `body`).
+    @State private var panelHeight: CGFloat
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let onCancel: () -> Void
     let onDone: (CGImage, Date?) -> Void
@@ -25,6 +27,7 @@ struct PhotoCropEditor: View {
         model.tool = initialTool
         _model = State(initialValue: model)
         _look = State(initialValue: look ?? PhotoLookModel())
+        _panelHeight = State(initialValue: initialTool.panelHeight)
         self.onCancel = onCancel
         self.onDone = onDone
     }
@@ -40,10 +43,17 @@ struct PhotoCropEditor: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
             .disabled(isRendering)
             toolPanel
-                .frame(height: model.tool.panelHeight)
+                // Bottom-anchored: Filter's and Adjust's knob rows sit in the same
+                // place above the tabs, and Filter's extra height holds its presets.
+                .frame(height: panelHeight,
+                       alignment: model.tool.showsLook ? .bottom : .center)
                 .padding(.horizontal, Spacing.lg)
+                // Vertical clip only (the rows reach the screen edges through the
+                // padding): mid-spring, a taller tool never draws over the photo.
+                .clipped()
                 .disabled(isRendering)
             tabs
                 .padding(.bottom, Spacing.sm)
@@ -52,6 +62,16 @@ struct PhotoCropEditor: View {
         .background(Color.pebbles.surface)
         .pebblesScreen()
         .task(id: model.tool) { await prepareLookIfNeeded() }
+        // A tool change swaps the controls and the canvas at once, then springs the
+        // panel to its height, so the photo resizes with it. Animating the switch
+        // itself cross-faded the outgoing tool over the incoming one.
+        .onChange(of: model.tool) { _, tool in
+            if reduceMotion {
+                panelHeight = tool.panelHeight
+            } else {
+                withAnimation(.photoEditorSpring) { panelHeight = tool.panelHeight }
+            }
+        }
     }
 
     /// A change with the editor's own animation, none under Reduce Motion.
@@ -194,6 +214,12 @@ struct PhotoCropEditor: View {
             }
         }
     }
+}
+
+extension Animation {
+    /// The photo editor's motion: a Material 3 Expressive spatial spring, quick with
+    /// a little overshoot. Shared by the tab bar and the panel so they move as one.
+    static let photoEditorSpring = Animation.spring(duration: 0.45, bounce: 0.3)
 }
 
 private extension CropTool {
