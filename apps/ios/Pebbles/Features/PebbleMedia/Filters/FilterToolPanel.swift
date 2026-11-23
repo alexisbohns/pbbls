@@ -17,7 +17,10 @@ struct FilterToolPanel: View {
                     tile(nil)
                     ForEach(FilterPreset.allCases) { tile($0) }
                 }
+                .scrollTargetLayout()
             }
+            // Snaps so a tile, not half of one, sits on the inset.
+            .scrollTargetBehavior(.viewAligned)
             // Edge to edge, like the Adjust row: the strip runs under the panel's
             // inset and its first tile still lines up with it.
             .contentMargins(.horizontal, Spacing.lg, for: .scrollContent)

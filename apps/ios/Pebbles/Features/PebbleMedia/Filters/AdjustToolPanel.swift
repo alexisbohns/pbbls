@@ -20,7 +20,10 @@ struct AdjustToolPanel: View {
                     }
                 }
                 .padding(.vertical, Spacing.sm)
+                .scrollTargetLayout()
             }
+            // Snaps so a knob, not half of one, sits on the inset.
+            .scrollTargetBehavior(.viewAligned)
             // Edge to edge, so the whole strip scrolls; the first knob lines up with the inset.
             .contentMargins(.horizontal, Spacing.lg, for: .scrollContent)
             .padding(.horizontal, -Spacing.lg)
