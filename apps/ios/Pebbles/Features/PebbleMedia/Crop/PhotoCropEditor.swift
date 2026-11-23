@@ -198,8 +198,16 @@ struct PhotoCropEditor: View {
 
 private extension CropTool {
     var showsLook: Bool { self == .filter || self == .adjust }
-    /// The crop tools fit one row; Filter and Adjust need room for their sliders.
-    var panelHeight: CGFloat { showsLook ? 360 : 96 }
+    /// As little as each tool needs, so the photo stays large enough to judge the
+    /// look: the crop tools fit one row, Filter its presets and knobs, Adjust shows
+    /// two sliders at a time and scrolls.
+    var panelHeight: CGFloat {
+        switch self {
+        case .ratio, .rotate: 96
+        case .filter: 204
+        case .adjust: 140
+        }
+    }
 }
 
 #Preview {

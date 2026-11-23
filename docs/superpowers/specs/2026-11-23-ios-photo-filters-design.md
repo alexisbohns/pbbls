@@ -56,10 +56,10 @@ The editor's layout stays as it is: top bar, canvas, tool panel, tabs.
 
 - **Canvas on Filter and Adjust:** the cropped result, no scrim or grid, gestures off: framing happens on Reframe. Touch and hold shows the photo without the look, as in the lab.
 - **Filter panel:**
-  - A horizontal row of presets: the cropped photo at about 64 pt with the preset at intensity 1 and no extras, its name under it, the selected one marked.
-  - Below the row, the four knobs as labelled sliders with a readout.
+  - A horizontal row of presets: the cropped photo at about 64 pt with the preset at intensity 1 and no extras, its name under it in sentence case. The selected tile rounds into a circle; the shape is the mark (device pass, 2026-11-24).
+  - Below the row, the four knobs in one row as circular dials (device pass, 2026-11-24): a tonal disc with a 270° track open at the bottom, the value as a primary arc ending in a dot, the percentage inside, the name below. Drag up or right to turn one up; a light tick every 5 %.
   - On Original, intensity is disabled.
-- **Adjust panel:** a scrolling list of the eleven sliders, each with its label and a signed readout.
+- **Adjust panel:** a scrolling list of the eleven sliders, each with its label and a signed readout. It is two sliders tall, so the photo stays large enough to judge the result (device pass, 2026-11-24).
 - **Tab glyphs:** Reframe `rectangleDashed`, Rotate `setSquare`, Filter `filterBox` (reserved for it by the crop spec), Adjust `slider`.
 - **Tab labels (device pass, 2026-11-24):** four labels do not fit side by side, so only the selected tab shows its name; it takes the rest of the row, the others are icon-only segments (their name stays their accessibility label).
 
