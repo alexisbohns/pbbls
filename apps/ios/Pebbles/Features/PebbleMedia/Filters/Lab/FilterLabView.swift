@@ -86,7 +86,7 @@ struct FilterLabView: View {
         }
         ToolbarItemGroup(placement: .primaryAction) {
             PhotosPicker(selection: $pickedItem, matching: .images) {
-                Image(systemName: "plus").accessibilityLabel(Text(verbatim: "Add a photo"))
+                PbblsGlyphView(.plusCircle, .toolbar).accessibilityLabel(Text(verbatim: "Add a photo"))
             }
             Menu {
                 Button { Task { await export() } } label: { Text(verbatim: "Export session") }
