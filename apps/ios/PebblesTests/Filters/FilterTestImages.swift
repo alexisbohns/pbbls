@@ -127,6 +127,17 @@ enum FilterTestImages {
         return (lumas.map { ($0 - mean) * ($0 - mean) }.reduce(0, +) / Double(lumas.count)).squareRoot()
     }
 
+    /// Mean per-pixel chroma: max − min of red, green and blue, 0…1.
+    static func meanChroma(_ image: CGImage) throws -> Double {
+        let rgba = try bytes(image)
+        var total = 0.0
+        for i in stride(from: 0, to: rgba.count, by: 4) {
+            let r = Double(rgba[i]), g = Double(rgba[i + 1]), b = Double(rgba[i + 2])
+            total += (max(r, g, b) - min(r, g, b)) / 255
+        }
+        return total / Double(rgba.count / 4)
+    }
+
     static func meanAbsDifference(_ a: CGImage, _ b: CGImage) throws -> Double {
         let x = try bytes(a), y = try bytes(b)
         try #require(x.count == y.count)
