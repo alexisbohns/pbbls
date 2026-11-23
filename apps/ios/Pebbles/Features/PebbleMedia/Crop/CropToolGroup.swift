@@ -35,6 +35,8 @@ struct CropToolGroup: View {
                 Text(tool.label)
                     .pebblesFont(.subheadEmphasized)
                     .lineLimit(1)
+                    // Four tools share the row: shrink a little before truncating.
+                    .minimumScaleFactor(0.8)
                     .foregroundStyle(ink)
             }
             .frame(maxWidth: .infinity, minHeight: Self.height)
