@@ -3,7 +3,7 @@ import os
 
 /// The photo editor (spec "Layout"): follows the app theme, top bar, canvas,
 /// the current tool's panel, then the tool group in thumb reach. Reframe and
-/// Rotate edit the crop; Filter shows the crop with its look
+/// Rotate edit the crop; Filter and Adjust show the crop with its look
 /// (spec 2026-11-23-ios-photo-filters-design).
 struct PhotoCropEditor: View {
     @State private var model: PhotoCropModel
@@ -129,6 +129,8 @@ struct PhotoCropEditor: View {
             }
         case .filter:
             FilterToolPanel(model: look)
+        case .adjust:
+            AdjustToolPanel(model: look)
         }
     }
 
@@ -136,6 +138,7 @@ struct PhotoCropEditor: View {
         switch model.tool {
         case .ratio, .rotate: model.hasChanges
         case .filter: look.look.hasFilterChanges
+        case .adjust: look.look.hasAdjustChanges
         }
     }
 
@@ -145,6 +148,7 @@ struct PhotoCropEditor: View {
             switch model.tool {
             case .ratio, .rotate: model.reset()
             case .filter: look.look.resetFilter()
+            case .adjust: look.look.resetAdjust()
             }
         }
     }
@@ -193,8 +197,8 @@ struct PhotoCropEditor: View {
 }
 
 private extension CropTool {
-    var showsLook: Bool { self == .filter }
-    /// The crop tools fit one row; the filter needs its preset row and four sliders.
+    var showsLook: Bool { self == .filter || self == .adjust }
+    /// The crop tools fit one row; Filter and Adjust need room for their sliders.
     var panelHeight: CGFloat { showsLook ? 360 : 96 }
 }
 

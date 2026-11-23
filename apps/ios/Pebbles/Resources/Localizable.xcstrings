@@ -174,6 +174,22 @@
         }
       }
     },
+    "Adjust" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adjust"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajuster"
+          }
+        }
+      }
+    },
     "All four are needed to continue." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -237,6 +253,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Flou"
+          }
+        }
+      }
+    },
+    "Brilliance" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brilliance"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Éclat"
           }
         }
       }
@@ -356,6 +388,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Continue avec Google pour confirmer que c'est bien toi."
+          }
+        }
+      }
+    },
+    "Contrast" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contrast"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contraste"
           }
         }
       }
@@ -512,6 +560,22 @@
         }
       }
     },
+    "Exposure" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exposure"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exposition"
+          }
+        }
+      }
+    },
     "Filter" : {
       "localizations" : {
         "en" : {
@@ -524,6 +588,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Filtre"
+          }
+        }
+      }
+    },
+    "Finding the subject…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finding the subject…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche du sujet…"
           }
         }
       }
@@ -557,6 +637,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Grain"
+          }
+        }
+      }
+    },
+    "Highlights" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highlights"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hautes lumières"
           }
         }
       }
@@ -807,6 +903,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pas de série, pas de culpabilité."
+          }
+        }
+      }
+    },
+    "No subject found in this photo." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No subject found in this photo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun sujet trouvé sur cette photo."
           }
         }
       }
@@ -1115,6 +1227,22 @@
         }
       }
     },
+    "Refocus" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refocus"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise au point"
+          }
+        }
+      }
+    },
     "Reframe" : {
       "localizations" : {
         "en" : {
@@ -1165,6 +1293,22 @@
         }
       }
     },
+    "Saturation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saturation"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saturation"
+          }
+        }
+      }
+    },
     "Search souls" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1195,6 +1339,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voir mes propres schémas"
+          }
+        }
+      }
+    },
+    "Shadows" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shadows"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ombres"
+          }
+        }
+      }
+    },
+    "Sharpness" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sharpness"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Netteté"
           }
         }
       }
@@ -1401,6 +1577,22 @@
         }
       }
     },
+    "Tint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tint"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teinte"
+          }
+        }
+      }
+    },
     "Untitled" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1452,6 +1644,22 @@
         }
       }
     },
+    "Vibrance" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibrance"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibrance"
+          }
+        }
+      }
+    },
     "Vignette" : {
       "localizations" : {
         "en" : {
@@ -1480,6 +1688,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vif"
+          }
+        }
+      }
+    },
+    "Warmth" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warmth"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaleur"
           }
         }
       }

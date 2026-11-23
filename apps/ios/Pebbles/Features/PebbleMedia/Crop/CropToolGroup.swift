@@ -67,6 +67,7 @@ private extension CropTool {
         case .ratio: .rectangleDashed
         case .rotate: .setSquare
         case .filter: .filterBox
+        case .adjust: .slider
         }
     }
 
@@ -75,6 +76,7 @@ private extension CropTool {
         case .ratio: "Reframe"
         case .rotate: "Rotate"
         case .filter: "Filter"
+        case .adjust: "Adjust"
         }
     }
 }
