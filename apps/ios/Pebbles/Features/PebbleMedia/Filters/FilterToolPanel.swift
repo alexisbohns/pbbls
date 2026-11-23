@@ -11,29 +11,31 @@ struct FilterToolPanel: View {
     private static let radius: CGFloat = 12
 
     var body: some View {
-        // Scrolls only when larger text makes the sliders outgrow the panel.
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: Spacing.md) {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: Spacing.sm) {
-                        tile(nil)
-                        ForEach(FilterPreset.allCases) { tile($0) }
-                    }
-                }
-                HStack(alignment: .top, spacing: 0) {
-                    LookKnob(label: "Intensity", value: $model.look.intensity, defaultValue: 1,
-                             isEnabled: model.look.preset != nil)
-                        .frame(maxWidth: .infinity)
-                    ForEach(PhotoLook.Extra.allCases, id: \.self) { extra in
-                        LookKnob(label: extra.label, value: binding(for: extra),
-                                 defaultValue: model.look.preset == nil ? 0 : extra.defaultValue)
-                            .frame(maxWidth: .infinity)
-                    }
+        VStack(spacing: Spacing.md) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: Spacing.sm) {
+                    tile(nil)
+                    ForEach(FilterPreset.allCases) { tile($0) }
                 }
             }
-            .padding(.vertical, Spacing.sm)
+            // Edge to edge, like the Adjust row: the strip runs under the panel's
+            // inset and its first tile still lines up with it.
+            .contentMargins(.horizontal, Spacing.lg, for: .scrollContent)
+            .padding(.horizontal, -Spacing.lg)
+            HStack(alignment: .top, spacing: 0) {
+                LookKnob(label: "Intensity", value: $model.look.intensity, defaultValue: 1,
+                         isEnabled: model.look.preset != nil)
+                    .frame(maxWidth: .infinity)
+                ForEach(PhotoLook.Extra.allCases, id: \.self) { extra in
+                    LookKnob(label: extra.label, value: binding(for: extra),
+                             defaultValue: model.look.preset == nil ? 0 : extra.defaultValue)
+                        .frame(maxWidth: .infinity)
+                }
+            }
         }
-        .scrollBounceBehavior(.basedOnSize)
+        .padding(.vertical, Spacing.sm)
+        // Chrome, not content: it stops growing before the knobs outgrow the panel.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 
     private func binding(for extra: PhotoLook.Extra) -> Binding<Double> {

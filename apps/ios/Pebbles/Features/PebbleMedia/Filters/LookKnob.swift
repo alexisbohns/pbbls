@@ -1,12 +1,13 @@
 import SwiftUI
+import UIKit
 
 /// A knob of the Filter and Adjust tools: a tonal disc with a 270° track, the value
 /// drawn as a primary arc ending in a dot, the value inside and the name below. A
 /// one-sided knob (0…1) fills from the start of the track; a two-sided one (−1…1)
 /// fills from its top-centre zero. The value reads ×100, signed when two-sided.
-/// Drag up to turn it up, down to turn it down; a sideways drag is left to the row it
-/// sits in, so the Adjust knobs scroll. Double-tap resets (spec 2026-11-23 decision 7);
-/// VoiceOver adjusts it in 5 % steps of the range.
+/// Drag up to turn it up, down to turn it down. A sideways drag is left to the row it
+/// sits in, even when it starts on the dial, so the rows scroll from anywhere.
+/// Double-tap resets (spec 2026-11-23 decision 7); VoiceOver adjusts it in 5 % steps.
 struct LookKnob: View {
     let label: LocalizedStringResource
     @Binding var value: Double
@@ -14,10 +15,8 @@ struct LookKnob: View {
     let defaultValue: Double
     var isEnabled = true
 
-    /// The value when a vertical drag began; nil between drags and during a sideways one.
+    /// The value when a drag began; nil between drags.
     @State private var dragStart: Double?
-    /// Decided on a drag's first movement: true when it is the row's, not the knob's.
-    @State private var dragIsSideways: Bool?
 
     static let diameter: CGFloat = 64
     private static let track: CGFloat = 4
@@ -37,10 +36,10 @@ struct LookKnob: View {
         VStack(spacing: Spacing.xs) {
             dial
                 .frame(width: Self.diameter, height: Self.diameter)
-                .contentShape(Circle())
-                // Simultaneous, so a sideways drag still scrolls the row around the knob.
-                .simultaneousGesture(drag, including: isEnabled ? .all : .none)
-                .simultaneousGesture(TapGesture(count: 2).onEnded { if isEnabled { value = defaultValue } })
+                .overlay {
+                    KnobTouchSurface(isEnabled: isEnabled, onChanged: dragged(by:), onEnded: { dragStart = nil },
+                                     onDoubleTap: { value = defaultValue })
+                }
                 .sensoryFeedback(.selection, trigger: Int((value / step).rounded()))
             Text(label)
                 .pebblesFont(.captionEmphasized)
@@ -106,20 +105,11 @@ struct LookKnob: View {
                 inset: Self.track * 1.5)
     }
 
-    private var drag: some Gesture {
-        DragGesture(minimumDistance: 6)
-            .onChanged { gesture in
-                let sideways = dragIsSideways ?? (abs(gesture.translation.width) > abs(gesture.translation.height))
-                dragIsSideways = sideways
-                guard !sideways else { return }
-                let start = dragStart ?? value
-                dragStart = start
-                value = clamped(start - gesture.translation.height / Self.travel * span)
-            }
-            .onEnded { _ in
-                dragStart = nil
-                dragIsSideways = nil
-            }
+    /// `rise` is the drag's vertical travel since it began, in points, down positive.
+    private func dragged(by rise: CGFloat) {
+        let start = dragStart ?? value
+        dragStart = start
+        value = clamped(start - rise / Self.travel * span)
     }
 
     private func fraction(of value: Double) -> Double { (clamped(value) - range.lowerBound) / span }
@@ -137,5 +127,58 @@ private struct KnobArc: Shape {
         path.addArc(center: CGPoint(x: rect.midX, y: rect.midY), radius: min(rect.width, rect.height) / 2 - inset,
                     startAngle: start, endAngle: end, clockwise: false)
         return path
+    }
+}
+
+/// The knob's touch handling, in UIKit because SwiftUI has no way to decline a drag
+/// once it started: a SwiftUI drag on the dial kept the row from scrolling. This pan
+/// begins only when the first movement is vertical; a sideways one fails it at once
+/// and the enclosing scroll view's own pan takes the touch.
+private struct KnobTouchSurface: UIViewRepresentable {
+    var isEnabled: Bool
+    let onChanged: (CGFloat) -> Void
+    let onEnded: () -> Void
+    let onDoubleTap: () -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(surface: self) }
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        let pan = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.pan(_:)))
+        pan.delegate = context.coordinator
+        view.addGestureRecognizer(pan)
+        let doubleTap = UITapGestureRecognizer(target: context.coordinator,
+                                               action: #selector(Coordinator.doubleTap))
+        doubleTap.numberOfTapsRequired = 2
+        view.addGestureRecognizer(doubleTap)
+        return view
+    }
+
+    func updateUIView(_ view: UIView, context: Context) {
+        context.coordinator.surface = self
+        view.isUserInteractionEnabled = isEnabled
+    }
+
+    @MainActor
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        var surface: KnobTouchSurface
+
+        init(surface: KnobTouchSurface) { self.surface = surface }
+
+        @objc func pan(_ recognizer: UIPanGestureRecognizer) {
+            switch recognizer.state {
+            case .changed: surface.onChanged(recognizer.translation(in: recognizer.view).y)
+            case .ended, .cancelled, .failed: surface.onEnded()
+            default: break
+            }
+        }
+
+        @objc func doubleTap() { surface.onDoubleTap() }
+
+        func gestureRecognizerShouldBegin(_ recognizer: UIGestureRecognizer) -> Bool {
+            guard let pan = recognizer as? UIPanGestureRecognizer else { return true }
+            let velocity = pan.velocity(in: pan.view)
+            return abs(velocity.y) > abs(velocity.x)
+        }
     }
 }

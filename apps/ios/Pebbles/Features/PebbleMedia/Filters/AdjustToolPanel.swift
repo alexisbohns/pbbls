@@ -21,7 +21,9 @@ struct AdjustToolPanel: View {
                 }
                 .padding(.vertical, Spacing.sm)
             }
-            .scrollClipDisabled()
+            // Edge to edge, so the whole strip scrolls; the first knob lines up with the inset.
+            .contentMargins(.horizontal, Spacing.lg, for: .scrollContent)
+            .padding(.horizontal, -Spacing.lg)
             if let note = refocusNote {
                 Text(note)
                     .pebblesFont(.captionEmphasized)
@@ -29,6 +31,8 @@ struct AdjustToolPanel: View {
                     .frame(maxWidth: .infinity, alignment: .trailing)
             }
         }
+        // Chrome, not content: it stops growing before the knobs outgrow the panel.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 
     private func binding(for control: AdjustControl) -> Binding<Double> {
