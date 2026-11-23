@@ -225,6 +225,22 @@
         }
       }
     },
+    "Blur" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blur"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flou"
+          }
+        }
+      }
+    },
     "Change glyph" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -480,6 +496,38 @@
         }
       }
     },
+    "Everyday" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Everyday"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quotidien"
+          }
+        }
+      }
+    },
+    "Filter" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filtre"
+          }
+        }
+      }
+    },
     "Get through a hard season" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -493,6 +541,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Traverser une période difficile"
+          }
+        }
+      }
+    },
+    "Grain" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grain"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grain"
           }
         }
       }
@@ -544,6 +608,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Je t'en tiendrai responsable"
+          }
+        }
+      }
+    },
+    "Intensity" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intensity"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intensité"
           }
         }
       }
@@ -612,6 +692,70 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Plus tard"
+          }
+        }
+      }
+    },
+    "Lift" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lift"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lumineux"
+          }
+        }
+      }
+    },
+    "Memory" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memory"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Souvenir"
+          }
+        }
+      }
+    },
+    "Mono" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mono"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mono"
+          }
+        }
+      }
+    },
+    "Mono Deep" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mono Deep"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mono profond"
           }
         }
       }
@@ -769,6 +913,22 @@
         }
       }
     },
+    "Original" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Original"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Original"
+          }
+        }
+      }
+    },
     "Our promise could not load. It will be here in Settings." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -833,6 +993,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Limite de photos atteinte pour ce moment."
+          }
+        }
+      }
+    },
+    "Photo with the look" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo with the look"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo avec le filtre"
           }
         }
       }
@@ -939,6 +1115,22 @@
         }
       }
     },
+    "Reframe" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reframe"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cadrer"
+          }
+        }
+      }
+    },
     "Remember the good days" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1003,6 +1195,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voir mes propres schémas"
+          }
+        }
+      }
+    },
+    "Show original" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show original"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir l'original"
+          }
+        }
+      }
+    },
+    "Soft" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soft"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doux"
           }
         }
       }
@@ -1224,6 +1448,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Habituels"
+          }
+        }
+      }
+    },
+    "Vignette" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vignette"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vignette"
+          }
+        }
+      }
+    },
+    "Vivid" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vivid"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vif"
           }
         }
       }
@@ -13290,22 +13546,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Actions rapides"
-          }
-        }
-      }
-    },
-    "Ratio" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ratio"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Format"
           }
         }
       }
