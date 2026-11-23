@@ -61,6 +61,7 @@ The editor's layout stays as it is: top bar, canvas, tool panel, tabs.
   - On Original, intensity is disabled.
 - **Adjust panel:** a scrolling list of the eleven sliders, each with its label and a signed readout.
 - **Tab glyphs:** Reframe `rectangleDashed`, Rotate `setSquare`, Filter `filterBox` (reserved for it by the crop spec), Adjust `slider`.
+- **Tab labels (device pass, 2026-11-24):** four labels do not fit side by side, so only the selected tab shows its name; it takes the rest of the row, the others are icon-only segments (their name stays their accessibility label).
 
 ## Architecture
 

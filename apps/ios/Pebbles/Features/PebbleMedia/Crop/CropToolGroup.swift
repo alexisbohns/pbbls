@@ -2,8 +2,9 @@ import SwiftUI
 
 /// The crop editor's tools as a connected button group, single-select (Material
 /// 3 Expressive): the buttons sit a hair apart, outer corners are pill ends and
-/// inner corners small; the selected button rounds off on every side and takes
-/// the tonal fill. A tool is one more case in `tools`.
+/// inner corners small; the selected button rounds off on every side, takes
+/// the tonal fill and the rest of the row's width, and alone shows its label:
+/// four labels do not fit side by side. A tool is one more case in `tools`.
 struct CropToolGroup: View {
     let tools: [CropTool]
     @Binding var selection: CropTool
@@ -13,6 +14,8 @@ struct CropToolGroup: View {
     private static let height: CGFloat = 48
     private static let gap: CGFloat = 2
     private static let innerRadius: CGFloat = 8
+    /// An unselected, icon-only segment: a comfortable target, not a stretched pill.
+    private static let iconSegmentWidth: CGFloat = 64
 
     var body: some View {
         HStack(spacing: Self.gap) {
@@ -32,19 +35,22 @@ struct CropToolGroup: View {
         return Button { selection = tool } label: {
             HStack(spacing: Spacing.sm) {
                 PbblsGlyphView(tool.glyph, size: 22, style: AnyShapeStyle(ink))
-                Text(tool.label)
-                    .pebblesFont(.subheadEmphasized)
-                    .lineLimit(1)
-                    // Four tools share the row: shrink a little before truncating.
-                    .minimumScaleFactor(0.8)
-                    .foregroundStyle(ink)
+                if selected {
+                    Text(tool.label)
+                        .pebblesFont(.subheadEmphasized)
+                        .lineLimit(1)
+                        .foregroundStyle(ink)
+                        .transition(.opacity)
+                }
             }
-            .frame(maxWidth: .infinity, minHeight: Self.height)
+            .frame(minWidth: Self.iconSegmentWidth, maxWidth: selected ? .infinity : Self.iconSegmentWidth,
+                   minHeight: Self.height)
             .background(shape(index: index, selected: selected)
                 .fill(selected ? Color.pebbles.secondaryContainer : Color.pebbles.surfaceContainerHigh))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(Text(tool.label))
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
