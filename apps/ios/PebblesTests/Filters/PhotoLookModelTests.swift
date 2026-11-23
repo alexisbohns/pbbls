@@ -43,4 +43,19 @@ struct PhotoLookModelTests {
         #expect(out.width == image.width && out.height == image.height)
         #expect(try Img.meanChroma(out) < 0.02)
     }
+
+    @Test("masks load only once refocus moves, and a picture with no subject says so")
+    func masksAreLazy() async throws {
+        let (image, geometry) = try cropped()
+        let model = PhotoLookModel()
+        await model.prepare(image, for: geometry)
+        #expect(model.masksState == .notLoaded)
+        model.look.adjust.refocus = 0.5
+        #expect(model.masksState == .loading)
+        await model.waitForMasks()
+        #expect(model.masksState == .ready)
+        // A ramp has no subject: refocus has nothing to act on, so it goes back to 0.
+        #expect(!model.subjectFound)
+        #expect(model.look.adjust.refocus == 0)
+    }
 }
