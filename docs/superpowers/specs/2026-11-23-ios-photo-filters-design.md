@@ -73,13 +73,13 @@ New code under `apps/ios/Pebbles/Features/PebbleMedia/Filters/`, next to the lab
 | `PhotoLookModel` | `@Observable` editor state for the two tabs: the look, the preview and the thumbnails, coalesced rendering, masks loaded lazily | `PhotoLook`, `FilterPipeline`, `FilterMasks` |
 | `FilterToolPanel`, `AdjustToolPanel` | The two panels | model |
 
-**Preview.** The working image (2048 px) is cropped through the current geometry at screen size, once per visit to Filter or Adjust. It then runs through `FilterPipeline` on the shared `CIContext`, with slider changes coalesced so at most one render is queued, as `FilterLookModel` does in the lab. The thumbnails render once from the same cropped image. The pipeline scales every radius to the long edge, and the lab checked that a Mac render and a phone render match within 0.34 %, so the preview matches the upload.
+**Preview.** The working image (2048 px) is cropped through the current geometry by `PhotoCropRenderer`, at the upload size (1024 px), whenever Filter or Adjust opens after the crop changed. The preview is therefore the upload itself. It then runs through `FilterPipeline` on the shared `CIContext`, with slider changes coalesced so at most one render is queued, as `FilterLookModel` does in the lab. The thumbnails render once from the same cropped image. The pipeline scales every radius to the long edge, and the lab checked that a Mac render and a phone render match within 0.34 %, so the preview matches the upload.
 
 **Masks.** `FilterMasks` runs only when refocus first moves above 0, on the cropped image. Until then refocus shows "Finding the subject…".
 
 **Done.**
 1. `PhotoCropRenderer` crops at 1024 px.
-2. If the look is not untouched, `FilterPipeline.apply` and `render` run in sRGB.
+2. If the look is not untouched, `FilterPipeline.apply` and `render` run in the cropped image's own colour space, as the lab does (a Display P3 photo stays P3).
 3. `ImagePipeline.process(_ image: CGImage)` runs as today; the capture-date path is unchanged.
 
 **The lab stays** a debug screen on its own `FilterParams` and keeps working. `FilterPipeline`, `FilterMasks` and `FilterParams` move out of draft status: they are now product code (the lab spec already called them "meant to last").
