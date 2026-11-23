@@ -59,7 +59,7 @@ struct FilterToolPanel: View {
                 Text(name)
                     .pebblesFont(.captionEmphasized)
                     .lineLimit(1)
-                    .foregroundStyle(selected ? Color.pebbles.onSurface : Color.pebbles.onSurfaceVariant)
+                    .foregroundStyle(selected ? Color.pebbles.primary : Color.pebbles.onSurfaceVariant)
             }
             .frame(width: Self.tileEdge + Spacing.sm)
             .contentShape(Rectangle())

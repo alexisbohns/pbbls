@@ -56,10 +56,10 @@ The editor's layout stays as it is: top bar, canvas, tool panel, tabs.
 
 - **Canvas on Filter and Adjust:** the cropped result, no scrim or grid, gestures off: framing happens on Reframe. Touch and hold shows the photo without the look, as in the lab.
 - **Filter panel:**
-  - A horizontal row of presets: the cropped photo at about 64 pt with the preset at intensity 1 and no extras, its name under it in sentence case. The selected tile rounds into a circle; the shape is the mark (device pass, 2026-11-24).
-  - Below the row, the four knobs in one row as circular dials (device pass, 2026-11-24): a tonal disc with a 270° track open at the bottom, the value as a primary arc ending in a dot, the percentage inside, the name below. Drag up or right to turn one up; a light tick every 5 %.
+  - A horizontal row of presets: the cropped photo at about 64 pt with the preset at intensity 1 and no extras, its name under it in sentence case. The selected tile rounds into a circle and its name takes the primary colour (device pass, 2026-11-24).
+  - Below the row, the four knobs in one row as circular dials (device pass, 2026-11-24): a tonal disc with a 270° track open at the bottom, the value as a primary arc ending in a dot, the value ×100 inside as a bare number, the name below. Drag up to turn one up, down to turn it down; a light tick every 5 %.
   - On Original, intensity is disabled.
-- **Adjust panel:** a scrolling list of the eleven sliders, each with its label and a signed readout. It is two sliders tall, so the photo stays large enough to judge the result (device pass, 2026-11-24).
+- **Adjust panel:** the eleven controls as one horizontally scrolling row of the same knobs (device pass, 2026-11-24), so the photo stays large enough to judge the result. A two-sided control (−1…1) fills from its top-centre zero and reads signed (+20, −35). Knobs turn on a vertical drag only, so a sideways drag scrolls the row. The refocus note sits under the row.
 - **Tab glyphs:** Reframe `rectangleDashed`, Rotate `setSquare`, Filter `filterBox` (reserved for it by the crop spec), Adjust `slider`.
 - **Tab labels (device pass, 2026-11-24):** four labels do not fit side by side, so only the selected tab shows its name; it takes the rest of the row, the others are icon-only segments (their name stays their accessibility label).
 

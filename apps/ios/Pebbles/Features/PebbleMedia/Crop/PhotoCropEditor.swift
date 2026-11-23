@@ -199,13 +199,13 @@ struct PhotoCropEditor: View {
 private extension CropTool {
     var showsLook: Bool { self == .filter || self == .adjust }
     /// As little as each tool needs, so the photo stays large enough to judge the
-    /// look: the crop tools fit one row, Filter its presets and knobs, Adjust shows
-    /// two sliders at a time and scrolls.
+    /// look: the crop tools fit one row, Filter its presets and knobs, Adjust one
+    /// scrolling row of knobs.
     var panelHeight: CGFloat {
         switch self {
         case .ratio, .rotate: 96
         case .filter: 204
-        case .adjust: 140
+        case .adjust: 124
         }
     }
 }
