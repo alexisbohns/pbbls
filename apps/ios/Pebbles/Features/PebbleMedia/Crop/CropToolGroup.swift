@@ -3,7 +3,7 @@ import SwiftUI
 /// The crop editor's tools as a connected button group, single-select (Material
 /// 3 Expressive): the buttons sit a hair apart, outer corners are pill ends and
 /// inner corners small; the selected button rounds off on every side and takes
-/// the tonal fill. A third tool (Filters) is one more case in `tools`.
+/// the tonal fill. A tool is one more case in `tools`.
 struct CropToolGroup: View {
     let tools: [CropTool]
     @Binding var selection: CropTool
@@ -66,13 +66,15 @@ private extension CropTool {
         switch self {
         case .ratio: .rectangleDashed
         case .rotate: .setSquare
+        case .filter: .filterBox
         }
     }
 
     var label: LocalizedStringResource {
         switch self {
-        case .ratio: "Ratio"
+        case .ratio: "Reframe"
         case .rotate: "Rotate"
+        case .filter: "Filter"
         }
     }
 }

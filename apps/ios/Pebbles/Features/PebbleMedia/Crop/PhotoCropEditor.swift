@@ -1,11 +1,13 @@
 import SwiftUI
 import os
 
-/// The crop editor (spec "Layout"): follows the app theme, top bar, canvas,
-/// the current tool's panel, then the tool group in thumb reach. Filters will
-/// be a third `CropTool` in it.
+/// The photo editor (spec "Layout"): follows the app theme, top bar, canvas,
+/// the current tool's panel, then the tool group in thumb reach. Reframe and
+/// Rotate edit the crop; Filter shows the crop with its look
+/// (spec 2026-11-23-ios-photo-filters-design).
 struct PhotoCropEditor: View {
     @State private var model: PhotoCropModel
+    @State private var look: PhotoLookModel
     @State private var isRendering = false
     @State private var renderTask: Task<Void, Never>?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -16,11 +18,13 @@ struct PhotoCropEditor: View {
 
     init(source: CropSource,
          initialTool: CropTool = .ratio,
+         look: PhotoLookModel? = nil,
          onCancel: @escaping () -> Void,
          onDone: @escaping (CGImage, Date?) -> Void) {
         let model = PhotoCropModel(source: source)
         model.tool = initialTool
         _model = State(initialValue: model)
+        _look = State(initialValue: look ?? PhotoLookModel())
         self.onCancel = onCancel
         self.onDone = onDone
     }
@@ -28,11 +32,17 @@ struct PhotoCropEditor: View {
     var body: some View {
         VStack(spacing: 0) {
             topBar
-            CropCanvas(model: model)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .disabled(isRendering)
+            Group {
+                if model.tool.showsLook {
+                    LookCanvas(model: look)
+                } else {
+                    CropCanvas(model: model)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .disabled(isRendering)
             toolPanel
-                .frame(height: 96)
+                .frame(height: model.tool.panelHeight)
                 .padding(.horizontal, Spacing.lg)
                 .disabled(isRendering)
             tabs
@@ -41,6 +51,7 @@ struct PhotoCropEditor: View {
         }
         .background(Color.pebbles.surface)
         .pebblesScreen()
+        .task(id: model.tool) { await prepareLookIfNeeded() }
     }
 
     /// A change with the editor's own animation, none under Reduce Motion.
@@ -74,8 +85,8 @@ struct PhotoCropEditor: View {
                 .buttonStyle(.plain)
                 .disabled(isRendering)
             }
-            if model.hasChanges {
-                Button { animated { model.reset() } } label: {
+            if showsReset {
+                Button(action: resetCurrentTool) {
                     Text("Reset")
                         .pebblesFont(.body)
                         .lineLimit(1)
@@ -116,6 +127,37 @@ struct PhotoCropEditor: View {
                            onChange: { model.setAngle($0) },
                            onEditingChanged: { model.isRotating = $0 })
             }
+        case .filter:
+            FilterToolPanel(model: look)
+        }
+    }
+
+    private var showsReset: Bool {
+        switch model.tool {
+        case .ratio, .rotate: model.hasChanges
+        case .filter: look.look.hasFilterChanges
+        }
+    }
+
+    /// Reset acts on the open tab's tool only (spec 2026-11-23 decision 8).
+    private func resetCurrentTool() {
+        animated {
+            switch model.tool {
+            case .ratio, .rotate: model.reset()
+            case .filter: look.look.resetFilter()
+            }
+        }
+    }
+
+    /// The look works on the crop, so a crop change since the last visit re-prepares it.
+    private func prepareLookIfNeeded() async {
+        let geometry = model.geometry
+        guard model.tool.showsLook, look.preparedFor != geometry else { return }
+        do {
+            let cropped = try await model.render()
+            await look.prepare(cropped, for: geometry)
+        } catch {
+            logger.error("look crop failed: \(String(describing: error), privacy: .public)")
         }
     }
 
@@ -136,7 +178,8 @@ struct PhotoCropEditor: View {
         isRendering = true
         renderTask = Task {
             do {
-                let image = try await model.render()
+                let cropped = try await model.render()
+                let image = await look.apply(to: cropped, sameCrop: look.preparedFor == model.geometry)
                 guard !Task.isCancelled else { return }
                 // `isRendering` stays on: the editor is about to be dismissed and
                 // Done must not fire twice meanwhile.
@@ -147,6 +190,12 @@ struct PhotoCropEditor: View {
             }
         }
     }
+}
+
+private extension CropTool {
+    var showsLook: Bool { self == .filter }
+    /// The crop tools fit one row; the filter needs its preset row and four sliders.
+    var panelHeight: CGFloat { showsLook ? 360 : 96 }
 }
 
 #Preview {
