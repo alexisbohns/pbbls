@@ -2,7 +2,7 @@ import CoreGraphics
 import Observation
 
 enum CropTool: CaseIterable, Identifiable {
-    case ratio, rotate, filter
+    case ratio, rotate, filter, adjust
     var id: Self { self }
 }
 

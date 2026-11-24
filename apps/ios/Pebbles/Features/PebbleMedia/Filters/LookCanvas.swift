@@ -4,6 +4,7 @@ import SwiftUI
 /// touch-and-hold for the photo without it (spec 2026-11-23 "Layout").
 struct LookCanvas: View {
     @Bindable var model: PhotoLookModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         Group {
@@ -22,5 +23,7 @@ struct LookCanvas: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // The first crop arrives after the tab opened: fade it in over the spinner.
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: model.base == nil)
     }
 }

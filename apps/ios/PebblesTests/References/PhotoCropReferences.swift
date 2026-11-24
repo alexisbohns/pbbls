@@ -38,5 +38,18 @@ extension References {
                 .frame(width: ReferenceConfig.phoneWidth, height: Self.height)
             ReferenceImage.assertMatches(editor, named: "cropFilter", config: Self.config(scheme))
         }
+
+        @Test(arguments: ReferenceScheme.allCases)
+        func adjust(scheme: ReferenceScheme) async throws {
+            let crop = PhotoCropModel(source: .fixture)
+            let look = PhotoLookModel()
+            look.look.select(.soft)
+            look.look.adjust.exposure = 0.3
+            await look.prepare(try await crop.render(), for: crop.geometry)
+            let editor = PhotoCropEditor(source: .fixture, initialTool: .adjust, look: look,
+                                         onCancel: {}, onDone: { _, _ in })
+                .frame(width: ReferenceConfig.phoneWidth, height: Self.height)
+            ReferenceImage.assertMatches(editor, named: "cropAdjust", config: Self.config(scheme))
+        }
     }
 }

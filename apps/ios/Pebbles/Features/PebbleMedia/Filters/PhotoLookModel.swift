@@ -21,6 +21,13 @@ final class PhotoLookModel {
     private(set) var thumbnails: [FilterPreset: CGImage] = [:]
     private(set) var masks = FilterMasks.none
 
+    enum MasksState: Equatable { case notLoaded, loading, ready }
+
+    /// The subject search for refocus runs only once refocus first moves (spec "Masks").
+    private(set) var masksState = MasksState.notLoaded
+    var subjectFound: Bool { masks.subject != nil }
+
+    @ObservationIgnored private var masksTask: Task<Void, Never>?
     @ObservationIgnored private var rendering = false
     @ObservationIgnored private var dirty = false
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "photo-look")
@@ -30,6 +37,9 @@ final class PhotoLookModel {
         base = cropped
         preparedFor = geometry
         masks = .none
+        masksState = .notLoaded
+        masksTask?.cancel()
+        masksTask = nil
         let small = Self.downscaled(cropped, longEdge: Self.thumbnailEdge)
         originalThumbnail = small
         thumbnails = await Task.detached(priority: .userInitiated) {
@@ -45,14 +55,27 @@ final class PhotoLookModel {
         let params = look.resolve(), masks = self.masks
         preview = await Task.detached(priority: .userInitiated) { Self.render(params, on: cropped, masks: masks) }.value
         if preview == nil { logger.error("look preview render failed") }
+        loadMasksIfNeeded()
     }
+
+    /// Tests wait on the subject search rather than poll it.
+    func waitForMasks() async { await masksTask?.value }
 
     /// Done: the look on the 1024 px crop, or the crop itself when the look is the identity.
     /// `sameCrop` says whether `cropped` matches the crop this model was prepared with.
     func apply(to cropped: CGImage, sameCrop: Bool) async -> CGImage {
         let params = look.resolve()
         guard params != .neutral else { return cropped }
-        let masks = sameCrop ? self.masks : .none
+        // Refocus needs the subject of this very crop: reuse it when it is ready,
+        // otherwise find it now (the search may still be running, or the crop moved).
+        let masks: FilterMasks
+        if params.refocus == 0 {
+            masks = .none
+        } else if sameCrop, masksState == .ready {
+            masks = self.masks
+        } else {
+            masks = await Task.detached(priority: .userInitiated) { Self.subjectMasks(for: cropped) }.value
+        }
         let rendered = await Task.detached(priority: .userInitiated) {
             Self.render(params, on: cropped, masks: masks)
         }.value
@@ -65,6 +88,29 @@ final class PhotoLookModel {
 
     private func lookChanged() {
         scheduleRender()
+        loadMasksIfNeeded()
+    }
+
+    private func loadMasksIfNeeded() {
+        guard look.adjust.refocus > 0, masksState == .notLoaded, let base else { return }
+        masksState = .loading
+        masksTask = Task {
+            let found = await Task.detached(priority: .userInitiated) { Self.subjectMasks(for: base) }.value
+            guard self.base === base else { return } // a new crop arrived meanwhile
+            masks = found
+            masksState = .ready
+            if found.subject == nil {
+                logger.info("no subject found; refocus goes back to 0")
+                look.adjust.refocus = 0
+            }
+            scheduleRender()
+        }
+    }
+
+    /// Refocus only: no auto-enhance chain (the spec drops auto-enhance).
+    nonisolated static func subjectMasks(for image: CGImage) -> FilterMasks {
+        FilterMasks(subject: FilterMasks.subjectMask(for: image, faceCount: PhotoMeasures.faceCount(in: image)),
+                    autoEnhance: [])
     }
 
     private func scheduleRender() {

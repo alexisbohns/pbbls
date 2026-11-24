@@ -2,8 +2,9 @@ import SwiftUI
 
 /// The crop editor's tools as a connected button group, single-select (Material
 /// 3 Expressive): the buttons sit a hair apart, outer corners are pill ends and
-/// inner corners small; the selected button rounds off on every side and takes
-/// the tonal fill. A tool is one more case in `tools`.
+/// inner corners small; the selected button rounds off on every side, takes
+/// the tonal fill and the rest of the row's width, and alone shows its label:
+/// four labels do not fit side by side. A tool is one more case in `tools`.
 struct CropToolGroup: View {
     let tools: [CropTool]
     @Binding var selection: CropTool
@@ -13,6 +14,12 @@ struct CropToolGroup: View {
     private static let height: CGFloat = 48
     private static let gap: CGFloat = 2
     private static let innerRadius: CGFloat = 8
+    /// An unselected, icon-only segment: a comfortable target, not a stretched pill.
+    private static let iconSegmentWidth: CGFloat = 64
+
+    /// Each label's natural width, measured once it lays out: the selected label
+    /// springs from 0 to it, so the name unrolls beside the icon as the segment opens.
+    @State private var labelWidths: [CropTool: CGFloat] = [:]
 
     var body: some View {
         HStack(spacing: Self.gap) {
@@ -20,7 +27,7 @@ struct CropToolGroup: View {
                 button(tool, index: index)
             }
         }
-        .animation(reduceMotion ? nil : .snappy, value: selection)
+        .animation(reduceMotion ? nil : .photoEditorSpring, value: selection)
         .accessibilityElement(children: .contain)
         // Chrome, not content: it stops growing before the labels crowd each other.
         .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
@@ -30,19 +37,33 @@ struct CropToolGroup: View {
         let selected = selection == tool
         let ink = selected ? Color.pebbles.onSecondaryContainer : Color.pebbles.onSurfaceVariant
         return Button { selection = tool } label: {
-            HStack(spacing: Spacing.sm) {
+            HStack(spacing: 0) {
                 PbblsGlyphView(tool.glyph, size: 22, style: AnyShapeStyle(ink))
+                // Always present, never inserted: only its width and opacity move, so
+                // the spring carries it and nothing lands on top of the icon.
                 Text(tool.label)
                     .pebblesFont(.subheadEmphasized)
                     .lineLimit(1)
+                    .fixedSize()
                     .foregroundStyle(ink)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { labelWidths[tool] = $0 }
+                    .padding(.leading, Spacing.sm)
+                    .frame(width: selected ? (labelWidths[tool] ?? 0) + Spacing.sm : 0, alignment: .leading)
+                    .clipped()
+                    .opacity(selected ? 1 : 0)
+                    .accessibilityHidden(true)
             }
-            .frame(maxWidth: .infinity, minHeight: Self.height)
+            .frame(minWidth: Self.iconSegmentWidth, maxWidth: selected ? .infinity : Self.iconSegmentWidth,
+                   minHeight: Self.height)
             .background(shape(index: index, selected: selected)
                 .fill(selected ? Color.pebbles.secondaryContainer : Color.pebbles.surfaceContainerHigh))
+            // Each segment draws only inside itself, so a label never spills over a
+            // neighbour while the row springs to its new widths.
+            .clipShape(shape(index: index, selected: selected))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(Text(tool.label))
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
@@ -67,6 +88,7 @@ private extension CropTool {
         case .ratio: .rectangleDashed
         case .rotate: .setSquare
         case .filter: .filterBox
+        case .adjust: .slider
         }
     }
 
@@ -75,6 +97,7 @@ private extension CropTool {
         case .ratio: "Reframe"
         case .rotate: "Rotate"
         case .filter: "Filter"
+        case .adjust: "Adjust"
         }
     }
 }

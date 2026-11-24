@@ -1,33 +1,44 @@
 import SwiftUI
 
 /// The Filter tool (spec 2026-11-23 "Layout"): Original and the seven presets as
-/// thumbnails, then intensity and the three extras.
+/// thumbnails, the selected one a circle, then intensity and the three extras as a
+/// row of knobs.
 struct FilterToolPanel: View {
     @Bindable var model: PhotoLookModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private static let tileEdge: CGFloat = 64
     private static let radius: CGFloat = 12
 
     var body: some View {
-        // Scrolls only when larger text makes the sliders outgrow the panel.
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(spacing: Spacing.md) {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: Spacing.sm) {
-                        tile(nil)
-                        ForEach(FilterPreset.allCases) { tile($0) }
-                    }
+        VStack(spacing: Spacing.md) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: Spacing.sm) {
+                    tile(nil)
+                    ForEach(FilterPreset.allCases) { tile($0) }
                 }
-                LookSlider(label: "Intensity", value: $model.look.intensity, range: 0...1, defaultValue: 1,
-                           readout: .percent, isEnabled: model.look.preset != nil)
+                .scrollTargetLayout()
+            }
+            // Snaps so a tile, not half of one, sits on the inset.
+            .scrollTargetBehavior(.viewAligned)
+            // Edge to edge, like the Adjust row: the strip runs under the panel's
+            // inset and its first tile still lines up with it.
+            .contentMargins(.horizontal, Spacing.lg, for: .scrollContent)
+            .padding(.horizontal, -Spacing.lg)
+            HStack(alignment: .top, spacing: 0) {
+                LookKnob(label: "Intensity", value: $model.look.intensity, defaultValue: 1,
+                         isEnabled: model.look.preset != nil)
+                    .frame(maxWidth: .infinity)
                 ForEach(PhotoLook.Extra.allCases, id: \.self) { extra in
-                    LookSlider(label: extra.label, value: binding(for: extra), range: 0...1,
-                               defaultValue: model.look.preset == nil ? 0 : extra.defaultValue, readout: .percent)
+                    LookKnob(label: extra.label, value: binding(for: extra),
+                             defaultValue: model.look.preset == nil ? 0 : extra.defaultValue)
+                        .frame(maxWidth: .infinity)
                 }
             }
-            .padding(.vertical, Spacing.sm)
         }
-        .scrollBounceBehavior(.basedOnSize)
+        .padding(.vertical, Spacing.sm)
+        // Chrome, not content: it stops growing before the knobs outgrow the panel.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 
     private func binding(for extra: PhotoLook.Extra) -> Binding<Double> {
@@ -38,7 +49,8 @@ struct FilterToolPanel: View {
         let selected = model.look.preset == preset
         let image: CGImage? = if let preset { model.thumbnails[preset] } else { model.originalThumbnail }
         let name: LocalizedStringResource = preset?.name ?? "Original"
-        let shape = RoundedRectangle(cornerRadius: Self.radius, style: .continuous)
+        // The selected tile rounds into a circle: the shape is the selection mark.
+        let shape = RoundedRectangle(cornerRadius: selected ? Self.tileEdge / 2 : Self.radius, style: .circular)
         return Button { model.look.select(preset) } label: {
             VStack(spacing: Spacing.xs) {
                 ZStack {
@@ -49,16 +61,16 @@ struct FilterToolPanel: View {
                 }
                 .frame(width: Self.tileEdge, height: Self.tileEdge)
                 .clipShape(shape)
-                .overlay(shape.strokeBorder(Color.pebbles.primary, lineWidth: selected ? 3 : 0))
                 Text(name)
-                    .pebblesFont(.meta)
+                    .pebblesFont(.captionEmphasized)
                     .lineLimit(1)
-                    .foregroundStyle(selected ? Color.pebbles.onSurface : Color.pebbles.onSurfaceVariant)
+                    .foregroundStyle(selected ? Color.pebbles.primary : Color.pebbles.onSurfaceVariant)
             }
             .frame(width: Self.tileEdge + Spacing.sm)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .animation(reduceMotion ? nil : .snappy, value: selected)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(name))
         .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)

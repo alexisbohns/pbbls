@@ -56,11 +56,13 @@ The editor's layout stays as it is: top bar, canvas, tool panel, tabs.
 
 - **Canvas on Filter and Adjust:** the cropped result, no scrim or grid, gestures off: framing happens on Reframe. Touch and hold shows the photo without the look, as in the lab.
 - **Filter panel:**
-  - A horizontal row of presets: the cropped photo at about 64 pt with the preset at intensity 1 and no extras, its name under it, the selected one marked.
-  - Below the row, the four knobs as labelled sliders with a readout.
+  - A horizontal row of presets: the cropped photo at about 64 pt with the preset at intensity 1 and no extras, its name under it in sentence case. The selected tile rounds into a circle and its name takes the primary colour (device pass, 2026-11-24).
+  - Below the row, the four knobs in one row as circular dials (device pass, 2026-11-24): a tonal disc with a 270° track open at the bottom, the value as a primary arc ending in a dot, the value ×100 inside as a bare number, the name below. Drag up to turn one up, down to turn it down; a light tick every 5 %.
   - On Original, intensity is disabled.
-- **Adjust panel:** a scrolling list of the eleven sliders, each with its label and a signed readout.
+- **Adjust panel:** the eleven controls as one horizontally scrolling row of the same knobs (device pass, 2026-11-24), so the photo stays large enough to judge the result. A two-sided control (−1…1) fills from its top-centre zero and reads signed (+20, −35). Knobs turn on a vertical drag only; a sideways drag scrolls the row from anywhere on it, dials included (the knob's pan declines a drag whose first movement is sideways). Both rows, presets and Adjust knobs, run edge to edge, their first item lined up with the panel's inset, and snap so an item always comes to rest on that inset. Each Adjust knob takes a quarter of the row, so a page is four knobs. The refocus note sits above the row, so it never moves the knobs.
 - **Tab glyphs:** Reframe `rectangleDashed`, Rotate `setSquare`, Filter `filterBox` (reserved for it by the crop spec), Adjust `slider`.
+- **Tab labels (device pass, 2026-11-24):** four labels do not fit side by side, so only the selected tab shows its name; it takes the rest of the row, the others are icon-only segments (their name stays their accessibility label).
+- **Switching tools (device pass, 2026-11-24):** the panel is anchored to the tabs on Filter and Adjust, so the two tools' knob rows sit in exactly the same place and only Filter's presets appear above them. A switch swaps the controls at once and then springs the panel to the new tool's height (the editor's shared spring: 0.45 s, bounce 0.3), with the photo resizing along with it; the panel is clipped so a taller tool never draws over the photo mid-spring. The selected tab's name unrolls inside its own segment on the same spring, never over a neighbour. Under Reduce Motion everything switches without animation.
 
 ## Architecture
 
