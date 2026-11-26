@@ -4,7 +4,7 @@ import Testing
 /// D8 (spec 2026-10-20-ios-m3-colour §7), the iOS twin of Android's
 /// ThemeLiteralsTest. Feature code names a colour only as
 /// `Color.pebbles.<role>`. The simulator shares the host filesystem, so the test
-/// reads the sources from `#filePath` (precedent: StoneLab/StoneLabPalettesTests).
+/// reads the sources from `#filePath` (precedent: the earlier stone lab palette test).
 ///
 /// A file's count is its number of offending *lines* (one line can break two
 /// rules: `UIColor(red:` also matches `Color(red`). A file's count must equal
@@ -56,7 +56,6 @@ struct ThemeLiteralsTests {
     /// Not scanned (spec §7).
     static let exemptPrefixes = [
         "Features/Path/Stone/",
-        "Features/StoneLab/",
         "Features/Path/Models/EmotionPalette.swift",
         "Components/Buttons/AppleSignInButton.swift",
         "Components/Buttons/GoogleSignInButton.swift"
@@ -64,7 +63,6 @@ struct ThemeLiteralsTests {
 
     /// Permanent: hits that are not chrome colours.
     static let allowlist: [String: (count: Int, reason: String)] = [
-        "Features/Path/Render/PebbleAnimatedRenderView.swift": (1, "stroke-reveal mask"),
         "Features/Connections/InviteSheet.swift": (1, "QR quiet zone must be white for scanners"),
         "Features/Capture/CaptureFlowView.swift": (1, "role: .destructive in a system dialog"),
         "Features/Path/MomentDeleteDialog.swift": (1, "role: .destructive in a system dialog"),

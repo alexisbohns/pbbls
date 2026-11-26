@@ -2,7 +2,7 @@ import CoreGraphics
 import Foundation
 
 /// Splits an engine shape seed (`docs/seeds/shape-seeds/*.svg`) into the parts
-/// the stone lab carves separately. The engine emits no ids. The outline is
+/// the stone carves separately. The engine emits no ids. The outline is
 /// the stroked `<path>` with the largest extent (`large-neutral` lists it
 /// third, so document order is not enough), every other stroked path is a
 /// vein in document order, and the single filled path is the fossil.

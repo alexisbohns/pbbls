@@ -32,7 +32,7 @@ struct PebbleStrokeTests {
 
     @Test func modelIsNilForMalformedSvgSoStaticViewFallsBack() {
         // No viewBox / no layers → PebbleSVGModel returns nil, and
-        // PebbleStaticRenderView renders the PebbleRenderView fallback.
+        // the caller renders the PebbleRenderView fallback.
         #expect(PebbleSVGModel(svg: "not svg at all") == nil)
     }
 

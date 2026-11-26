@@ -28,6 +28,7 @@ struct CompleteFlowView: View {
     @Environment(AchievementsService.self) private var achievements
     @Environment(CompleteDraftStore.self) private var drafts
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.displayScale) private var displayScale
     @Environment(\.dismiss) private var dismiss
 
     @State private var model = CompleteFlowModel()
@@ -63,10 +64,12 @@ struct CompleteFlowView: View {
         }
         .task {
             TapHaptics.prepare()
-            // The valence fan wobbles nine artworks on first sight.
+            // The valence fan wobbles nine artworks on first sight, and its lit
+            // stones need their carvings, grain tile and glyph lines.
+            let scale = displayScale
             Task.detached(priority: .utility) {
                 ValenceArt.prewarm()
-                StoneCarvingArt.prewarm()
+                LitStonePrewarm.run(scale: scale)
             }
             if autosave == nil {
                 autosave = CompleteAutosave(

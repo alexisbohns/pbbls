@@ -1,6 +1,6 @@
 import CoreGraphics
 
-/// Layout constants for composing `PebbleOutlineBackdropView` underneath
+/// Layout constants for composing the outline backdrop underneath
 /// `PebbleRenderView`. The outline viewBox is intentionally ~1.35× the
 /// pebble's viewBox so the silhouette frames the artwork with ~12–13%
 /// margin per edge. `SVGView` scales each child to fill its proposed

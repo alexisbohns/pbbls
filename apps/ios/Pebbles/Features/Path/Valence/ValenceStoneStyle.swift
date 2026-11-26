@@ -3,14 +3,14 @@ import SwiftUI
 /// The headline word's fill for the picked valence.
 ///
 /// Until #975 this type also drew the valence stones themselves (a wash, an
-/// ink and a mesh per polarity). The picker draws lit `StoneView`s since, so
+/// ink and a mesh per polarity). The picker draws lit stones (`LitStoneImage`) since, so
 /// those members had no caller and were deleted with their hex tables (#1143,
 /// iOS half): iOS carries no red valence stop. A later port of the mesh starts
 /// from the retuned tables in
 /// `docs/superpowers/specs/2026-10-20-ios-new-path-foundations-design.md` §B3.1,
 /// never from git history.
 enum ValenceStoneStyle {
-    /// Since #974 the stones are lit brand-coloured stone (`StoneTones.starting`:
+    /// Since #974 the stones are lit brand-coloured stone (`LitStoneTones`:
     /// dark, shaded and primary bodies), so the word takes the brand tone its
     /// stone wears. Lowlight stays the system foreground: at headline size the
     /// near-black `shaded` reads as disabled in light mode and vanishes in dark mode.
