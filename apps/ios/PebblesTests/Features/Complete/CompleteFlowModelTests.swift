@@ -171,6 +171,21 @@ struct CompleteFlowModelTests {
         #expect(!recorder.taps.contains(.success))
     }
 
+    @Test("a success owes one achievement check, taken once; a quiet one owes none")
+    func achievementCheckIsOwedOnce() {
+        let (model, _) = model()
+        #expect(!model.takePendingAchievementCheck())
+        model.beginCompleting()
+        model.succeed(with: CompletionResult(pebbleId: UUID(), karmaDelta: 4, glyph: nil))
+        #expect(model.takePendingAchievementCheck())
+        #expect(!model.takePendingAchievementCheck())
+
+        let (quiet, _) = self.model()
+        quiet.beginCompleting()
+        quiet.succeed(with: CompletionResult(pebbleId: UUID(), karmaDelta: 4, glyph: nil), quiet: true)
+        #expect(!quiet.takePendingAchievementCheck())
+    }
+
     @Test("closing marks the flow as leaving, silently")
     func closing() {
         let (model, recorder) = model()

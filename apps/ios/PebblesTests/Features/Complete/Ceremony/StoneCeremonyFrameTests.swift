@@ -111,7 +111,16 @@ struct StoneCeremonyFrameTests {
         let q = quiet.act2(at: quiet.landing + 0.3, markedDay: marked)
         #expect(q.press.waves.isEmpty); #expect(q.press.sweep == nil)
         #expect(quiet.act2(at: 0, markedDay: marked).supportUnderContinue == 1)
-        #expect(quiet.act2(at: 0.25, markedDay: marked).supportUnderContinue == 0)
+        // The link stays until the one above Done is in: no gap where a quiet pebble has no support link.
+        #expect(quiet.act2(at: 0.25, markedDay: marked).supportUnderContinue == 1)
+        #expect(quiet.act2(at: quiet.still, markedDay: marked).supportUnderContinue == 0)
+        for mode in [StoneCeremonyMode.full, .reducedMotion, .lowPower] {
+            let tl = StoneCeremonyTimeline(size: .medium, polarity: .neutral, carves: true, quiet: true, mode: mode)
+            for u in stride(from: 0.0, through: tl.still + 0.1, by: 0.01) {
+                let f = tl.act2(at: u, markedDay: marked)
+                #expect(close(f.supportUnderContinue + f.actionsOpacity, 1), "\(mode) at \(u)")
+            }
+        }
         #expect(t.act2(at: t.still, markedDay: marked) == t.settledFrame(markedDay: marked))
         let gem = timeline(.highlight)
         #expect(gem.act2(at: gem.landing + 0.30 + 0.266, markedDay: marked).press.sparkAlpha > 0)

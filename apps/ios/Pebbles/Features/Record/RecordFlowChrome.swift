@@ -57,6 +57,8 @@ struct RecordFlowChrome: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(stepAnnouncement)
+        // The success step has no dots: nothing to announce, least of all "Done".
+        .accessibilityHidden(dotCount == 0)
     }
 
     private func fill(for index: Int) -> Color {

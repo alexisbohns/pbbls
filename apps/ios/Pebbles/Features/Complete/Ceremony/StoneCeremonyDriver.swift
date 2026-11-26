@@ -18,11 +18,12 @@ final class StoneCeremonyDriver {
     @ObservationIgnored private var closed = false
 
     init(ceremony: StoneCeremony, carveLength: CGFloat, hapticsOn: Bool,
-         haptics: StoneCeremonyHapticPlaying = StoneCeremonyHaptics.shared) {
+         haptics: StoneCeremonyHapticPlaying? = nil) {
         self.ceremony = ceremony
         self.carveLength = carveLength
         self.hapticsOn = hapticsOn
-        self.haptics = haptics
+        // Resolved here, in the main-actor init: a default argument is read from a nonisolated context.
+        self.haptics = haptics ?? StoneCeremonyHaptics.shared
         self.frozen = !ceremony.isRunning
     }
 
@@ -74,9 +75,10 @@ final class StoneCeremonyDriver {
         haptics.stop()
     }
 
-    /// The engine may have auto-shut down during a long pause: warm it as the ceremony arrives
-    /// there, so the Continue tick is not late. Quiet and Haptics-off ceremonies play nothing, so
-    /// they need no engine.
+    /// Warms the engine as the ceremony arrives at the pause, so a quick Continue finds it running.
+    /// The engine auto-shuts down when idle, so after a long pause this does nothing: `play` restarts
+    /// the engine itself, and the Continue tick can then be a little late. Quiet and Haptics-off
+    /// ceremonies play nothing, so they need no engine.
     private func warmIfPaused(since before: StoneCeremonyPhase) {
         guard !frozen, ceremony.phase == .paused, before != .paused else { return }
         guard !StoneCeremonyScore.act2(ceremony.timeline, hapticsOn: hapticsOn).isEmpty else { return }

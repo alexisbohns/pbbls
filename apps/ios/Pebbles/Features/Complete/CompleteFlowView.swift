@@ -61,6 +61,7 @@ struct CompleteFlowView: View {
         }
         .background(Color.pebbles.surface)
         .pebblesScreen()
+        .onDisappear { fireAchievementCheck() }
         .animation(.snappy(duration: 0.28), value: model.step)
         .onChange(of: model.step) { old, new in
             isMovingBack = new.rawValue < old.rawValue
@@ -114,6 +115,7 @@ struct CompleteFlowView: View {
                     draft: model.draft,
                     hasWords: momentHasWords,
                     onExit: { dismiss() },
+                    onSettled: fireAchievementCheck,
                     onRecordAnother: onRecordAnother,
                     onEdited: { onCompleted(momentId) }
                 )
@@ -189,10 +191,18 @@ struct CompleteFlowView: View {
     /// view's `onDisappear` latch comes after the animation, and its ticks would play on the
     /// screen underneath.
     private func close() {
+        fireAchievementCheck()
         model.beginClosing()
         StoneCeremonyHaptics.shared.stop()
         autosave?.flush()
         dismiss()
+    }
+
+    /// Fires the check the success owes, once: when the ceremony settles, and on every way out before
+    /// that (✕, the flow disappearing), so an unlock is never lost. Not `AchievementNotificationService.hold()`:
+    /// that flag is shared with the onboarding hand-off, which Home's `composerSaved()` would release early.
+    private func fireAchievementCheck() {
+        if model.takePendingAchievementCheck() { achievements.fireCheck() }
     }
 
     // MARK: - Complete
@@ -223,8 +233,11 @@ struct CompleteFlowView: View {
             let quiet = model.draft.valence?.quietSuccess ?? false
             if !quiet {
                 // The end screen shows `+N`, so no capsule (A4).
-                karma.notifyEarned(amount: karmaDelta ?? 0, reason: .pebbleCreated, presentsCapsule: false)
-                achievements.fireCheck()
+                // The ceremony plays the haptic when its stone is on screen, and the achievement check
+                // waits for the ceremony to settle (`fireAchievementCheck`): an unlock card must not
+                // cover Act 1.
+                karma.notifyEarned(amount: karmaDelta ?? 0, reason: .pebbleCreated, presentsCapsule: false,
+                                   playsHaptic: false)
             }
             autosave?.clear()
             if let owner = supabase.session?.user.id {

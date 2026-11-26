@@ -18,6 +18,8 @@ struct CompleteRicherStep: View {
     let result: CompletionResult
     let draft: CompleteDraft
     let onExit: () -> Void
+    /// Fired once when the ceremony comes to rest, by the clock or by a skip.
+    var onSettled: () -> Void = {}
     /// Nil when the host cannot start another capture (the held card).
     let onRecordAnother: (() -> Void)?
     let onEdited: () -> Void
@@ -43,6 +45,8 @@ struct CompleteRicherStep: View {
     @State private var driver: StoneCeremonyDriver?
     /// Act 1 plays once, from the stage's first appearance.
     @State private var hasStarted = false
+    /// VoiceOver's focus, moved to Continue when the ceremony reaches the pause.
+    @AccessibilityFocusState private var continueFocused: Bool
 
     private var quiet: Bool { draft.valence?.quietSuccess ?? false }
     private var valence: Valence { draft.valence ?? .neutralMedium }
@@ -50,7 +54,8 @@ struct CompleteRicherStep: View {
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "complete-richer")
 
     init(momentId: UUID, name: String?, happenedAt: Date?, result: CompletionResult, draft: CompleteDraft,
-         hasWords: Bool, onExit: @escaping () -> Void, onRecordAnother: (() -> Void)?, onEdited: @escaping () -> Void,
+         hasWords: Bool, onExit: @escaping () -> Void, onSettled: @escaping () -> Void = {},
+         onRecordAnother: (() -> Void)?, onEdited: @escaping () -> Void,
          scrolls: Bool = true, frozen: StoneCeremonyFreeze? = nil) {
         self.momentId = momentId
         self.scrolls = scrolls
@@ -59,6 +64,7 @@ struct CompleteRicherStep: View {
         self.result = result
         self.draft = draft
         self.onExit = onExit
+        self.onSettled = onSettled
         self.onRecordAnother = onRecordAnother
         self.onEdited = onEdited
         _collectionId = State(initialValue: draft.collectionId)
@@ -121,6 +127,14 @@ struct CompleteRicherStep: View {
             .gesture(TapGesture().onEnded { driver?.tapOutside(at: .now) }, including: running ? .all : .subviews)
         }
         .task(id: driver?.ceremony.phase) { await tickAtEnd() }
+        .onChange(of: driver?.ceremony.phase) { _, phase in
+            switch phase {
+            case .settled: onSettled()
+            // VoiceOver meets Continue where the ceremony rests, not on ✕ with Continue appearing silently.
+            case .paused: continueFocused = true
+            default: break
+            }
+        }
         .onDisappear { driver?.close() }
         .sheet(isPresented: $showsCrisisResources) {
             CrisisResourcesSheet()
@@ -287,15 +301,18 @@ struct CompleteRicherStep: View {
     // MARK: Bar
 
     /// One capsule from the pause to the end (D6): Continue, which becomes Done in place.
-    /// A quiet pebble's Get support sits under it at the pause, then above Done; Record
-    /// another takes the slot under it. Every spot is held, so nothing moves.
+    /// A quiet pebble's Get support sits under it at the pause, then cross-fades to above Done, with
+    /// no instant where neither shows; Record another takes the slot under it. Every spot is held, so
+    /// nothing moves.
     private func bar(frame: StoneCeremonyFrame, accepts: Bool) -> some View {
         VStack(spacing: Spacing.xs) {
             if quiet {
+                // Takes taps as soon as it shows: the under-Continue link fades out as this one fades in.
+                let shown = frame.actionsOpacity > 0
                 textButton("Get support") { showsCrisisResources = true }
                     .opacity(frame.actionsOpacity)
-                    .allowsHitTesting(accepts)
-                    .accessibilityHidden(!accepts)
+                    .allowsHitTesting(shown)
+                    .accessibilityHidden(!shown)
             }
             Button(action: continueOrDone) {
                 ZStack {
@@ -308,6 +325,7 @@ struct CompleteRicherStep: View {
             .opacity(frame.buttonOpacity)
             // Nothing draws until Continue fades in, so VoiceOver meets it then.
             .accessibilityHidden(frame.buttonOpacity == 0)
+            .focusedForVoiceOver($continueFocused, enabled: scrolls)
             // Continue takes the tap from the first frame, before it is drawn: a transparent view is not
             // hit-tested, so this clear capsule behind it holds the spot (before contact it only skips).
             .background {
@@ -550,6 +568,13 @@ struct RicherWeekRow: View {
 }
 
 private extension View {
+    /// VoiceOver's focus on this view. Off in reference renders: `ImageRenderer` drops the page's
+    /// bar when the focus modifier is on it, and no reference needs a focus.
+    @ViewBuilder
+    func focusedForVoiceOver(_ focus: AccessibilityFocusState<Bool>.Binding, enabled: Bool) -> some View {
+        if enabled { accessibilityFocused(focus) } else { self }
+    }
+
     /// The richer cascade (#1691): row `index` fades in with a 6 pt rise.
     func cascade(_ frame: StoneCeremonyFrame, _ index: Int) -> some View {
         opacity(frame.rowOpacity[index]).offset(y: frame.rowRise[index])

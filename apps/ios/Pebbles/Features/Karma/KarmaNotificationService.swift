@@ -16,8 +16,8 @@ final class KarmaNotificationService {
     /// by the karma overlay window.
     private(set) var activeCapsule: KarmaEarnedContent?
 
-    /// Counts how many times feedback (haptic + sound) has fired. Observable so
-    /// tests can assert the guard without reaching into CoreHaptics/audio.
+    /// Counts how many times the earned haptic has fired. Observable so tests
+    /// can assert the guard without reaching into CoreHaptics/audio.
     private(set) var hapticTrigger: Int = 0
 
     private let audio: AudioService
@@ -34,18 +34,25 @@ final class KarmaNotificationService {
         self.haptics = haptics
     }
 
-    /// - Parameter presentsCapsule: pass `false` when the surface already shows
-    ///   the amount — the record flow's success step does, and a pastille over
-    ///   it is redundant. The sound and the haptic still fire either way: they
-    ///   are the celebration, not the notification (D10).
-    func notifyEarned(amount: Int, reason: KarmaReason, presentsCapsule: Bool = true) {
+    /// - Parameters:
+    ///   - presentsCapsule: pass `false` when the surface already shows the
+    ///     amount — the record flow's success step does, and a pastille over it
+    ///     is redundant. The sound still plays either way: it is the
+    ///     celebration, not the notification (D10).
+    ///   - playsHaptic: pass `false` when the surface plays its own haptic for
+    ///     this moment. The record flow's stone ceremony does (#1691): a tick
+    ///     at write-return would land before the stone is on screen. The haptic
+    ///     fires by default; the sound is unaffected.
+    func notifyEarned(amount: Int, reason: KarmaReason, presentsCapsule: Bool = true, playsHaptic: Bool = true) {
         // Only positive credits celebrate; deletions/clawbacks stay silent.
         guard amount > 0 else { return }
 
         // Fire haptic + sound together so the waveform-matched vibration lands
         // in sync with the ceramic sound.
-        hapticTrigger &+= 1
-        haptics.playKarmaEarned()
+        if playsHaptic {
+            hapticTrigger &+= 1
+            haptics.playKarmaEarned()
+        }
         audio.playKarmaEarnedSound()
 
         guard presentsCapsule else { return }
