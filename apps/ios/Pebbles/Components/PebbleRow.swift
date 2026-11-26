@@ -37,7 +37,7 @@ struct PebbleRow: View {
         ])
     }
 
-    /// The lit stone (#974), at the rest light: the row never animates.
+    /// The lit stone (#1690): the row never animates.
     private var thumbnail: some View {
         stone
             .frame(width: 40, height: 40)
@@ -48,9 +48,10 @@ struct PebbleRow: View {
     @ViewBuilder
     private var stone: some View {
         if let pebble = moment.pebble {
-            PebbleStoneView(valence: pebble.valence, glyph: pebble.glyph, palette: palette)
+            PebbleStoneView(valence: pebble.valence, glyph: pebble.glyph, palette: palette,
+                            seed: StableHash.seed(pebble.id))
         } else {
-            PebbleStoneView.blank()
+            PebbleStoneView.blank(seed: StableHash.seed(moment.id))
         }
     }
 

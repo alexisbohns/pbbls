@@ -2,8 +2,8 @@ import SwiftUI
 
 /// The verso's lit stone (#1146 §Verso), 150 pt wide when large, in its rings:
 /// stack D's `SpineStone` layers at the verso's size, so the print can press it
-/// in with the Spine's dip, ripple and glint (E3). Drawn at its own width, never
-/// scaled up (the lit stone is a shader layer). The tilt stays off on the card.
+/// in with the Spine's dip, ripple and glint (E3). Drawn at its own width: the
+/// vector stone is painted at the size it is shown, so a scale would blur it.
 struct VersoStone: View {
     let valence: Valence
     let glyph: PebbleGlyph?
@@ -36,7 +36,7 @@ struct VersoStone: View {
                     StoneRipple(geometry: geometry, stone: stone, waves: frame.waves, reach: reach)
                 }
             }
-            PebbleStoneView(valence: valence, glyph: glyph, palette: palette, followsTilt: false, seed: seed)
+            PebbleStoneView(valence: valence, glyph: glyph, palette: palette, seed: seed)
                 .frame(width: stone.width, height: stone.height)
                 .scaleEffect(frame.dip)
             if let geometry {
