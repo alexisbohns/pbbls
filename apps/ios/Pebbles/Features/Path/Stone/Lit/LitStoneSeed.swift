@@ -3,7 +3,8 @@ import Foundation
 /// The seed of a sample stone, one that belongs to no pebble (#1690 D4): the
 /// valence picker's fan. A real pebble passes `StableHash.seed(pebble.id)`; a
 /// sample passes a fixed constant per valence, so it never changes between
-/// launches and matches the same sample on web and Android.
+/// launches. (Neither web nor Android draws a lit sample stone, so there is no
+/// sibling seed to match.)
 enum LitStoneSeed {
     static func sample(_ valence: Valence) -> UInt32 {
         StableHash.fnv1a("sample-\(valence.rawValue)")

@@ -1,9 +1,10 @@
 import SwiftUI
 
-/// Whether a stone sweeps its light on appearance. Reference renders only:
-/// the sweep is clocked from `.now`, so two recordings of the same tree would
-/// differ by a few pixels and the re-baseline bot refuses them. Production
-/// never sets it; `ValenceStoneView` reads it next to Reduce Motion.
+/// Whether a selected stone plays its press (dip and glint) on appearance.
+/// Reference renders only: the press is clocked from `.now`, so two recordings
+/// of the same tree would differ by a few pixels and the re-baseline bot
+/// refuses them. Production never sets it; `ValenceStoneView` reads it next to
+/// Reduce Motion.
 private struct StoneSweepsKey: EnvironmentKey {
     static let defaultValue = true
 }
