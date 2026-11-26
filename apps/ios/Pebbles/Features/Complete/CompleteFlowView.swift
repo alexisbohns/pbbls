@@ -44,15 +44,16 @@ struct CompleteFlowView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if model.step != .success {
-                RecordFlowChrome(
-                    dotCount: CompleteStep.counted.count,
-                    dotIndex: model.step.dotIndex,
-                    canGoBack: model.step.previous != nil && !model.isCompleting,
-                    onBack: { model.back() },
-                    onClose: close
-                )
-            }
+            // The success step shows ✕ alone, no dots and no back: the ceremony owns it, and closing
+            // works throughout (D9).
+            let onSuccess = model.step == .success
+            RecordFlowChrome(
+                dotCount: onSuccess ? 0 : CompleteStep.counted.count,
+                dotIndex: onSuccess ? nil : model.step.dotIndex,
+                canGoBack: !onSuccess && model.step.previous != nil && !model.isCompleting,
+                onBack: { model.back() },
+                onClose: close
+            )
             stepBody
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -131,10 +132,20 @@ struct CompleteFlowView: View {
             }
         }
         .id(model.step)
-        .transition(.asymmetric(
-            insertion: .move(edge: isMovingBack ? .leading : .trailing).combined(with: .opacity),
-            removal: .move(edge: isMovingBack ? .trailing : .leading).combined(with: .opacity)
-        ))
+        .transition(stepTransition)
+    }
+
+    /// Steps slide; the success step fades in and the life step fades out into it, so the stone's
+    /// flight never shares the screen with a sliding page (#1691). A leaving view keeps the
+    /// transition of its last render, and Back is disabled while completing, so `isCompleting`
+    /// marks the one departure that is not a slide.
+    private var stepTransition: AnyTransition {
+        let slide = AnyTransition.move(edge: isMovingBack ? .leading : .trailing).combined(with: .opacity)
+        let slideOut = AnyTransition.move(edge: isMovingBack ? .trailing : .leading).combined(with: .opacity)
+        return .asymmetric(
+            insertion: model.step == .success ? .opacity : slide,
+            removal: model.isCompleting ? .opacity : slideOut
+        )
     }
 
     private var valenceSubtitle: LocalizedStringResource? {
@@ -187,6 +198,8 @@ struct CompleteFlowView: View {
             return
         }
         model.beginCompleting()
+        // Warm the haptic engine while the write runs, so the ceremony's first event is on time.
+        StoneCeremonyHaptics.shared.prepare()
         let service = MomentsService(client: supabase.client)
         // Karma already earned by a pebble that exists on the moment (a stale
         // read, a retried chain): `complete_pebble` updates it in place, so

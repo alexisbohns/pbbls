@@ -153,7 +153,7 @@ struct CompleteFlowModelTests {
         #expect(model.draftToAutosave.soulIds == [soul])
     }
 
-    @Test("success goes to the success step with a success haptic; failure stays put")
+    @Test("success goes to the success step and the ceremony plays the haptic; failure stays put")
     func outcomes() {
         let (model, recorder) = model()
         model.go(to: .life)
@@ -167,7 +167,8 @@ struct CompleteFlowModelTests {
         model.succeed(with: result)
         #expect(model.step == .success)
         #expect(model.completed == result)
-        #expect(recorder.taps.suffix(2) == [.warning, .success])
+        #expect(recorder.taps.suffix(1) == [.warning])
+        #expect(!recorder.taps.contains(.success))
     }
 
     @Test("quiet success does not buzz")

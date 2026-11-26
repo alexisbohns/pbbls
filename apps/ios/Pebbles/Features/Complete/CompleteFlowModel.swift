@@ -144,9 +144,9 @@ final class CompleteFlowModel {
         completeError = nil
     }
 
-    /// `quiet` (a high-distress pebble) skips the success haptic.
+    /// The success step's ceremony plays the haptic (#1691), so this one is silent. `quiet` (a
+    /// high-distress pebble) stays on the signature so the ceremony and the flow agree on it.
     func succeed(with result: CompletionResult, quiet: Bool = false) {
-        if !quiet { haptic(.success) }
         isCompleting = false
         completed = result
         step = .success
