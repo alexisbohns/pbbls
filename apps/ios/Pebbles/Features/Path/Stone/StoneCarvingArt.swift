@@ -133,14 +133,26 @@ enum StoneCarvingArt {
 
     // MARK: - Build
 
-    private static func build(_ valence: Valence) -> Art? {
-        let name = "stone-shape-\(valence.sizeGroup.rawValue)-\(valence.polarity.rawValue)"
+    /// One bundled engine shape seed, split into outline, veins and fossil.
+    /// Nil (and logged) when the seed is missing or does not parse.
+    static func parsedSeed(size: ValenceSizeGroup, polarity: ValencePolarity) -> StoneShapeParser.Parsed? {
+        let name = seedName(size: size, polarity: polarity)
         guard let url = Bundle.main.url(forResource: name, withExtension: "svg"),
               let svg = try? String(contentsOf: url, encoding: .utf8),
               let parsed = StoneShapeParser.parse(svg) else {
             logger.error("stone: missing or unparseable seed \(name, privacy: .public)")
             return nil
         }
+        return parsed
+    }
+
+    private static func seedName(size: ValenceSizeGroup, polarity: ValencePolarity) -> String {
+        "stone-shape-\(size.rawValue)-\(polarity.rawValue)"
+    }
+
+    private static func build(_ valence: Valence) -> Art? {
+        let name = seedName(size: valence.sizeGroup, polarity: valence.polarity)
+        guard let parsed = parsedSeed(size: valence.sizeGroup, polarity: valence.polarity) else { return nil }
 
         let outline = CGMutablePath()
         if let path = WobbleRenderer.glyphInk(d: parsed.outline.d, width: parsed.outline.width) {
