@@ -30,6 +30,29 @@ enum StoneCeremonyLayout {
         max(2, Double(screenWidth / heroWidth) * 0.96) * (1 - 0.06 * Double(k))
     }
 
+    /// How far under the hero stone the name sits at the pause, before it slides to its rest.
+    static let nameGap: CGFloat = 26
+
+    /// Where the flying stone is at `progress` of its flight (D4): the origin and
+    /// the size, each straight from `from` to `to`. The timeline eases `progress`.
+    static func flightRect(from: CGRect, to: CGRect, progress: Double) -> CGRect {
+        let p = CGFloat(progress)
+        return CGRect(x: from.minX + (to.minX - from.minX) * p,
+                      y: from.minY + (to.minY - from.minY) * p,
+                      width: from.width + (to.width - from.width) * p,
+                      height: from.height + (to.height - from.height) * p)
+    }
+
+    /// How far the landing image has replaced the hero image in flight (D3): 0
+    /// for the first 60 % of the flight, then a smoothstep to 1 at its end.
+    static func flightCrossfade(_ progress: Double) -> Double {
+        let x = min(max((progress - flightCrossfadeStart) / (1 - flightCrossfadeStart), 0), 1)
+        return x * x * (3 - 2 * x)
+    }
+
+    /// The share of the flight the hero image flies alone.
+    private static let flightCrossfadeStart = 0.6
+
     private static func sized(width: CGFloat, _ size: ValenceSizeGroup) -> CGSize {
         let outline = LitStoneGeometry.outlineBox(size)
         return CGSize(width: width, height: width * outline.height / outline.width)

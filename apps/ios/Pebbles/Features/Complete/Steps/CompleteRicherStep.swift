@@ -1,12 +1,14 @@
 import SwiftUI
 import os
 
-/// Make it richer (record-flow D12, Riverbed treatment): the lit stone with
-/// its derived glyph, "+N karma", the name, the week with the new stone on
-/// its day, then three rows that each edit the finished pebble: collection
-/// and visibility through `complete_pebble` (keyed on moment and caller, so
-/// a second call is an edit), words through `save_moment` (the edit sheet).
-/// Done returns to the origin; Record another starts a fresh capture.
+/// Make it richer (record-flow D12, Riverbed treatment), entered through the
+/// stone reveal ceremony (#1691): the stone is set down large at the centre and
+/// carved, held on Continue, then sent to its day in the week while the page
+/// comes in under it: the name, "+N karma", the week, then three rows that each
+/// edit the finished pebble: collection and visibility through `complete_pebble`
+/// (keyed on moment and caller, so a second call is an edit), words through
+/// `save_moment` (the edit sheet). Continue becomes Done in place (D6); Done
+/// returns to the origin, Record another starts a fresh capture.
 /// A high-distress pebble stays quiet: no karma line, a calm sentence and a
 /// way to support instead (#1551).
 struct CompleteRicherStep: View {
@@ -26,6 +28,8 @@ struct CompleteRicherStep: View {
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(ReferenceDataService.self) private var refs
     @Environment(SupabaseService.self) private var supabase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.displayScale) private var displayScale
 
     @State private var collectionId: UUID?
     @State private var visibility: Visibility
@@ -35,14 +39,19 @@ struct CompleteRicherStep: View {
     /// One edit at a time: the rows sit out while a write or the words fetch is in flight.
     @State private var isEditing = false
     @State private var showsCrisisResources = false
+    /// The ceremony: built on the step's first appearance, or frozen in `init` (references, D8).
+    @State private var driver: StoneCeremonyDriver?
+    /// Act 1 plays once, from the stage's first appearance.
+    @State private var hasStarted = false
 
     private var quiet: Bool { draft.valence?.quietSuccess ?? false }
+    private var valence: Valence { draft.valence ?? .neutralMedium }
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "complete-richer")
 
     init(momentId: UUID, name: String?, happenedAt: Date?, result: CompletionResult, draft: CompleteDraft,
          hasWords: Bool, onExit: @escaping () -> Void, onRecordAnother: (() -> Void)?, onEdited: @escaping () -> Void,
-         scrolls: Bool = true) {
+         scrolls: Bool = true, frozen: StoneCeremonyFreeze? = nil) {
         self.momentId = momentId
         self.scrolls = scrolls
         self.name = name
@@ -55,16 +64,51 @@ struct CompleteRicherStep: View {
         _collectionId = State(initialValue: draft.collectionId)
         _visibility = State(initialValue: draft.visibility)
         _hasWords = State(initialValue: hasWords)
+        if let frozen {
+            // Never starts a clock or a haptic. Every wave has ended by the pause, so no reach is needed.
+            let timeline = StoneCeremonyTimeline(valence: draft.valence ?? .neutralMedium,
+                                                 carves: result.glyph != nil, mode: .full)
+            let ceremony = StoneCeremony(timeline: timeline, markedDay: Self.markedDay(happenedAt),
+                                         heroReach: [], frozen: frozen)
+            _driver = State(initialValue: StoneCeremonyDriver(ceremony: ceremony, carveLength: 0, hapticsOn: false))
+        }
+    }
+
+    /// The pebble's stone, built as `PebbleStoneView` builds it.
+    private var spec: LitStoneSpec {
+        LitStoneSpec(size: valence.sizeGroup, polarity: valence.polarity,
+                     palette: draft.emotionId.flatMap { palettes.palette(for: $0) }.map(StonePalette.init(emotion:))
+                        ?? .brand,
+                     glyph: result.glyph, seed: StableHash.seed(result.pebbleId), night: false, flat: false)
+    }
+
+    private static func markedDay(_ happenedAt: Date?) -> Int {
+        happenedAt.flatMap { RicherWeekRow.markedIndex(around: $0, calendar: SpineCalendar.current) } ?? 0
     }
 
     var body: some View {
-        Group {
-            if scrolls {
-                ScrollView { content }
-            } else {
-                content
+        let running = driver?.ceremony.isRunning ?? false
+        TimelineView(.animation(minimumInterval: nil, paused: !running)) { context in
+            let ceremony = driver?.ceremony
+            // Before the driver is built, every value is at its start: nothing shows.
+            let frame = ceremony?.frame(at: context.date) ?? StoneCeremonyFrame()
+            let accepts = ceremony?.acceptsRicherInput(at: context.date) ?? false
+            GeometryReader { proxy in
+                page(frame: frame, accepts: accepts, region: proxy.size)
+                    .onAppear { buildDriver(width: proxy.size.width) }
             }
+            .overlayPreferenceValue(StoneCeremonyCellKey.self) { cell in
+                stage(frame: frame, cell: cell)
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                bar(frame: frame, accepts: accepts)
+            }
+            .contentShape(Rectangle())
+            // A tap that no control takes skips to the next rest; once still, the controls alone listen.
+            .gesture(TapGesture().onEnded { driver?.tapOutside(at: .now) }, including: running ? .all : .subviews)
         }
+        .task(id: driver?.ceremony.phase) { await tickAtEnd() }
+        .onDisappear { driver?.close() }
         .sheet(isPresented: $showsCrisisResources) {
             CrisisResourcesSheet()
         }
@@ -76,39 +120,115 @@ struct CompleteRicherStep: View {
         }
     }
 
-    private var content: some View {
-        VStack(spacing: Spacing.xl) {
-            PebbleStoneView(
-                valence: draft.valence ?? .neutralMedium,
-                glyph: result.glyph,
-                palette: draft.emotionId.flatMap { palettes.palette(for: $0) },
-                seed: StableHash.seed(result.pebbleId)
-            )
-            .frame(maxWidth: .infinity)
-            .frame(height: 240)
-            .padding(.top, Spacing.lg)
+    // MARK: Ceremony
 
-            VStack(spacing: Spacing.sm) {
-                MomentNameText(name: name, untitledFont: .ysabeauSemiboldItalic(28))
-                    .pebblesFont(.title)
-                    .multilineTextAlignment(.center)
-                if quiet {
-                    Text("Thank you for keeping this. If today is heavy, support is one tap away.")
-                        .pebblesFont(.body)
-                        .foregroundStyle(Color.pebbles.onSurface)
-                        .multilineTextAlignment(.center)
-                } else if let karma = result.karmaDelta, karma > 0 {
-                    HStack(spacing: 6) {
-                        PbblsGlyphView(.karmaDot, size: 18, relativeTo: .headline,
-                                       style: AnyShapeStyle(Color.pebbles.primary))
-                        Text("+\(karma) karma").pebblesFont(.headline).foregroundStyle(Color.pebbles.onSurface)
+    /// Read once, here: the mode, the haptics switch, the carve's length at the hero size.
+    private func buildDriver(width: CGFloat) {
+        guard driver == nil else { return }
+        let mode = StoneCeremonyMode.resolve(reduceMotion: reduceMotion,
+                                             lowPower: ProcessInfo.processInfo.isLowPowerModeEnabled)
+        let hero = StoneCeremonyLayout.heroSize(valence.sizeGroup)
+        let carveLength = LitStonePainter.carveLength(spec, box: hero, scale: displayScale)
+        let timeline = StoneCeremonyTimeline(valence: valence, carves: carveLength > 0, mode: mode)
+        let heroReach = (0..<timeline.heroWaveCount).map {
+            StoneCeremonyLayout.heroWaveReach(screenWidth: width, heroWidth: hero.width, wave: $0)
+        }
+        let ceremony = StoneCeremony(timeline: timeline, markedDay: Self.markedDay(happenedAt),
+                                     heroReach: heroReach, start: .now)
+        driver = StoneCeremonyDriver(ceremony: ceremony, carveLength: carveLength, hapticsOn: HapticsPreference.isOn())
+    }
+
+    /// Sleeps until the running phase ends, then moves the ceremony on, which stops the clock.
+    private func tickAtEnd() async {
+        guard let driver, let end = driver.ceremony.endsAt() else { return }
+        let wait = end.timeIntervalSinceNow
+        if wait > 0 {
+            do {
+                try await Task.sleep(for: .seconds(wait))
+            } catch {
+                return
+            }
+        }
+        // Never a hair early: a tick before the end would leave the clock running.
+        driver.tick(at: max(.now, end))
+    }
+
+    /// The centre slot, a clear hero-size frame at the centre of the step, and the stone over the
+    /// page, placed from the slot and the day's cell.
+    private func stage(frame: StoneCeremonyFrame, cell: Anchor<CGRect>?) -> some View {
+        let hero = StoneCeremonyLayout.heroSize(valence.sizeGroup)
+        return GeometryReader { proxy in
+            Color.clear
+                .frame(width: hero.width, height: hero.height)
+                .anchorPreference(key: StoneCeremonyCentreKey.self, value: .bounds) { $0 }
+                .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
+                .overlayPreferenceValue(StoneCeremonyCentreKey.self) { centre in
+                    GeometryReader { space in
+                        if let driver, let centre {
+                            let centreRect = space[centre]
+                            StoneCeremonyStage(spec: spec, valence: valence, frame: frame, centre: centreRect,
+                                               cell: cell.map { space[$0] } ?? centreRect, bounds: space.size)
+                                .onAppear {
+                                    guard !hasStarted else { return }
+                                    hasStarted = true
+                                    driver.start(at: .now)
+                                }
+                        }
                     }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel(Text("Earned \(karma) karma"))
                 }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    // MARK: Page
+
+    /// Over the name at its rest: the page's top margin, and the no-day slot (D12).
+    private static let topInset = Spacing.lg
+
+    @ViewBuilder
+    private func page(frame: StoneCeremonyFrame, accepts: Bool, region: CGSize) -> some View {
+        let column = content(frame: frame, accepts: accepts, region: region)
+        if scrolls {
+            // Still while the ceremony plays: the text's drop is measured from the page's top.
+            ScrollView { column }
+                .scrollBounceBehavior(.basedOnSize)
+                .scrollDisabled(!accepts)
+        } else {
+            column.frame(maxHeight: .infinity, alignment: .top)
+        }
+    }
+
+    private func content(frame: StoneCeremonyFrame, accepts: Bool, region: CGSize) -> some View {
+        let hero = StoneCeremonyLayout.heroSize(valence.sizeGroup)
+        let landing = StoneCeremonyLayout.landingSize(valence.sizeGroup)
+        // The name's rest, and where it sits at the pause: under the hero, at the region's centre.
+        let nameRestY = Self.topInset + (happenedAt == nil ? landing.height + Spacing.sm : 0)
+        let drop = frame.textDrop * (region.height / 2 + hero.height / 2 + StoneCeremonyLayout.nameGap - nameRestY)
+        // Index 0 is the header; each visible row takes the next.
+        let showsCollections = !refs.collections.isEmpty
+        let visibilityIndex = showsCollections ? 2 : 1
+        return VStack(spacing: Spacing.xl) {
+            VStack(spacing: Spacing.sm) {
+                if happenedAt == nil {
+                    LitStoneImage(spec: spec)
+                        .frame(width: landing.width, height: landing.height)
+                        .opacity(frame.cellStoneOpacity)
+                        .anchorPreference(key: StoneCeremonyCellKey.self, value: .bounds) { $0 }
+                }
+                VStack(spacing: Spacing.sm) {
+                    MomentNameText(name: name, untitledFont: .ysabeauSemiboldItalic(28))
+                        .pebblesFont(.title)
+                        .multilineTextAlignment(.center)
+                        .opacity(frame.nameOpacity)
+                    karmaLine.opacity(frame.karmaOpacity)
+                }
+                .offset(y: drop)
                 if let happenedAt {
-                    RicherWeekRow(date: happenedAt)
+                    RicherWeekRow(date: happenedAt, stone: spec, dayOpacity: frame.dayOpacity,
+                                  stoneOpacity: frame.cellStoneOpacity)
                         .padding(.top, Spacing.sm)
+                        .accessibilityHidden(!accepts)
                 }
             }
 
@@ -116,35 +236,96 @@ struct CompleteRicherStep: View {
                 Text("MAKE IT RICHER")
                     .pebblesFont(.meta)
                     .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                    .cascade(frame, 0)
                 Group {
-                    if !refs.collections.isEmpty { collectionRow }
-                    visibilityRow
-                    if !hasWords { wordsRow }
+                    if showsCollections { collectionRow.cascade(frame, 1) }
+                    visibilityRow.cascade(frame, visibilityIndex)
+                    if !hasWords { wordsRow.cascade(frame, visibilityIndex + 1) }
                 }
                 .disabled(isEditing)
                 if let editError {
                     Text(verbatim: editError).pebblesFont(.subhead).foregroundStyle(Color.pebbles.error)
                 }
             }
+            .allowsHitTesting(accepts)
+            .accessibilityHidden(!accepts)
+        }
+        .padding(.horizontal, Spacing.lg)
+        .padding(.top, Self.topInset)
+        .padding(.bottom, Spacing.lg)
+    }
 
-            VStack(spacing: Spacing.xs) {
-                if quiet {
-                    Button("Get support") { showsCrisisResources = true }
-                        .pebblesFont(.bodyEmphasized)
-                        .foregroundStyle(Color.pebbles.primary)
-                        .frame(maxWidth: .infinity, minHeight: 44)
+    @ViewBuilder
+    private var karmaLine: some View {
+        if quiet {
+            Text("Thank you for keeping this. If today is heavy, support is one tap away.")
+                .pebblesFont(.body)
+                .foregroundStyle(Color.pebbles.onSurface)
+                .multilineTextAlignment(.center)
+        } else if let karma = result.karmaDelta, karma > 0 {
+            HStack(spacing: 6) {
+                PbblsGlyphView(.karmaDot, size: 18, relativeTo: .headline, style: AnyShapeStyle(Color.pebbles.primary))
+                Text("+\(karma) karma").pebblesFont(.headline).foregroundStyle(Color.pebbles.onSurface)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(Text("Earned \(karma) karma"))
+        }
+    }
+
+    // MARK: Bar
+
+    /// One capsule from the pause to the end (D6): Continue, which becomes Done in place.
+    /// A quiet pebble's Get support sits under it at the pause, then above Done; Record
+    /// another takes the slot under it. Every spot is held, so nothing moves.
+    private func bar(frame: StoneCeremonyFrame, accepts: Bool) -> some View {
+        VStack(spacing: Spacing.xs) {
+            if quiet {
+                textButton("Get support") { showsCrisisResources = true }
+                    .opacity(frame.actionsOpacity)
+                    .allowsHitTesting(accepts)
+                    .accessibilityHidden(!accepts)
+            }
+            Button {
+                guard let driver else { return }
+                if driver.ceremony.acceptsRicherInput(at: .now) {
+                    onExit()
+                } else {
+                    driver.tapContinue(at: .now)
                 }
-                Button("Done", action: onExit).buttonStyle(PebblesPrimaryButtonStyle())
+            } label: {
+                ZStack {
+                    Text("Continue").opacity(1 - frame.buttonLabel)
+                    Text("Done").opacity(frame.buttonLabel)
+                }
+            }
+            .buttonStyle(PebblesPrimaryButtonStyle())
+            .accessibilityLabel(accepts ? Text("Done") : Text("Continue"))
+            .opacity(frame.buttonOpacity)
+            ZStack {
                 if let onRecordAnother {
-                    Button("Record another", action: onRecordAnother)
-                        .pebblesFont(.bodyEmphasized)
-                        .foregroundStyle(Color.pebbles.primary)
-                        .frame(maxWidth: .infinity, minHeight: 44)
+                    textButton("Record another", action: onRecordAnother)
+                        .opacity(frame.actionsOpacity)
+                        .allowsHitTesting(accepts)
+                        .accessibilityHidden(!accepts)
+                }
+                if quiet {
+                    let shown = frame.supportUnderContinue > 0
+                    textButton("Get support") { showsCrisisResources = true }
+                        .opacity(frame.supportUnderContinue)
+                        .allowsHitTesting(shown)
+                        .accessibilityHidden(!shown)
                 }
             }
         }
         .padding(.horizontal, Spacing.lg)
-        .padding(.bottom, Spacing.lg)
+        .padding(.vertical, Spacing.sm)
+    }
+
+    private func textButton(_ title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+        Button(title, action: action)
+            .pebblesFont(.bodyEmphasized)
+            .foregroundStyle(Color.pebbles.primary)
+            .frame(maxWidth: .infinity, minHeight: 44)
     }
 
     // MARK: Rows
@@ -340,5 +521,12 @@ struct RicherWeekRow: View {
                 .frame(width: day.isMarked ? 10 : 6, height: day.isMarked ? 10 : 6)
                 .frame(height: height)
         }
+    }
+}
+
+private extension View {
+    /// The richer cascade (#1691): row `index` fades in with a 6 pt rise.
+    func cascade(_ frame: StoneCeremonyFrame, _ index: Int) -> some View {
+        opacity(frame.rowOpacity[index]).offset(y: frame.rowRise[index])
     }
 }
