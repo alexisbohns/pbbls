@@ -82,8 +82,11 @@ extension StoneCeremonyTimeline {
             f.stoneOpacity = ease(Curves.out, progress(t, 0, contact))
         }
 
-        f.nameOpacity = ease(Curves.out, progress(t, nameIn, 0.3 * tempo))
-        f.karmaOpacity = ease(Curves.out, progress(t, karmaIn, 0.3 * tempo))
+        // Reduce Motion and Low Power show no text at the pause (D7); it arrives with Act 2.
+        if mode == .full {
+            f.nameOpacity = ease(Curves.out, progress(t, nameIn, 0.3 * tempo))
+            f.karmaOpacity = ease(Curves.out, progress(t, karmaIn, 0.3 * tempo))
+        }
         f.buttonOpacity = ease(Curves.out, progress(t, continueIn, continueFade))
         f.supportUnderContinue = quiet ? f.buttonOpacity : 0
         return f

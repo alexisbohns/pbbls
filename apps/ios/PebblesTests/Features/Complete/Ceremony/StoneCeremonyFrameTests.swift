@@ -69,6 +69,7 @@ struct StoneCeremonyFrameTests {
     @Test func pauseIsStill() {
         let p = t.act1(at: t.pause, heroReach: reach)
         #expect(p.lipTrim == 1 && p.inkTrim == 1 && p.inkOpacity == 1)
+        #expect(p.stoneScale == 1 && p.lift == 0)   // what Act 2 starts from
         #expect(p.nameOpacity == 1 && p.karmaOpacity == 1 && p.buttonOpacity == 1 && p.textDrop == 1)
         #expect(p.press.waves.allSatisfy { $0.alpha == 0 }); #expect(p.press.sweep == nil); #expect(p.press.sparkAlpha == 0)
         #expect(p.dayOpacity == Array(repeating: 0, count: 7)); #expect(p.rowOpacity == [0, 0, 0, 0]); #expect(p.actionsOpacity == 0)
@@ -142,6 +143,8 @@ struct StoneCeremonyFrameTests {
         #expect(a.stoneOpacity == 1); #expect(a.lipTrim == 1 && a.inkTrim == 1 && a.inkOpacity == 1)
         #expect(a.stoneScale == 1); #expect(a.lift == 0); #expect(a.press.waves.isEmpty); #expect(a.nameOpacity == 0)
         #expect(rm.act1(at: 0.70, heroReach: reach).buttonOpacity == 1)
+        let rmPause = rm.act1(at: rm.pause, heroReach: reach)
+        #expect(rmPause.nameOpacity == 0 && rmPause.karmaOpacity == 0)
         for u in stride(from: 0.0, to: 0.25, by: 0.01) {
             let f = rm.act2(at: u, markedDay: marked)
             #expect(f.flight == 0 && f.stoneScale == 1 && f.textDrop == 0)
@@ -155,6 +158,9 @@ struct StoneCeremonyFrameTests {
 
         let lp = timeline(.highlight, mode: .lowPower)
         #expect(lp.act1(at: 0.1, heroReach: reach).stoneOpacity > 0)
+        let lpPause = lp.act1(at: lp.pause, heroReach: reach)
+        #expect(lpPause.nameOpacity == 0 && lpPause.karmaOpacity == 0)
+        #expect(lpPause.buttonOpacity == 1)
         for u in stride(from: 0.0, to: 0.20, by: 0.01) {
             let f = lp.act2(at: u, markedDay: marked)
             #expect(f.flight == 0 && f.stoneScale == 1 && f.press.sweep == nil && f.press.sparkAlpha == 0)
