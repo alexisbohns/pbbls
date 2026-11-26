@@ -265,6 +265,11 @@ struct CompleteRicherStep: View {
 }
 
 /// The week around the pebble's day, Monday first, the new stone on its day.
+///
+/// With a `stone` (the stone reveal ceremony, #1691) every slot is as tall as
+/// the landed stone, so nothing shifts when it lands, and the marked slot draws
+/// the stone instead of the dot. `dayOpacity` fades whole day columns, one value
+/// per column; nil leaves them all at 1.
 struct RicherWeekRow: View {
     struct Day: Identifiable {
         let date: Date
@@ -273,6 +278,16 @@ struct RicherWeekRow: View {
     }
 
     let date: Date
+    var stone: LitStoneSpec?
+    var dayOpacity: [Double]?
+    var stoneOpacity: Double
+
+    init(date: Date, stone: LitStoneSpec? = nil, dayOpacity: [Double]? = nil, stoneOpacity: Double = 1) {
+        self.date = date
+        self.stone = stone
+        self.dayOpacity = dayOpacity
+        self.stoneOpacity = stoneOpacity
+    }
 
     private var locale: Locale { SpineStrings.appLocale }
 
@@ -286,22 +301,44 @@ struct RicherWeekRow: View {
         }
     }
 
+    /// Which of the seven columns holds the pebble's day: where the stone lands.
+    static func markedIndex(around date: Date, calendar: Calendar) -> Int? {
+        days(around: date, calendar: calendar).firstIndex(where: \.isMarked)
+    }
+
     var body: some View {
+        let days = Self.days(around: date, calendar: SpineCalendar.current)
+        let slotHeight = StoneCeremonyLayout.slotHeight(stone?.size)
         HStack(spacing: Spacing.sm) {
-            ForEach(Self.days(around: date, calendar: SpineCalendar.current)) { day in
+            ForEach(Array(days.enumerated()), id: \.element.id) { index, day in
                 VStack(spacing: Spacing.xs) {
                     Text(verbatim: day.date.formatted(.dateTime.weekday(.narrow).locale(locale)))
                         .pebblesFont(.meta)
                         .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                    Circle()
-                        .fill(day.isMarked ? Color.pebbles.primary : Color.pebbles.outlineVariant)
-                        .frame(width: day.isMarked ? 10 : 6, height: day.isMarked ? 10 : 6)
-                        .frame(height: 10)
+                    slot(for: day, height: slotHeight)
                 }
                 .frame(maxWidth: .infinity)
+                .opacity(dayOpacity?[index] ?? 1)
             }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: date.formatted(.dateTime.weekday(.wide).day().month().locale(locale))))
+    }
+
+    @ViewBuilder
+    private func slot(for day: Day, height: CGFloat) -> some View {
+        if let stone, day.isMarked {
+            let size = StoneCeremonyLayout.landingSize(stone.size)
+            LitStoneImage(spec: stone)
+                .frame(width: size.width, height: size.height)
+                .opacity(stoneOpacity)
+                .anchorPreference(key: StoneCeremonyCellKey.self, value: .bounds) { $0 }
+                .frame(height: height)
+        } else {
+            Circle()
+                .fill(day.isMarked ? Color.pebbles.primary : Color.pebbles.outlineVariant)
+                .frame(width: day.isMarked ? 10 : 6, height: day.isMarked ? 10 : 6)
+                .frame(height: height)
+        }
     }
 }

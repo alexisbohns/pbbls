@@ -60,7 +60,7 @@ final class LitStoneCache {
             heightPx: Int((box.height * scale).rounded()), scale: scale)
     }
 
-    private static func snapped(_ box: CGSize, scale: CGFloat) -> CGSize {
+    static func snapped(_ box: CGSize, scale: CGFloat) -> CGSize {
         CGSize(width: (box.width * scale).rounded() / scale, height: (box.height * scale).rounded() / scale)
     }
 

@@ -77,6 +77,12 @@ enum LitStonePainter {
     /// The same margin with the size named. The body is taken to fill its box (the
     /// outline's viewBox), which it never exceeds, so the margin is never short.
     static func shadowMargin(size: ValenceSizeGroup, box: CGSize) -> EdgeInsets {
+        margin(size: size, box: box, shadows: shadows.map { (offset: $0.offset, blur: $0.blur) })
+    }
+
+    /// How far a set of shadows (an offset in phone px, a blur in canvas units) reach past the body.
+    private static func margin(size: ValenceSizeGroup, box: CGSize,
+                               shadows: [(offset: CGVector, blur: CGFloat)]) -> EdgeInsets {
         let outline = LitStoneGeometry.outlineBox(size)
         let pxPerUnit = box.width / outline.width
         let unitPx = LitStoneGeometry.unitsPerPx(size) * pxPerUnit
@@ -279,10 +285,15 @@ enum LitStonePainter {
         }
     }
 
-    /// The glyph: the lip, pushed down-right, then the ink, each stroke a wobbled line at
-    /// 1.25 pt x the stone's gain (a stroke thinner than the engine's keeps its proportion).
-    private static func drawGlyph(_ scene: LitStoneScene, _ glyph: PebbleGlyph, inkOnly: Bool,
-                                  in context: inout GraphicsContext) {
+    /// A glyph's wobbled lines, in its own space, with the two matrices that lay them on the
+    /// stone: the ink's, and the lip's, which is the ink's pushed down-right.
+    private struct GlyphLines {
+        let lines: [(line: Path, width: Double)]
+        let ink: CGAffineTransform
+        let lip: CGAffineTransform
+    }
+
+    private static func glyphLines(_ scene: LitStoneScene, _ glyph: PebbleGlyph) -> GlyphLines {
         let side = LitStoneGeometry.glyphSide(viewBox: glyph.viewBox)
         let inkMatrix = scene.glyphMatrix(side: side)
         let lipMatrix = inkMatrix.concatenating(CGAffineTransform(
@@ -290,13 +301,26 @@ enum LitStonePainter {
         let lines = glyph.strokes.compactMap { stroke in
             LitGlyphLine.line(d: stroke.d, side: Double(side)).map { (line: $0, width: stroke.width) }
         }
+        return GlyphLines(lines: lines, ink: inkMatrix, lip: lipMatrix)
+    }
+
+    /// A stroke thinner than the engine's keeps its proportion of 1.25 pt x the stone's gain.
+    private static func glyphStrokeStyle(_ scene: LitStoneScene, width: Double) -> StrokeStyle {
+        StrokeStyle(lineWidth: LitStoneGeometry.carveStrokePx * scene.carveGain * CGFloat(width / engineStrokeWidth),
+                    lineCap: .round, lineJoin: .round)
+    }
+
+    /// The glyph: the lip, pushed down-right, then the ink, each stroke a wobbled line at
+    /// 1.25 pt x the stone's gain (a stroke thinner than the engine's keeps its proportion).
+    private static func drawGlyph(_ scene: LitStoneScene, _ glyph: PebbleGlyph, inkOnly: Bool,
+                                  in context: inout GraphicsContext) {
+        let drawing = glyphLines(scene, glyph)
         let tones = LitStoneTones.glyphTones(scene.polarity, scene.palette)
-        let passes = inkOnly ? [(tones.ink, inkMatrix)] : [(tones.lip, lipMatrix), (tones.ink, inkMatrix)]
+        let passes = inkOnly ? [(tones.ink, drawing.ink)] : [(tones.lip, drawing.lip), (tones.ink, drawing.ink)]
         for (tone, matrix) in passes {
-            for (line, width) in lines {
-                let strokeWidth = LitStoneGeometry.carveStrokePx * scene.carveGain * CGFloat(width / engineStrokeWidth)
+            for (line, width) in drawing.lines {
                 context.stroke(line.applying(matrix), with: .color(tone.color.opacity(tone.opacity)),
-                               style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
+                               style: glyphStrokeStyle(scene, width: width))
             }
         }
     }
@@ -321,5 +345,133 @@ enum LitStonePainter {
         matrix.b1 = m[10]; matrix.b2 = m[11]; matrix.b3 = m[12]; matrix.b4 = m[13]; matrix.b5 = m[14]
         matrix.a1 = m[15]; matrix.a2 = m[16]; matrix.a3 = m[17]; matrix.a4 = m[18]; matrix.a5 = m[19]
         return matrix
+    }
+}
+
+// MARK: - The carve and the lift shadow (#1691)
+
+/// The stone's glyph drawn live, line by line, over `spec.uncarved`; and a second far
+/// shadow that deepens as the stone lifts. Both go through the painter's own scene,
+/// clip, tones and night matrix, so the swap to the cached stone shows no change.
+extension LitStonePainter {
+
+    /// How far the lift shadow reaches past the body at a full lift: the far shadow at
+    /// twice its offset and 2.2 times its blur, and never less than the baked margin.
+    static func liftShadowMargin(size: ValenceSizeGroup, box: CGSize) -> EdgeInsets {
+        let baked = shadowMargin(size: size, box: box)
+        let lifted = margin(size: size, box: box, shadows: [(offset: farLiftOffset(1), blur: farLiftBlur(1))])
+        return EdgeInsets(top: max(baked.top, lifted.top), leading: max(baked.leading, lifted.leading),
+                          bottom: max(baked.bottom, lifted.bottom), trailing: max(baked.trailing, lifted.trailing))
+    }
+
+    /// The carve at one moment: the lip trimmed to `lip` of the whole line (0...1), the ink to `ink`,
+    /// the ink at `inkOpacity` of its tone's own. Strokes are trimmed cumulatively by on-screen
+    /// length, in glyph order, so the line is drawn as one. A flat stone has no lip.
+    /// Nothing is drawn for a blank moment, a stone without a glyph, or a trim of 0.
+    static func paintCarve(_ spec: LitStoneSpec, in context: inout GraphicsContext, box: CGSize, scale: CGFloat,
+                           lip: Double, ink: Double, inkOpacity: Double) {
+        guard let scene = LitStoneScene(spec, box: box, scale: scale), !scene.blank, let glyph = scene.glyph else { return }
+        let lip = spec.flat ? 0 : min(max(lip, 0), 1), ink = min(max(ink, 0), 1)
+        guard lip > 0 || ink > 0 else { return }
+        let drawing = glyphLines(scene, glyph)
+        let tones = LitStoneTones.glyphTones(scene.polarity, scene.palette)
+        let lengths = drawing.lines.map { length(of: $0.line.applying(drawing.ink)) }
+
+        func draw(in context: inout GraphicsContext) {
+            var clipped = context
+            clipped.clip(to: scene.body, style: scene.fillStyle)
+            let passes = [(tones.lip, drawing.lip, lip, 1.0), (tones.ink, drawing.ink, ink, inkOpacity)]
+            for (tone, matrix, trim, opacity) in passes where trim > 0 {
+                let color = tone.color.opacity(tone.opacity * min(max(opacity, 0), 1))
+                for (index, stroke) in drawing.lines.enumerated() {
+                    let kept = keptFraction(of: index, lengths: lengths, trim: trim)
+                    guard kept > 0 else { continue }
+                    let line = stroke.line.applying(matrix)
+                    clipped.stroke(kept >= 1 ? line : line.trimmedPath(from: 0, to: kept), with: .color(color),
+                                   style: glyphStrokeStyle(scene, width: stroke.width))
+                }
+            }
+        }
+        if spec.night {
+            context.drawLayer { layer in
+                layer.addFilter(.colorMatrix(nightMatrix(scene.polarity)))
+                draw(in: &layer)
+            }
+        } else {
+            draw(in: &context)
+        }
+    }
+
+    /// The total on-screen length of the ink lines, in points; 0 without a glyph, or for a blank moment.
+    static func carveLength(_ spec: LitStoneSpec, box: CGSize, scale: CGFloat) -> CGFloat {
+        guard let scene = LitStoneScene(spec, box: box, scale: scale), !scene.blank, let glyph = scene.glyph else { return 0 }
+        let drawing = glyphLines(scene, glyph)
+        return drawing.lines.reduce(0) { $0 + length(of: $1.line.applying(drawing.ink)) }
+    }
+
+    /// The far shadow, a second time, under the stone: at `1 + lift` times the offset, `1 + 1.2 lift`
+    /// times the blur, and `0.5 lift` times the alpha. Nothing at lift 0, nor for a flat stone.
+    static func paintLiftShadow(_ spec: LitStoneSpec, in context: inout GraphicsContext, box: CGSize, lift: Double) {
+        let lift = max(lift, 0)
+        guard lift > 0, !spec.flat, let scene = LitStoneScene(spec, box: box, scale: 1) else { return }
+        let far = shadows[0]
+        let night = spec.night
+        let offset = farLiftOffset(lift)
+        let moved = scene.body.applying(CGAffineTransform(translationX: offset.dx * scene.unitPx,
+                                                          y: offset.dy * scene.unitPx))
+        let alpha = min((night ? nightShadowAlpha : paperShadowAlpha) * far.gain * 0.5 * lift, 1)
+        let color = (night ? nightShadow : paperShadow).opacity(alpha)
+        func draw(in context: inout GraphicsContext) {
+            blurred(sigma: farLiftBlur(lift) * scene.canvasScale, in: &context) {
+                $0.fill(moved, with: .color(color), style: scene.fillStyle)
+            }
+        }
+        if night {
+            context.drawLayer { layer in
+                layer.addFilter(.colorMatrix(nightMatrix(scene.polarity)))
+                draw(in: &layer)
+            }
+        } else {
+            draw(in: &context)
+        }
+    }
+
+    private static func farLiftOffset(_ lift: Double) -> CGVector {
+        let far = shadows[0].offset
+        return CGVector(dx: far.dx * (1 + lift), dy: far.dy * (1 + lift))
+    }
+
+    private static func farLiftBlur(_ lift: Double) -> CGFloat {
+        shadows[0].blur * CGFloat(1 + 1.2 * lift)
+    }
+
+    /// The share of stroke `index` that a cumulative trim of `trim` (0...1) of the whole length
+    /// leaves: strokes before it count whole, strokes after it not at all. A zero-length stroke
+    /// (a tap, drawn as a dot) appears as soon as the trim reaches it.
+    private static func keptFraction(of index: Int, lengths: [CGFloat], trim: Double) -> Double {
+        guard trim < 1 else { return 1 }
+        let total = lengths.reduce(0, +)
+        let before = lengths[..<index].reduce(0, +)
+        let reach = CGFloat(trim) * total
+        guard lengths[index] > 0 else { return reach >= before ? 1 : 0 }
+        return Double(min(max((reach - before) / lengths[index], 0), 1))
+    }
+
+    /// A polyline's length, which is every line the wobble builds (a move, lines and a close).
+    private static func length(of path: Path) -> CGFloat {
+        var total: CGFloat = 0
+        var start = CGPoint.zero, current = CGPoint.zero
+        path.forEach { element in
+            switch element {
+            case .move(let point): start = point; current = point
+            case .line(let point), .quadCurve(let point, _), .curve(let point, _, _):
+                total += hypot(point.x - current.x, point.y - current.y)
+                current = point
+            case .closeSubpath:
+                total += hypot(start.x - current.x, start.y - current.y)
+                current = start
+            }
+        }
+        return total
     }
 }
