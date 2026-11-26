@@ -33,6 +33,14 @@ enum StoneCeremonyLayout {
     /// How far under the hero stone the name sits at the pause, before it slides to its rest.
     static let nameGap: CGFloat = 26
 
+    /// The hero's centre at the pause, from the region's top: the region's centre, raised as far as
+    /// the name block under it (`nameGap`, then `textHeight`) needs to end at the region's bottom,
+    /// never above the region's top. The stone keeps its size; only its place moves.
+    static func pauseCentreY(region: CGFloat, hero: CGSize, textHeight: CGFloat) -> CGFloat {
+        let lowest = region - textHeight - nameGap - hero.height / 2
+        return max(hero.height / 2, min(region / 2, lowest))
+    }
+
     /// Where the flying stone is at `progress` of its flight (D4): the origin and
     /// the size, each straight from `from` to `to`. The timeline eases `progress`.
     static func flightRect(from: CGRect, to: CGRect, progress: Double) -> CGRect {

@@ -13,6 +13,8 @@ extension References {
         /// The Life screen at accessibility2 does not scroll under ImageRenderer:
         /// one domain column and a two-line pill need a taller page to draw whole.
         private static let lifeAx2Height: CGFloat = 1100
+        /// An iPhone SE's height: the shortest page the pause must fit at accessibility sizes.
+        private static let shortPageHeight: CGFloat = 667
 
         /// A Wednesday, so the when chip and the week row never read "Today".
         private static let wednesday: Date = {
@@ -144,11 +146,12 @@ extension References {
 
         /// The success step on a frozen ceremony (#1691 D8): the pause, or the settled page.
         private static func richer(frozen: StoneCeremonyFreeze, valence: Valence = .highlightMedium,
-                                   glyph: PebbleGlyph? = nil, happenedAt: Date? = wednesday) -> some View {
+                                   glyph: PebbleGlyph? = nil, happenedAt: Date? = wednesday,
+                                   height: CGFloat = pageHeight) -> some View {
             var draft = CompleteDraft()
             draft.valence = valence
             draft.domainIds = [domains[0].id]
-            return host(height: pageHeight) {
+            return host(height: height) {
                 CompleteRicherStep(
                     momentId: uuid(21), name: "Coffee with Léa", happenedAt: happenedAt,
                     result: CompletionResult(pebbleId: uuid(22), karmaDelta: 3, glyph: glyph),
@@ -214,6 +217,15 @@ extension References {
         func richerPauseAx2() {
             ReferenceImage.assertMatches(Self.richer(frozen: .pause, glyph: Self.glyph), named: "richerPause",
                                          config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
+        }
+
+        /// The worst case for the pause: the large stone, the calm sentence and both quiet links at
+        /// accessibility2 on a short phone. The stone rises; the whole sentence stays above the bar.
+        @Test
+        func richerPauseQuietAx2() {
+            ReferenceImage.assertMatches(
+                Self.richer(frozen: .pause, valence: .lowlightLarge, glyph: Self.glyph, height: Self.shortPageHeight),
+                named: "richerPauseQuiet", config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
         }
 
         /// The settled page: the stone on its day, the rows, Done and Record another.

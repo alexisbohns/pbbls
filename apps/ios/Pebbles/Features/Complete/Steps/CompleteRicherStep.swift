@@ -66,8 +66,10 @@ struct CompleteRicherStep: View {
         _hasWords = State(initialValue: hasWords)
         if let frozen {
             // Never starts a clock or a haptic. Every wave has ended by the pause, so no reach is needed.
+            // The palette is the environment's, out of reach here; the carve does not depend on it.
+            let stone = Self.stoneSpec(draft: draft, result: result, palette: .brand)
             let timeline = StoneCeremonyTimeline(valence: draft.valence ?? .neutralMedium,
-                                                 carves: result.glyph != nil, mode: .full)
+                                                 carves: Self.carveLength(stone, scale: 2) > 0, mode: .full)
             let ceremony = StoneCeremony(timeline: timeline, markedDay: Self.markedDay(happenedAt),
                                          heroReach: [], frozen: frozen)
             _driver = State(initialValue: StoneCeremonyDriver(ceremony: ceremony, carveLength: 0, hapticsOn: false))
@@ -76,10 +78,21 @@ struct CompleteRicherStep: View {
 
     /// The pebble's stone, built as `PebbleStoneView` builds it.
     private var spec: LitStoneSpec {
-        LitStoneSpec(size: valence.sizeGroup, polarity: valence.polarity,
-                     palette: draft.emotionId.flatMap { palettes.palette(for: $0) }.map(StonePalette.init(emotion:))
-                        ?? .brand,
-                     glyph: result.glyph, seed: StableHash.seed(result.pebbleId), night: false, flat: false)
+        Self.stoneSpec(draft: draft, result: result,
+                       palette: draft.emotionId.flatMap { palettes.palette(for: $0) }.map(StonePalette.init(emotion:))
+                        ?? .brand)
+    }
+
+    private static func stoneSpec(draft: CompleteDraft, result: CompletionResult,
+                                  palette: StonePalette) -> LitStoneSpec {
+        let valence = draft.valence ?? .neutralMedium
+        return LitStoneSpec(size: valence.sizeGroup, polarity: valence.polarity, palette: palette,
+                            glyph: result.glyph, seed: StableHash.seed(result.pebbleId), night: false, flat: false)
+    }
+
+    /// The ink's length at the hero size. One predicate on every path: a stone carves when it is above 0.
+    private static func carveLength(_ spec: LitStoneSpec, scale: CGFloat) -> CGFloat {
+        LitStonePainter.carveLength(spec, box: StoneCeremonyLayout.heroSize(spec.size), scale: scale)
     }
 
     private static func markedDay(_ happenedAt: Date?) -> Int {
@@ -97,8 +110,8 @@ struct CompleteRicherStep: View {
                 page(frame: frame, accepts: accepts, region: proxy.size)
                     .onAppear { buildDriver(width: proxy.size.width) }
             }
-            .overlayPreferenceValue(StoneCeremonyCellKey.self) { cell in
-                stage(frame: frame, cell: cell)
+            .stoneCeremonyLandmarks { landmarks in
+                stage(frame: frame, landmarks: landmarks)
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 bar(frame: frame, accepts: accepts)
@@ -128,7 +141,7 @@ struct CompleteRicherStep: View {
         let mode = StoneCeremonyMode.resolve(reduceMotion: reduceMotion,
                                              lowPower: ProcessInfo.processInfo.isLowPowerModeEnabled)
         let hero = StoneCeremonyLayout.heroSize(valence.sizeGroup)
-        let carveLength = LitStonePainter.carveLength(spec, box: hero, scale: displayScale)
+        let carveLength = Self.carveLength(spec, scale: displayScale)
         let timeline = StoneCeremonyTimeline(valence: valence, carves: carveLength > 0, mode: mode)
         let heroReach = (0..<timeline.heroWaveCount).map {
             StoneCeremonyLayout.heroWaveReach(screenWidth: width, heroWidth: hero.width, wave: $0)
@@ -153,29 +166,19 @@ struct CompleteRicherStep: View {
         driver.tick(at: max(.now, end))
     }
 
-    /// The centre slot, a clear hero-size frame at the centre of the step, and the stone over the
-    /// page, placed from the slot and the day's cell.
-    private func stage(frame: StoneCeremonyFrame, cell: Anchor<CGRect>?) -> some View {
-        let hero = StoneCeremonyLayout.heroSize(valence.sizeGroup)
-        return GeometryReader { proxy in
-            Color.clear
-                .frame(width: hero.width, height: hero.height)
-                .anchorPreference(key: StoneCeremonyCentreKey.self, value: .bounds) { $0 }
-                .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
-                .overlayPreferenceValue(StoneCeremonyCentreKey.self) { centre in
-                    GeometryReader { space in
-                        if let driver, let centre {
-                            let centreRect = space[centre]
-                            StoneCeremonyStage(spec: spec, valence: valence, frame: frame, centre: centreRect,
-                                               cell: cell.map { space[$0] } ?? centreRect, bounds: space.size)
-                                .onAppear {
-                                    guard !hasStarted else { return }
-                                    hasStarted = true
-                                    driver.start(at: .now)
-                                }
-                        }
+    /// The stone over the page, placed from the column's centre slot and the day's cell.
+    private func stage(frame: StoneCeremonyFrame, landmarks: StoneCeremonyLandmarks) -> some View {
+        GeometryReader { space in
+            if let driver, let centre = landmarks.centre {
+                let centreRect = space[centre]
+                StoneCeremonyStage(spec: spec, valence: valence, frame: frame, centre: centreRect,
+                                   cell: landmarks.cell.map { space[$0] } ?? centreRect, bounds: space.size)
+                    .onAppear {
+                        guard !hasStarted else { return }
+                        hasStarted = true
+                        driver.start(at: .now)
                     }
-                }
+            }
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
@@ -183,14 +186,14 @@ struct CompleteRicherStep: View {
 
     // MARK: Page
 
-    /// Over the name at its rest: the page's top margin, and the no-day slot (D12).
+    /// The page's top margin, over the column.
     private static let topInset = Spacing.lg
 
     @ViewBuilder
     private func page(frame: StoneCeremonyFrame, accepts: Bool, region: CGSize) -> some View {
         let column = content(frame: frame, accepts: accepts, region: region)
         if scrolls {
-            // Still while the ceremony plays: the text's drop is measured from the page's top.
+            // Still while the ceremony plays: the column places the hero's slot from the page's top.
             ScrollView { column }
                 .scrollBounceBehavior(.basedOnSize)
                 .scrollDisabled(!accepts)
@@ -202,57 +205,66 @@ struct CompleteRicherStep: View {
     private func content(frame: StoneCeremonyFrame, accepts: Bool, region: CGSize) -> some View {
         let hero = StoneCeremonyLayout.heroSize(valence.sizeGroup)
         let landing = StoneCeremonyLayout.landingSize(valence.sizeGroup)
-        // The name's rest, and where it sits at the pause: under the hero, at the region's centre.
-        let nameRestY = Self.topInset + (happenedAt == nil ? landing.height + Spacing.sm : 0)
-        let drop = frame.textDrop * (region.height / 2 + hero.height / 2 + StoneCeremonyLayout.nameGap - nameRestY)
-        // Index 0 is the header; each visible row takes the next.
-        let showsCollections = !refs.collections.isEmpty
-        let visibilityIndex = showsCollections ? 2 : 1
-        return VStack(spacing: Spacing.xl) {
+        return StoneCeremonyColumn(regionHeight: region.height, regionTop: Self.topInset, hero: hero,
+                                   textDrop: frame.textDrop) {
+            if happenedAt == nil {
+                LitStoneImage(spec: spec)
+                    .frame(width: landing.width, height: landing.height)
+                    .opacity(frame.cellStoneOpacity)
+                    .anchorPreference(key: StoneCeremonyCellKey.self, value: .bounds) { $0 }
+                    .ceremonyColumn()
+            }
             VStack(spacing: Spacing.sm) {
-                if happenedAt == nil {
-                    LitStoneImage(spec: spec)
-                        .frame(width: landing.width, height: landing.height)
-                        .opacity(frame.cellStoneOpacity)
-                        .anchorPreference(key: StoneCeremonyCellKey.self, value: .bounds) { $0 }
-                }
-                VStack(spacing: Spacing.sm) {
-                    MomentNameText(name: name, untitledFont: .ysabeauSemiboldItalic(28))
-                        .pebblesFont(.title)
-                        .multilineTextAlignment(.center)
-                        .opacity(frame.nameOpacity)
-                    karmaLine.opacity(frame.karmaOpacity)
-                }
-                .offset(y: drop)
-                if let happenedAt {
-                    RicherWeekRow(date: happenedAt, stone: spec, dayOpacity: frame.dayOpacity,
-                                  stoneOpacity: frame.cellStoneOpacity)
-                        .padding(.top, Spacing.sm)
-                        .accessibilityHidden(!accepts)
-                }
+                MomentNameText(name: name, untitledFont: .ysabeauSemiboldItalic(28))
+                    .pebblesFont(.title)
+                    .multilineTextAlignment(.center)
+                    .opacity(frame.nameOpacity)
+                karmaLine.opacity(frame.karmaOpacity)
             }
-
-            VStack(alignment: .leading, spacing: Spacing.sm) {
-                Text("MAKE IT RICHER")
-                    .pebblesFont(.meta)
-                    .foregroundStyle(Color.pebbles.onSurfaceVariant)
-                    .cascade(frame, 0)
-                Group {
-                    if showsCollections { collectionRow.cascade(frame, 1) }
-                    visibilityRow.cascade(frame, visibilityIndex)
-                    if !hasWords { wordsRow.cascade(frame, visibilityIndex + 1) }
-                }
-                .disabled(isEditing)
-                if let editError {
-                    Text(verbatim: editError).pebblesFont(.subhead).foregroundStyle(Color.pebbles.error)
-                }
+            .ceremonyColumn(.text, gap: Spacing.sm)
+            if let happenedAt {
+                RicherWeekRow(date: happenedAt, stone: spec, dayOpacity: frame.dayOpacity,
+                              stoneOpacity: frame.cellStoneOpacity)
+                    .padding(.top, Spacing.sm)
+                    .accessibilityHidden(!accepts)
+                    .ceremonyColumn(gap: Spacing.sm)
             }
-            .allowsHitTesting(accepts)
-            .accessibilityHidden(!accepts)
+            richerRows(frame: frame, accepts: accepts)
+                .ceremonyColumn(gap: Spacing.xl)
+            // The hero's slot at the pause; it takes no room in the column.
+            Color.clear
+                .frame(width: hero.width, height: hero.height)
+                .anchorPreference(key: StoneCeremonyCentreKey.self, value: .bounds) { $0 }
+                .accessibilityHidden(true)
+                .ceremonyColumn(.centre)
         }
         .padding(.horizontal, Spacing.lg)
         .padding(.top, Self.topInset)
         .padding(.bottom, Spacing.lg)
+    }
+
+    /// The header and the rows, out of reach until the page is in.
+    private func richerRows(frame: StoneCeremonyFrame, accepts: Bool) -> some View {
+        // Index 0 is the header; each visible row takes the next.
+        let showsCollections = !refs.collections.isEmpty
+        let visibilityIndex = showsCollections ? 2 : 1
+        return VStack(alignment: .leading, spacing: Spacing.sm) {
+            Text("MAKE IT RICHER")
+                .pebblesFont(.meta)
+                .foregroundStyle(Color.pebbles.onSurfaceVariant)
+                .cascade(frame, 0)
+            Group {
+                if showsCollections { collectionRow.cascade(frame, 1) }
+                visibilityRow.cascade(frame, visibilityIndex)
+                if !hasWords { wordsRow.cascade(frame, visibilityIndex + 1) }
+            }
+            .disabled(isEditing)
+            if let editError {
+                Text(verbatim: editError).pebblesFont(.subhead).foregroundStyle(Color.pebbles.error)
+            }
+        }
+        .allowsHitTesting(accepts)
+        .accessibilityHidden(!accepts)
     }
 
     @ViewBuilder
@@ -285,14 +297,7 @@ struct CompleteRicherStep: View {
                     .allowsHitTesting(accepts)
                     .accessibilityHidden(!accepts)
             }
-            Button {
-                guard let driver else { return }
-                if driver.ceremony.acceptsRicherInput(at: .now) {
-                    onExit()
-                } else {
-                    driver.tapContinue(at: .now)
-                }
-            } label: {
+            Button(action: continueOrDone) {
                 ZStack {
                     Text("Continue").opacity(1 - frame.buttonLabel)
                     Text("Done").opacity(frame.buttonLabel)
@@ -301,6 +306,16 @@ struct CompleteRicherStep: View {
             .buttonStyle(PebblesPrimaryButtonStyle())
             .accessibilityLabel(accepts ? Text("Done") : Text("Continue"))
             .opacity(frame.buttonOpacity)
+            // Nothing draws until Continue fades in, so VoiceOver meets it then.
+            .accessibilityHidden(frame.buttonOpacity == 0)
+            // Continue takes the tap from the first frame, before it is drawn: a transparent view is not
+            // hit-tested, so this clear capsule behind it holds the spot (before contact it only skips).
+            .background {
+                Color.clear
+                    .contentShape(Capsule())
+                    .onTapGesture(perform: continueOrDone)
+                    .accessibilityHidden(true)
+            }
             ZStack {
                 if let onRecordAnother {
                     textButton("Record another", action: onRecordAnother)
@@ -319,6 +334,16 @@ struct CompleteRicherStep: View {
         }
         .padding(.horizontal, Spacing.lg)
         .padding(.vertical, Spacing.sm)
+    }
+
+    /// Continue until the page is in, which only lands it if Act 2 is already playing; then Done.
+    private func continueOrDone() {
+        guard let driver else { return }
+        if driver.ceremony.acceptsRicherInput(at: .now) {
+            onExit()
+        } else {
+            driver.tapContinue(at: .now)
+        }
     }
 
     private func textButton(_ title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
