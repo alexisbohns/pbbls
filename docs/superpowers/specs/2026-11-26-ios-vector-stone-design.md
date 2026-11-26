@@ -1,7 +1,7 @@
 # iOS draws the web and Android stone — design
 
 **Date:** 2026-11-26 · **Issue:** #1690 · **Surface:** ios · **Size:** large (new renderer under every iOS pebble surface)
-**Status:** approach and D1–D8 approved by the maintainer 2026-11-26.
+**Status:** the approach, D1 (tilt) and D8 (picker) were approved by the maintainer on 2026-11-26. D4–D7 are the author's calls and are marked as such.
 
 ## Intent
 
