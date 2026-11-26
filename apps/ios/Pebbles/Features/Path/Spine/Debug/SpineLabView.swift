@@ -78,7 +78,7 @@ struct SpineLabView: View {
         ScrollView {
             switch section {
             case .stones:
-                SpineStoneGallery(pressable: true)
+                SpineStoneGallery(pressable: true, vector: true)
             case .cards:
                 SpineCardGallery(numbers: [1, 4, 7, 9, 13, 15])
             case .feed:
