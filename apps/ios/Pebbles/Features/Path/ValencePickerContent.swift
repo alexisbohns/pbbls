@@ -16,10 +16,6 @@ struct ValencePickerContent: View {
     /// The help sheet shows the fan alone: its lit stone is the explanation.
     var showsCaption = true
 
-    /// The phone's lean, read by the chosen stone only. Started with the fan,
-    /// stopped with it; a pick re-zeroes so the chosen stone starts level.
-    @State private var motion = StoneMotionSource()
-
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Opacity of the eight stones that are not the chosen one. With nothing
@@ -52,8 +48,6 @@ struct ValencePickerContent: View {
         .overlay(alignment: .bottom) { columnLabels }
         .overlay(alignment: .leading) { rowLabels }
         .animation(.snappy(duration: 0.22), value: selected)
-        .onAppear { motion.start() }
-        .onDisappear { motion.stop() }
     }
 
     @ViewBuilder
@@ -65,10 +59,9 @@ struct ValencePickerContent: View {
         let width = ValenceFanLayout.stoneWidth(for: valence.sizeGroup)
 
         Button {
-            motion.rezero()
             onSelect(valence)
         } label: {
-            ValenceStoneView(valence: valence, height: height, isSelected: isActive, lean: isActive ? motion.lean : nil)
+            ValenceStoneView(valence: valence, height: height, isSelected: isActive)
                 .frame(
                     width: max(width, Self.minimumHitTarget),
                     height: max(height, Self.minimumHitTarget)

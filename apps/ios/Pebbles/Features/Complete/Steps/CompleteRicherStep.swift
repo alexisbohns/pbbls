@@ -82,7 +82,7 @@ struct CompleteRicherStep: View {
                 valence: draft.valence ?? .neutralMedium,
                 glyph: result.glyph,
                 palette: draft.emotionId.flatMap { palettes.palette(for: $0) },
-                followsTilt: true
+                seed: StableHash.seed(result.pebbleId)
             )
             .frame(maxWidth: .infinity)
             .frame(height: 240)

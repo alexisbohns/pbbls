@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// The Spine's stone (#1130 D1, R2–R3, R12–R14), bottom to top: the halo and
-/// the rings, the ripple (mounted only while a press is live), the existing lit
-/// stone at rest light, then the glint. It lays out at the stone's phone size;
+/// the rings, the ripple (mounted only while a press is live), the vector
+/// stone (#1690), then the glint. It lays out at the stone's phone size;
 /// the halo, the rings and the ripple overflow it unclipped (D4).
 ///
 /// The press is a value (`StonePress`) the caller owns as `@State` and clears
@@ -44,7 +44,7 @@ struct SpineStone: View {
 
     var body: some View {
         // One TimelineView whatever the press, so the lit stone keeps its identity
-        // (and its tilt state) when a press starts and ends.
+        // when a press starts and ends.
         TimelineView(.animation(minimumInterval: nil, paused: press == nil || frozenAt != nil)) { context in
             layers(frame(at: context.date))
         }
