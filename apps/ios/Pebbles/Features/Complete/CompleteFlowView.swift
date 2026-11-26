@@ -44,20 +44,24 @@ struct CompleteFlowView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if model.step != .success {
-                RecordFlowChrome(
-                    dotCount: CompleteStep.counted.count,
-                    dotIndex: model.step.dotIndex,
-                    canGoBack: model.step.previous != nil && !model.isCompleting,
-                    onBack: { model.back() },
-                    onClose: close
-                )
-            }
+            // The success step shows ✕ alone, no dots and no back: the ceremony owns it, and closing
+            // works throughout (D9).
+            let onSuccess = model.step == .success
+            RecordFlowChrome(
+                dotCount: onSuccess ? 0 : CompleteStep.counted.count,
+                dotIndex: onSuccess ? nil : model.step.dotIndex,
+                canGoBack: !onSuccess && model.step.previous != nil && !model.isCompleting,
+                onBack: { model.back() },
+                onClose: close
+            )
             stepBody
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // Leaving: nothing under the ✕ takes a tap, Continue included.
+                .allowsHitTesting(!model.isClosing)
         }
         .background(Color.pebbles.surface)
         .pebblesScreen()
+        .onDisappear { fireAchievementCheck() }
         .animation(.snappy(duration: 0.28), value: model.step)
         .onChange(of: model.step) { old, new in
             isMovingBack = new.rawValue < old.rawValue
@@ -111,6 +115,7 @@ struct CompleteFlowView: View {
                     draft: model.draft,
                     hasWords: momentHasWords,
                     onExit: { dismiss() },
+                    onSettled: fireAchievementCheck,
                     onRecordAnother: onRecordAnother,
                     onEdited: { onCompleted(momentId) }
                 )
@@ -131,10 +136,20 @@ struct CompleteFlowView: View {
             }
         }
         .id(model.step)
-        .transition(.asymmetric(
-            insertion: .move(edge: isMovingBack ? .leading : .trailing).combined(with: .opacity),
-            removal: .move(edge: isMovingBack ? .trailing : .leading).combined(with: .opacity)
-        ))
+        .transition(stepTransition)
+    }
+
+    /// Steps slide; the success step fades in and the life step fades out into it, so the stone's
+    /// flight never shares the screen with a sliding page (#1691). A leaving view keeps the
+    /// transition of its last render, and Back is disabled while completing, so `isCompleting`
+    /// marks the one departure that is not a slide.
+    private var stepTransition: AnyTransition {
+        let slide = AnyTransition.move(edge: isMovingBack ? .leading : .trailing).combined(with: .opacity)
+        let slideOut = AnyTransition.move(edge: isMovingBack ? .trailing : .leading).combined(with: .opacity)
+        return .asymmetric(
+            insertion: model.step == .success ? .opacity : slide,
+            removal: model.isCompleting ? .opacity : slideOut
+        )
     }
 
     private var valenceSubtitle: LocalizedStringResource? {
@@ -172,9 +187,22 @@ struct CompleteFlowView: View {
     }
 
     /// ✕ never asks (A1): the answers are already on disk.
+    /// On the success step it also silences the ceremony now, not when the dismissal completes: the
+    /// view's `onDisappear` latch comes after the animation, and its ticks would play on the
+    /// screen underneath.
     private func close() {
+        fireAchievementCheck()
+        model.beginClosing()
+        StoneCeremonyHaptics.shared.stop()
         autosave?.flush()
         dismiss()
+    }
+
+    /// Fires the check the success owes, once: when the ceremony settles, and on every way out before
+    /// that (✕, the flow disappearing), so an unlock is never lost. Not `AchievementNotificationService.hold()`:
+    /// that flag is shared with the onboarding hand-off, which Home's `composerSaved()` would release early.
+    private func fireAchievementCheck() {
+        if model.takePendingAchievementCheck() { achievements.fireCheck() }
     }
 
     // MARK: - Complete
@@ -187,6 +215,8 @@ struct CompleteFlowView: View {
             return
         }
         model.beginCompleting()
+        // Warm the haptic engine while the write runs, so the ceremony's first event is on time.
+        StoneCeremonyHaptics.shared.prepare()
         let service = MomentsService(client: supabase.client)
         // Karma already earned by a pebble that exists on the moment (a stale
         // read, a retried chain): `complete_pebble` updates it in place, so
@@ -203,8 +233,11 @@ struct CompleteFlowView: View {
             let quiet = model.draft.valence?.quietSuccess ?? false
             if !quiet {
                 // The end screen shows `+N`, so no capsule (A4).
-                karma.notifyEarned(amount: karmaDelta ?? 0, reason: .pebbleCreated, presentsCapsule: false)
-                achievements.fireCheck()
+                // The ceremony plays the haptic when its stone is on screen, and the achievement check
+                // waits for the ceremony to settle (`fireAchievementCheck`): an unlock card must not
+                // cover Act 1.
+                karma.notifyEarned(amount: karmaDelta ?? 0, reason: .pebbleCreated, presentsCapsule: false,
+                                   playsHaptic: false)
             }
             autosave?.clear()
             if let owner = supabase.session?.user.id {

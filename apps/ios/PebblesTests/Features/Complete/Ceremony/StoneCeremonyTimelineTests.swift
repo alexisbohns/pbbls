@@ -86,4 +86,31 @@ struct StoneCeremonyTimelineTests {
         #expect(abs(StoneCeremonyLayout.heroWaveReach(screenWidth: 393, heroWidth: 158, wave: 0) - 2.388) < 0.001)
         #expect(abs(StoneCeremonyLayout.heroWaveReach(screenWidth: 393, heroWidth: 158, wave: 1) - 2.245) < 0.001)
     }
+
+    @Test func pauseCentre() {
+        let hero = CGSize(width: 158, height: 158)
+        // a short name block: the region's centre
+        #expect(StoneCeremonyLayout.pauseCentreY(region: 630, hero: hero, textHeight: 80) == 315)
+        // a tall one: raised until it ends at the region's bottom, 26 pt under the stone
+        let raised = StoneCeremonyLayout.pauseCentreY(region: 630, hero: hero, textHeight: 300)
+        #expect(raised == 225)
+        #expect(raised + hero.height / 2 + StoneCeremonyLayout.nameGap + 300 <= 630)
+        // taller than the room: the stone stops at the region's top, never smaller
+        #expect(StoneCeremonyLayout.pauseCentreY(region: 630, hero: hero, textHeight: 600) == 79)
+    }
+
+    @Test func flight() {
+        let from = CGRect(x: 117.5, y: 260, width: 158, height: 158)
+        let to = CGRect(x: 230, y: 96, width: 28, height: 28)
+        #expect(StoneCeremonyLayout.flightRect(from: from, to: to, progress: 0) == from)
+        #expect(StoneCeremonyLayout.flightRect(from: from, to: to, progress: 1) == to)
+        let mid = StoneCeremonyLayout.flightRect(from: from, to: to, progress: 0.5)
+        #expect(abs(mid.midX - (from.midX + to.midX) / 2) < 0.0001)
+        #expect(abs(mid.width - (from.width + to.width) / 2) < 0.0001)
+        // D3: the landing image fades in over the last 40 % of the flight only.
+        #expect(StoneCeremonyLayout.flightCrossfade(0) == 0)
+        #expect(StoneCeremonyLayout.flightCrossfade(0.6) == 0)
+        #expect(abs(StoneCeremonyLayout.flightCrossfade(0.8) - 0.5) < 0.0001)
+        #expect(StoneCeremonyLayout.flightCrossfade(1) == 1)
+    }
 }

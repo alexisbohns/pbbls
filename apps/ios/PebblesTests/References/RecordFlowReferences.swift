@@ -13,6 +13,8 @@ extension References {
         /// The Life screen at accessibility2 does not scroll under ImageRenderer:
         /// one domain column and a two-line pill need a taller page to draw whole.
         private static let lifeAx2Height: CGFloat = 1100
+        /// An iPhone SE's height: the shortest page the pause must fit at accessibility sizes.
+        private static let shortPageHeight: CGFloat = 667
 
         /// A Wednesday, so the when chip and the week row never read "Today".
         private static let wednesday: Date = {
@@ -132,16 +134,29 @@ extension References {
             }
         }
 
-        private static func richer() -> some View {
+        /// The fixture glyph of the lit-stone tests: a bar and a curve, so the pause shows a carve.
+        private static let glyph = PebbleGlyph(
+            id: uuid(31), name: nil,
+            strokes: [
+                GlyphStroke(d: "M 40 100 L 160 100", width: 6),
+                GlyphStroke(d: "M 100 40 Q 120 100 100 160", width: 4)
+            ],
+            viewBox: "0 0 200 200", source: nil
+        )
+
+        /// The success step on a frozen ceremony (#1691 D8): the pause, or the settled page.
+        private static func richer(frozen: StoneCeremonyFreeze, valence: Valence = .highlightMedium,
+                                   glyph: PebbleGlyph? = nil, happenedAt: Date? = wednesday,
+                                   height: CGFloat = pageHeight) -> some View {
             var draft = CompleteDraft()
-            draft.valence = .highlightMedium
+            draft.valence = valence
             draft.domainIds = [domains[0].id]
-            return host(height: pageHeight) {
+            return host(height: height) {
                 CompleteRicherStep(
-                    momentId: uuid(21), name: "Coffee with Léa", happenedAt: wednesday,
-                    result: CompletionResult(pebbleId: uuid(22), karmaDelta: 3, glyph: nil),
+                    momentId: uuid(21), name: "Coffee with Léa", happenedAt: happenedAt,
+                    result: CompletionResult(pebbleId: uuid(22), karmaDelta: 3, glyph: glyph),
                     draft: draft, hasWords: false, onExit: {}, onRecordAnother: {}, onEdited: {},
-                    scrolls: false
+                    scrolls: false, frozen: frozen
                 )
             }
         }
@@ -183,9 +198,47 @@ extension References {
                                          config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
         }
 
+        /// The ceremony's pause: the carved hero stone, its name and karma, Continue.
+        @Test(arguments: ReferenceScheme.allCases)
+        func richerPause(scheme: ReferenceScheme) {
+            ReferenceImage.assertMatches(Self.richer(frozen: .pause, glyph: Self.glyph),
+                                         named: "richerPause", config: Self.config(scheme))
+        }
+
+        /// A quiet pebble's pause: the calm sentence, and Get support under Continue.
+        @Test
+        func richerPauseQuiet() {
+            ReferenceImage.assertMatches(Self.richer(frozen: .pause, valence: .lowlightLarge, glyph: Self.glyph),
+                                         named: "richerPauseQuiet", config: ReferenceConfig(scheme: .paper))
+        }
+
+        /// The name and the karma line under the hero stone never run under Continue.
+        @Test
+        func richerPauseAx2() {
+            ReferenceImage.assertMatches(Self.richer(frozen: .pause, glyph: Self.glyph), named: "richerPause",
+                                         config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
+        }
+
+        /// The worst case for the pause: the large stone, the calm sentence and both quiet links at
+        /// accessibility2 on a short phone. The stone rises; the whole sentence stays above the bar.
+        @Test
+        func richerPauseQuietAx2() {
+            ReferenceImage.assertMatches(
+                Self.richer(frozen: .pause, valence: .lowlightLarge, glyph: Self.glyph, height: Self.shortPageHeight),
+                named: "richerPauseQuiet", config: ReferenceConfig(scheme: .paper, dynamicType: .accessibility2))
+        }
+
+        /// The settled page: the stone on its day, the rows, Done and Record another.
         @Test(arguments: ReferenceScheme.allCases)
         func richer(scheme: ReferenceScheme) {
-            ReferenceImage.assertMatches(Self.richer(), named: "richer", config: Self.config(scheme))
+            ReferenceImage.assertMatches(Self.richer(frozen: .settled), named: "richer", config: Self.config(scheme))
+        }
+
+        /// No known day (D12): the stone lands in its own slot above the name.
+        @Test
+        func richerNoDay() {
+            ReferenceImage.assertMatches(Self.richer(frozen: .settled, happenedAt: nil), named: "richerNoDay",
+                                         config: ReferenceConfig(scheme: .paper))
         }
     }
 }

@@ -13,6 +13,14 @@ struct KarmaNotificationServiceTests {
         #expect(service.activeCapsule == KarmaEarnedContent(amount: 5, reason: .pebbleCreated))
     }
 
+    @Test("playsHaptic false skips the haptic but still shows the pastille")
+    func hapticCanBeSkipped() {
+        let service = KarmaNotificationService()
+        service.notifyEarned(amount: 5, reason: .pebbleCreated, playsHaptic: false)
+        #expect(service.hapticTrigger == 0)
+        #expect(service.activeCapsule == KarmaEarnedContent(amount: 5, reason: .pebbleCreated))
+    }
+
     @Test("non-positive earn is a silent no-op")
     func nonPositiveIsSilent() {
         let service = KarmaNotificationService()

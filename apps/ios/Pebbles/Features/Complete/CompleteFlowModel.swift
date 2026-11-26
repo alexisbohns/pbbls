@@ -20,6 +20,12 @@ final class CompleteFlowModel {
     private(set) var completed: CompletionResult?
     private(set) var isCompleting = false
     private(set) var completeError: String?
+    /// ✕ was pressed and the flow is leaving: the step stops taking taps for the dismissal, so a
+    /// late Continue cannot start the ceremony's second act on the way out.
+    private(set) var isClosing = false
+    /// An achievement check owed for the pebble just made. The success step's ceremony plays first,
+    /// so the unlock card lands on the rested page, not over Act 1 (#1691); the view takes it once.
+    private(set) var achievementCheckPending = false
 
     private let haptic: @MainActor (TapHaptic) -> Void
 
@@ -137,6 +143,20 @@ final class CompleteFlowModel {
         step = firstGap()
     }
 
+    /// True once for the check `succeed` left owed, then false: the ceremony settling, ✕ and the
+    /// flow disappearing all ask, and only the first fires it.
+    func takePendingAchievementCheck() -> Bool {
+        defer { achievementCheckPending = false }
+        return achievementCheckPending
+    }
+
+    // MARK: Closing
+
+    /// Silent, like ✕ itself: the flow is going and there is nothing to confirm.
+    func beginClosing() {
+        isClosing = true
+    }
+
     // MARK: Completing
 
     func beginCompleting() {
@@ -144,9 +164,11 @@ final class CompleteFlowModel {
         completeError = nil
     }
 
-    /// `quiet` (a high-distress pebble) skips the success haptic.
+    /// The success step's ceremony plays the haptic (#1691), so this one is silent. `quiet` (a
+    /// high-distress pebble) stays on the signature so the ceremony and the flow agree on it.
     func succeed(with result: CompletionResult, quiet: Bool = false) {
-        if !quiet { haptic(.success) }
+        // A quiet (high-distress) pebble stays free of any achievement moment.
+        achievementCheckPending = !quiet
         isCompleting = false
         completed = result
         step = .success

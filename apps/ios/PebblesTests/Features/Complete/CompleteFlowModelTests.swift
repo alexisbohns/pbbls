@@ -153,7 +153,7 @@ struct CompleteFlowModelTests {
         #expect(model.draftToAutosave.soulIds == [soul])
     }
 
-    @Test("success goes to the success step with a success haptic; failure stays put")
+    @Test("success goes to the success step and the ceremony plays the haptic; failure stays put")
     func outcomes() {
         let (model, recorder) = model()
         model.go(to: .life)
@@ -167,7 +167,32 @@ struct CompleteFlowModelTests {
         model.succeed(with: result)
         #expect(model.step == .success)
         #expect(model.completed == result)
-        #expect(recorder.taps.suffix(2) == [.warning, .success])
+        #expect(recorder.taps.suffix(1) == [.warning])
+        #expect(!recorder.taps.contains(.success))
+    }
+
+    @Test("a success owes one achievement check, taken once; a quiet one owes none")
+    func achievementCheckIsOwedOnce() {
+        let (model, _) = model()
+        #expect(!model.takePendingAchievementCheck())
+        model.beginCompleting()
+        model.succeed(with: CompletionResult(pebbleId: UUID(), karmaDelta: 4, glyph: nil))
+        #expect(model.takePendingAchievementCheck())
+        #expect(!model.takePendingAchievementCheck())
+
+        let (quiet, _) = self.model()
+        quiet.beginCompleting()
+        quiet.succeed(with: CompletionResult(pebbleId: UUID(), karmaDelta: 4, glyph: nil), quiet: true)
+        #expect(!quiet.takePendingAchievementCheck())
+    }
+
+    @Test("closing marks the flow as leaving, silently")
+    func closing() {
+        let (model, recorder) = model()
+        #expect(!model.isClosing)
+        model.beginClosing()
+        #expect(model.isClosing)
+        #expect(recorder.taps.isEmpty)
     }
 
     @Test("quiet success does not buzz")

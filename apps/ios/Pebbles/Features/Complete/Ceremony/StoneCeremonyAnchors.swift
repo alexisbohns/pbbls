@@ -21,3 +21,35 @@ struct StoneCeremonyCellKey: PreferenceKey {
         value = value ?? nextValue()
     }
 }
+
+/// Both landmarks together, so one overlay can resolve them: each key is re-published into this
+/// one by an overlay of its own (`View.stoneCeremonyLandmarks`).
+struct StoneCeremonyLandmarks {
+    var centre: Anchor<CGRect>?
+    var cell: Anchor<CGRect>?
+}
+
+struct StoneCeremonyLandmarksKey: PreferenceKey {
+    static let defaultValue = StoneCeremonyLandmarks()
+
+    static func reduce(value: inout StoneCeremonyLandmarks, nextValue: () -> StoneCeremonyLandmarks) {
+        let next = nextValue()
+        value.centre = value.centre ?? next.centre
+        value.cell = value.cell ?? next.cell
+    }
+}
+
+extension View {
+    /// Draws `content` over this view with the centre and the cell published inside it.
+    func stoneCeremonyLandmarks<Content: View>(
+        @ViewBuilder _ content: @escaping (StoneCeremonyLandmarks) -> Content
+    ) -> some View {
+        overlayPreferenceValue(StoneCeremonyCentreKey.self) { centre in
+            Color.clear.preference(key: StoneCeremonyLandmarksKey.self, value: StoneCeremonyLandmarks(centre: centre))
+        }
+        .overlayPreferenceValue(StoneCeremonyCellKey.self) { cell in
+            Color.clear.preference(key: StoneCeremonyLandmarksKey.self, value: StoneCeremonyLandmarks(cell: cell))
+        }
+        .overlayPreferenceValue(StoneCeremonyLandmarksKey.self, content)
+    }
+}

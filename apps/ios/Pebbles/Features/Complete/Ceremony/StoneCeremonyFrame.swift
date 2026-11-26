@@ -30,7 +30,8 @@ struct StoneCeremonyFrame: Equatable {
     var buttonOpacity = 0.0
     /// 0 reads "Continue", 1 reads "Done".
     var buttonLabel = 0.0
-    /// The quiet link at the pause.
+    /// The quiet link under Continue: in at the pause, then out as the link above Done comes in, so
+    /// the two opacities always sum to 1 through Act 2.
     var supportUnderContinue = 0.0
     /// Record another, and the quiet link above Done.
     var actionsOpacity = 0.0
@@ -97,8 +98,6 @@ extension StoneCeremonyTimeline {
     func act2(at u: Double, markedDay: Int) -> StoneCeremonyFrame {
         let u = max(u, 0)
         var f = StoneCeremonyFrame()
-        // The quiet link fades as Continue becomes Done; a stone that is not quiet never showed one.
-        f.supportUnderContinue = quiet ? 1 - progress(u, 0, 0.2) : 0
         f.buttonOpacity = 1
 
         guard mode == .full else {
@@ -107,6 +106,7 @@ extension StoneCeremonyTimeline {
             f.cellStoneOpacity = a
             f.nameOpacity = a; f.karmaOpacity = a
             f.buttonLabel = a; f.actionsOpacity = a
+            f.supportUnderContinue = quiet ? 1 - a : 0
             f.dayOpacity = f.dayOpacity.map { _ in a }
             f.rowOpacity = f.rowOpacity.map { _ in a }
             f.textDrop = 0
@@ -145,6 +145,8 @@ extension StoneCeremonyTimeline {
 
         f.buttonLabel = ease(Curves.out, progress(u, actionsIn, 0.3 * tempo))
         f.actionsOpacity = f.buttonLabel
+        // The quiet link crosses over with Done: one link is always showing (a stone that is not quiet never had one).
+        f.supportUnderContinue = quiet ? 1 - f.actionsOpacity : 0
         return f
     }
 
