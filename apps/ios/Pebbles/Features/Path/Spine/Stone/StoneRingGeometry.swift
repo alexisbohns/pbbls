@@ -93,7 +93,7 @@ struct StoneRingGeometry {
     @MainActor private static var cache: [CacheKey: StoneRingGeometry] = [:]
 
     /// Shoelace over the first contour; nil when it encloses no area.
-    private static func areaCentroid(_ points: [CGPoint]) -> CGPoint? {
+    static func areaCentroid(_ points: [CGPoint]) -> CGPoint? {
         guard points.count >= 3 else { return nil }
         var area: CGFloat = 0
         var cx: CGFloat = 0

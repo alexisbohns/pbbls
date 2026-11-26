@@ -24,13 +24,17 @@ struct LitStoneGeometryTests {
         #expect(near(transform.ty, ty), "ty \(transform.ty) vs \(ty)", sourceLocation: sourceLocation)
     }
 
-    /// The `d` of an outline asset's single path, as the bundle ships it.
+    /// The `d` of an outline asset's single path; nil when the asset has none.
+    private func pathData(_ raw: String) -> String? {
+        raw.firstMatch(of: /<path\b[^>]*?\sd="([^"]*)"/).map { String($0.output.1) }
+    }
+
+    /// The bundled outline asset's path data.
     private func outline(_ size: ValenceSizeGroup, _ polarity: ValencePolarity) throws -> String {
         let name = "\(size.rawValue)-\(polarity.rawValue)"
         let url = try #require(Bundle.main.url(forResource: name, withExtension: "svg"))
         let raw = try String(contentsOf: url, encoding: .utf8)
-        let match = try #require(raw.firstMatch(of: /<path\b[^>]*?\sd="([^"]*)"/))
-        return String(match.output.1)
+        return try #require(pathData(raw))
     }
 
     @Test("outline units per on-screen px")
@@ -72,6 +76,24 @@ struct LitStoneGeometryTests {
         expectAffine(LitStoneGeometry.glyphTransform(.small, .neutral, side: 200), a: 0.7, d: 0.7, tx: 25, ty: 30)
     }
 
+    @Test("every zone's glyph transform is the web's table, at two glyph sides")
+    func glyphZones() {
+        // `GLYPH_SIZE` and `GLYPH_POSITION` in `apps/web/lib/config/stone-geometry.ts`.
+        let zones: [(ValenceSizeGroup, ValencePolarity, size: Double, x: Double, y: Double)] = [
+            (.small, .highlight, 140, 37.5, 30), (.small, .neutral, 140, 25, 30), (.small, .lowlight, 140, 30, 30),
+            (.medium, .highlight, 150, 26, 84), (.medium, .neutral, 150, 26, 55), (.medium, .lowlight, 150, 39, 26),
+            (.large, .highlight, 160, 50, 75), (.large, .neutral, 160, 26, 88), (.large, .lowlight, 160, 26, 75),
+        ]
+        #expect(zones.count == ValenceSizeGroup.allCases.count * ValencePolarity.allCases.count)
+        for (size, polarity, zoneSize, x, y) in zones {
+            for side in [200.0, 160.0] {
+                let scale = zoneSize / side
+                let transform = LitStoneGeometry.glyphTransform(size, polarity, side: CGFloat(side))
+                expectAffine(transform, a: scale, d: scale, tx: x, ty: y)
+            }
+        }
+    }
+
     @Test("silhouette frame is the outer contour's centroid and box")
     func silhouetteFrame() throws {
         let small = try outline(.small, .neutral)
@@ -90,6 +112,14 @@ struct LitStoneGeometryTests {
         #expect(near(largeCentroid.y, 196.36803073996094))
         #expect(near(largeBox.width, 319.99817198421874))
         #expect(near(largeBox.height, 360.0751259097222))
+    }
+
+    @Test("outline path data is the asset's single path")
+    func outlinePathData() throws {
+        let d = try outline(.small, .neutral)
+        #expect(d.hasPrefix("M97.3622 12.4435C113.519"))
+        #expect(d.hasSuffix("Z"))
+        #expect(pathData("<svg id=\"x\"></svg>") == nil)
     }
 
     @Test("an unreadable path has no frame")

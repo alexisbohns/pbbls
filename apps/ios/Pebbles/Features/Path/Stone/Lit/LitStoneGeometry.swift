@@ -120,27 +120,17 @@ enum LitStoneGeometry {
               // The first contour is the outer one; large-lowlight's second is its hole.
               let points = WobblePathFlattener.flatten(path, step: frameFlattenStep).first?.points,
               !points.isEmpty else { return nil }
-        var area = 0.0
-        var cx = 0.0
-        var cy = 0.0
-        var minX = Double.infinity
-        var minY = Double.infinity
-        var maxX = -Double.infinity
-        var maxY = -Double.infinity
-        for index in points.indices {
-            let p = points[index]
-            let q = points[(index + 1) % points.count]
-            let cross = Double(p.x * q.y - q.x * p.y)
-            area += cross
-            cx += Double(p.x + q.x) * cross
-            cy += Double(p.y + q.y) * cross
-            minX = min(minX, Double(p.x))
-            minY = min(minY, Double(p.y))
-            maxX = max(maxX, Double(p.x))
-            maxY = max(maxY, Double(p.y))
+        var minX = CGFloat.infinity
+        var minY = CGFloat.infinity
+        var maxX = -CGFloat.infinity
+        var maxY = -CGFloat.infinity
+        for p in points {
+            minX = min(minX, p.x)
+            minY = min(minY, p.y)
+            maxX = max(maxX, p.x)
+            maxY = max(maxY, p.y)
         }
-        area /= 2
-        let centroid = abs(area) > 1e-9 ? CGPoint(x: cx / (6 * area), y: cy / (6 * area)) : .zero
+        let centroid = StoneRingGeometry.areaCentroid(points) ?? .zero
         return (CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY), centroid)
     }
 
