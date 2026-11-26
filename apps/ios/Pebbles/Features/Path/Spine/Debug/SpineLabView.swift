@@ -1,7 +1,7 @@
 #if DEBUG
 import SwiftUI
 
-/// The Spine's debug lab (#1130), Settings → Developer, beside the stone lab:
+/// The Spine's debug lab (#1130), Settings → Developer:
 /// the Spine's pieces on their own, one section each, pressable on a device.
 /// Verbatim text throughout, so nothing reaches the string catalogue.
 struct SpineLabView: View {
@@ -78,7 +78,7 @@ struct SpineLabView: View {
         ScrollView {
             switch section {
             case .stones:
-                SpineStoneGallery(pressable: true, vector: true)
+                SpineStoneGallery(pressable: true)
             case .cards:
                 SpineCardGallery(numbers: [1, 4, 7, 9, 13, 15])
             case .feed:

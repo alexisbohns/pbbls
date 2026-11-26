@@ -4,14 +4,9 @@ import SwiftUI
 /// The nine Spine stones (size × polarity) on the brand palette, then the blank
 /// stone, at their phone widths with their rings and halo: the lab's gallery and
 /// the `gallery` / `midPress` references. `pressable` makes each one a button.
-///
-/// `vector` puts the new vector stone (#1690, `LitStoneImage`) under each metal one,
-/// same valence, same seed, brand palette, for a visual check before the switch-over.
-/// Off for the references, so they do not move.
 struct SpineStoneGallery: View {
     var pressable = false
     var frozenAt: Double?
-    var vector = false
     /// The same stone with six seeds: the crust varies by pebble (`seeds` reference).
     var seeds = false
 
@@ -35,14 +30,9 @@ struct SpineStoneGallery: View {
                             if let valence = Valence.allCases.first(where: {
                                 $0.sizeGroup == size && $0.polarity == polarity
                             }) {
-                                let seed = StableHash.fnv1a("\(valence)")
-                                VStack(spacing: 28) {
-                                    SpineStoneCell(valence: valence, isBlank: false, seed: seed,
-                                                   pressable: pressable, frozenAt: frozenAt)
-                                    if vector {
-                                        VectorStoneCell(valence: valence, isBlank: false, seed: seed)
-                                    }
-                                }
+                                SpineStoneCell(valence: valence, isBlank: false,
+                                               seed: StableHash.fnv1a("\(valence)"),
+                                               pressable: pressable, frozenAt: frozenAt)
                             }
                         }
                     }
@@ -50,32 +40,12 @@ struct SpineStoneGallery: View {
                 HStack(spacing: 28) {
                     SpineStoneCell(valence: .neutralMedium, isBlank: true, seed: StableHash.fnv1a("blank"),
                                    pressable: pressable, frozenAt: frozenAt)
-                    if vector {
-                        VectorStoneCell(valence: .neutralMedium, isBlank: true, seed: StableHash.fnv1a("blank"))
-                    }
                 }
             }
         }
         .padding(.vertical, 56)
         .frame(maxWidth: .infinity)
         .background(Color.pebbles.surface)
-    }
-}
-
-/// The vector stone at the Spine's width for its size, in the same 80 pt cell as the metal one.
-private struct VectorStoneCell: View {
-    let valence: Valence
-    let isBlank: Bool
-    let seed: UInt32
-
-    var body: some View {
-        // `LitStoneImage` reads the scheme and Low Power Mode itself; the spec's own are not used.
-        let spec = LitStoneSpec(size: valence.sizeGroup, polarity: valence.polarity,
-                                palette: isBlank ? nil : .brand, glyph: nil, seed: seed,
-                                night: false, flat: false)
-        LitStoneImage(spec: spec)
-            .frame(width: SpineLayout.stoneSize(valence.sizeGroup).width)
-            .frame(width: 80, height: 80)
     }
 }
 

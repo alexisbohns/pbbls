@@ -39,7 +39,6 @@ struct SettingsSheet: View {
     @State private var isPresentingGlyphPicker = false
     #if DEBUG
     @Environment(OnboardingGateModel.self) private var onboardingGate
-    @State private var isPresentingStoneLab = false
     @State private var isPresentingSpineLab = false
     @State private var isPresentingIconLab = false
     @State private var isPresentingFilterLab = false
@@ -191,9 +190,6 @@ struct SettingsSheet: View {
                 links = await SettingsLinksService(client: supabase.client).refresh()
             }
             #if DEBUG
-            .fullScreenCover(isPresented: $isPresentingStoneLab) {
-                StoneLabView()
-            }
             .fullScreenCover(isPresented: $isPresentingSpineLab) {
                 SpineLabView()
             }
@@ -491,24 +487,10 @@ struct SettingsSheet: View {
     }
 
     #if DEBUG
-    /// Debug builds only: the stone material lab (#974). Verbatim text so the
-    /// row never reaches the string catalog.
+    /// Debug builds only: the labs. Verbatim text so the rows never reach the
+    /// string catalog.
     private var developerSection: some View {
         Section {
-            Button {
-                // Start building the nine carvings off the main actor now, so
-                // the lab has less to wait for when it opens.
-                Task.detached(priority: .userInitiated) { StoneCarvingArt.prewarm() }
-                isPresentingStoneLab = true
-            } label: {
-                Label {
-                    Text(verbatim: "Stone lab")
-                } icon: {
-                    PbblsGlyphView(.pebbleRound, .row)
-                }
-            }
-            .buttonStyle(.plain)
-            .pebblesListRow(position: .top)
             Button {
                 isPresentingSpineLab = true
             } label: {
@@ -519,7 +501,7 @@ struct SettingsSheet: View {
                 }
             }
             .buttonStyle(.plain)
-            .pebblesListRow(position: .middle)
+            .pebblesListRow(position: .top)
             Button {
                 isPresentingIconLab = true
             } label: {

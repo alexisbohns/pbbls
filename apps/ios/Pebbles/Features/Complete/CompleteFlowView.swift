@@ -66,7 +66,6 @@ struct CompleteFlowView: View {
             // The valence fan wobbles nine artworks on first sight.
             Task.detached(priority: .utility) {
                 ValenceArt.prewarm()
-                StoneCarvingArt.prewarm()
             }
             if autosave == nil {
                 autosave = CompleteAutosave(

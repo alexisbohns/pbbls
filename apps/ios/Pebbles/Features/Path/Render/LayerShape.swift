@@ -4,8 +4,7 @@ import SwiftUI
 ///
 /// Combines the layer's SVG-space transform with the viewBox→rect fit so the
 /// resulting path draws at the right size and position inside the Shape's
-/// drawing rect. Shared by `PebbleAnimatedRenderView` (animated trim) and
-/// `PebbleStaticRenderView` (static, full trim).
+/// drawing rect. Used by the stroke-reveal and static pebble renders.
 struct LayerShape: Shape {
     let layer: PebbleSVGModel.Layer
     let viewBox: CGRect

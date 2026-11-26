@@ -19,7 +19,7 @@ import Foundation
 /// `StoneRingGeometry` already covers them.
 enum LitStoneGeometry {
 
-    /// The carving's inset relative to the engine's (`StoneLook.carvingScale`).
+    /// The carving's inset relative to the engine's (the retired Metal stone's `carvingScale`).
     static let carveScale: CGFloat = 1.22
 
     /// The glyph's carved line, whatever the stone's size.

@@ -6,8 +6,7 @@ import os
 /// its `transform` chain, opacity, and a single combined `CGPath` of all the
 /// descendant `<path d="…">` strings concatenated together.
 ///
-/// Built once on first appearance of `PebbleAnimatedRenderView`. Failure
-/// (`init?` returning nil) means the caller falls back to the existing
+/// Failure (`init?` returning nil) means the caller falls back to the
 /// `SVGView`-based static renderer.
 struct PebbleSVGModel {
     let viewBox: CGRect

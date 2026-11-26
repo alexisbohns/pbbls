@@ -109,11 +109,11 @@ struct PebbleFrameColors: Equatable {
     /// 6-digit `#RRGGBB`. Consumed by `PebbleRenderView` (replaces
     /// `currentColor` in the composed pebble SVG).
     let strokeHex: String
-    /// 6-digit `#RRGGBB`. Consumed by `PebbleOutlineBackdropView`
-    /// (replaces the `#FF00FF` sentinel in the outline SVG).
+    /// 6-digit `#RRGGBB`. Replaces the `#FF00FF` sentinel
+    /// in the outline SVG.
     let fillHex: String
-    /// The fill color's alpha (0...1), applied as view opacity by
-    /// `PebbleOutlineBackdropView`. Large pebbles fill with opaque
+    /// The fill color's alpha (0...1), applied as view opacity to the
+    /// outline backdrop. Large pebbles fill with opaque
     /// `primary` (1.0); small/medium fill with `surface`, which the
     /// palette seeds at ~10% alpha for a faint silhouette wash.
     let fillOpacity: Double
