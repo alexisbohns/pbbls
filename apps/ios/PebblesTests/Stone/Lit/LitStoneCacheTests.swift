@@ -86,7 +86,8 @@ struct LitStoneCacheTests {
         let spec = Self.spec()
         let scale: CGFloat = 3
         let raw = CGSize(width: 44.1, height: 61.3)
-        let snapped = CGSize(width: (raw.width * scale).rounded() / scale, height: (raw.height * scale).rounded() / scale)
+        let snapped = CGSize(width: (raw.width * scale).rounded() / scale,
+                             height: (raw.height * scale).rounded() / scale)
         let padding = LitStoneCache.padding(spec, box: raw, scale: scale)
         let want = LitStoneCache.padding(spec, box: snapped)
         #expect(padding.top == want.top && padding.leading == want.leading)
