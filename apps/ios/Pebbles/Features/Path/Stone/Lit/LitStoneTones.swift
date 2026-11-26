@@ -151,17 +151,10 @@ enum LitStoneTones {
         }
     }
 
-    /// A moment with no emotion yet: a blank river pebble in the web's
-    /// `BLANK_PALETTE` grey ramp (the shame category's own). A separate value
-    /// from `StonePalette.blank`, which the shader stone still reads.
-    static let blankPalette = StonePalette(
-        primary: srgb(0x86, 0x86, 0x86),
-        secondary: srgb(0xB9, 0xB9, 0xB9),
-        light: srgb(0xF3, 0xF3, 0xF3),
-        surface: srgb(0x86, 0x86, 0x86, opacity: 0.1),
-        dark: srgb(0x1B, 0x1B, 0x1B),
-        shaded: srgb(0x5E, 0x5E, 0x5E)
-    )
+    /// A moment with no emotion yet: a blank river pebble in the grey ramp the
+    /// web calls `BLANK_PALETTE` (the shame category's own). It is the same
+    /// value as `StonePalette.blank`; the tests pin it to the web hexes.
+    static let blankPalette = StonePalette.blank
 
     // MARK: - Night
 

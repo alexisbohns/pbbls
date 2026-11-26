@@ -35,6 +35,12 @@ struct LitStoneTonesTests {
         return String(format: "#%02X%02X%02X", c[0], c[1], c[2])
     }
 
+    private func alpha(_ color: Color) -> Float {
+        var environment = EnvironmentValues()
+        environment.colorScheme = .light
+        return color.resolve(in: environment).opacity
+    }
+
     private func same(_ a: LitPaint, _ b: LitPaint) -> Bool {
         same(a.color, b.color) && a.opacity == b.opacity && a.width == b.width
             && a.offset == b.offset && a.glow == b.glow
@@ -71,6 +77,9 @@ struct LitStoneTonesTests {
         #expect(hex(blank.light) == "#F3F3F3")
         #expect(hex(blank.shaded) == "#5E5E5E")
         #expect(hex(blank.dark) == "#1B1B1B")
+        // The surface is the primary grey at 10 % alpha.
+        #expect(hex(blank.surface) == "#868686")
+        #expect(abs(Double(blank.surface.resolve(in: EnvironmentValues()).opacity) - 0.1) < 0.01)
     }
 
     @Test("StonePalette.blank is left as it was")
@@ -189,6 +198,8 @@ struct LitStoneTonesTests {
         let white = Color(.sRGB, red: 1, green: 1, blue: 1)
         let black = Color(.sRGB, red: 0, green: 0, blue: 0)
         #expect(hex(Tones.mixSrgb(white, 0.5, black)) == "#808080")
+        #expect(alpha(Tones.mixSrgb(white, 0.5, black)) == 1)
+        #expect(alpha(Tones.mixSrgb(p.secondary, 0.3, p.light)) == 1)
         #expect(same(Tones.mixSrgb(p.secondary, 1, p.light), p.secondary))
         #expect(same(Tones.mixSrgb(p.secondary, 0, p.light), p.light))
     }
@@ -203,6 +214,8 @@ struct LitStoneTonesTests {
         for channel in mid { #expect(abs(channel - 0.389 * 255) < 0.01 * 255) }
         #expect(mid[0] < 128)
         #expect(hex(Tones.mixOklab(white, 0.5, black)) == "#636363")
+        #expect(alpha(Tones.mixOklab(white, 0.5, black)) == 1)
+        #expect(alpha(Tones.mixOklab(p.secondary, 0.31, p.shaded)) == 1)
     }
 
     @Test("mixOklab endpoints are exact")
