@@ -10,15 +10,16 @@ import SwiftUI
 enum LitGlyphLine {
     private static let noise = SVGTurbulence(seed: WobbleParams.seed)
 
-    /// Look-up-or-build is guarded, as in `WobbleRenderer`: the painter runs in
-    /// `Canvas` closures, off the main actor and concurrently. A cache by key —
-    /// never iterated while drawing.
+    /// Look-up-or-build is guarded, as in `WobbleRenderer`: a prewarm runs off the
+    /// main actor while the cache paints on it. A cache by key — never iterated
+    /// while drawing.
     private static let lock = NSLock()
     private static var memo: [String: Path?] = [:]
     private static let memoLimit = 512
 
     /// The wobbled centreline of `d`, in the glyph's own space, or nil when `d`
-    /// doesn't parse or nothing renders (the caller falls back to the plain `d`).
+    /// doesn't parse or nothing renders. A lone tap comes back as a zero-length
+    /// segment, which the painter's round cap draws as a dot.
     static func line(d: String, side: Double) -> Path? {
         let key = "\(side)|\(d)"
         lock.lock()
@@ -34,14 +35,15 @@ enum LitGlyphLine {
         guard let parsed = SVGPathParser.parse(d), !parsed.isEmpty else { return nil }
         let params = WobbleParams.scaled(for: CGSize(width: side, height: side))
         let line = CGMutablePath()
-        // Web skips a lone point (a dot): a one-point line draws nothing.
         for polyline in WobblePathFlattener.flatten(parsed, step: params.flattenStep)
-        where polyline.points.count >= 2 {
+        where !polyline.points.isEmpty {
             let displaced = polyline.points.map { params.displace($0, using: noise) }
             line.move(to: displaced[0])
             for point in displaced.dropFirst() {
                 line.addLine(to: point)
             }
+            // A single tap is a dot, as on Android: a zero-length segment the round cap fills.
+            if displaced.count == 1 { line.addLine(to: displaced[0]) }
             if polyline.isClosed { line.closeSubpath() }
         }
         guard !line.isEmpty else { return nil }

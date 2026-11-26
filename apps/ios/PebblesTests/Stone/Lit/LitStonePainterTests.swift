@@ -266,6 +266,35 @@ struct LitStonePainterTests {
         #expect(flatGlyph.pixels != full.pixels)
     }
 
+    @Test("a tap in a glyph is inked as a dot at its mapped point")
+    func tapIsInked() throws {
+        let tap = PebbleGlyph(
+            id: UUID(uuidString: "00000000-0000-0000-0000-0000000000C3")!, name: nil,
+            strokes: [GlyphStroke(d: "M100,100 L100,100", width: 6)], viewBox: "0 0 200 200", source: nil)
+        let with = try Self.render(Self.spec(polarity: .neutral, glyph: tap, flat: true), width: 120)
+        let bare = try Self.render(Self.spec(polarity: .neutral, glyph: nil, flat: true), width: 120)
+        let pxPerUnit = with.box.width / LitStoneGeometry.outlineBox(.medium).width
+        let transform = LitStoneGeometry.glyphTransform(.medium, .neutral, side: 200)
+            .concatenating(LitStoneGeometry.carveTransform(.medium, .neutral))
+            .concatenating(CGAffineTransform(scaleX: pxPerUnit, y: pxPerUnit))
+        let mapped = CGPoint(x: 100, y: 100).applying(transform)
+
+        var inked = 0
+        var farthest = 0.0
+        for y in 0..<with.height {
+            for x in 0..<with.width {
+                let a = with.at(x, y), b = bare.at(x, y)
+                guard abs(a.r - b.r) + abs(a.g - b.g) + abs(a.b - b.b) > 30 else { continue }
+                inked += 1
+                let px = Double(x - with.originX) / Double(with.scale), py = Double(y - with.originY) / Double(with.scale)
+                farthest = max(farthest, hypot(px - Double(mapped.x), py - Double(mapped.y)))
+            }
+        }
+        #expect(inked > 0, "a lone tap leaves no ink")
+        // The wobble moves the point a little; the dot stays within a couple of points of it.
+        #expect(farthest < 3, "ink \(farthest) pt from the mapped tap")
+    }
+
     // MARK: - Constant carve weight
 
     /// The ink's width in points, measured across a straight glyph segment: the

@@ -58,6 +58,18 @@ struct LitGlyphLineTests {
         #expect(LitGlyphLine.line(d: "garbage", side: 200) == nil)
     }
 
+    @Test("a tap is a dot: a zero-length segment the round cap fills, as on Android")
+    func tapIsADot() throws {
+        for d in ["M 100 100 L 100 100", "M100,100 L100,100"] {
+            let line = try #require(LitGlyphLine.line(d: d, side: 200), "\(d)")
+            let steps = Self.elements(line.cgPath)
+            #expect(steps.count == 2, "\(d): move then a zero-length line")
+            #expect(steps.first?.kind == .moveToPoint)
+            #expect(steps.last?.kind == .addLineToPoint)
+            if let first = steps.first, let last = steps.last { #expect(first.point == last.point) }
+        }
+    }
+
     @Test("the memo returns the same line for the same key")
     func memoizes() throws {
         let golden = try #require(Self.goldens().first)
