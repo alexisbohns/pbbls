@@ -56,6 +56,8 @@ struct CompleteFlowView: View {
             )
             stepBody
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // Leaving: nothing under the ✕ takes a tap, Continue included.
+                .allowsHitTesting(!model.isClosing)
         }
         .background(Color.pebbles.surface)
         .pebblesScreen()
@@ -183,7 +185,12 @@ struct CompleteFlowView: View {
     }
 
     /// ✕ never asks (A1): the answers are already on disk.
+    /// On the success step it also silences the ceremony now, not when the dismissal completes: the
+    /// view's `onDisappear` latch comes after the animation, and its ticks would play on the
+    /// screen underneath.
     private func close() {
+        model.beginClosing()
+        StoneCeremonyHaptics.shared.stop()
         autosave?.flush()
         dismiss()
     }

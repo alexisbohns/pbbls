@@ -171,6 +171,15 @@ struct CompleteFlowModelTests {
         #expect(!recorder.taps.contains(.success))
     }
 
+    @Test("closing marks the flow as leaving, silently")
+    func closing() {
+        let (model, recorder) = model()
+        #expect(!model.isClosing)
+        model.beginClosing()
+        #expect(model.isClosing)
+        #expect(recorder.taps.isEmpty)
+    }
+
     @Test("quiet success does not buzz")
     func quietSuccessIsSilent() {
         let (model, recorder) = model()

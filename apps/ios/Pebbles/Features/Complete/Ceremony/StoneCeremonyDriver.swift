@@ -78,7 +78,8 @@ final class StoneCeremonyDriver {
     /// there, so the Continue tick is not late. Quiet and Haptics-off ceremonies play nothing, so
     /// they need no engine.
     private func warmIfPaused(since before: StoneCeremonyPhase) {
-        guard !frozen, hapticsOn, ceremony.phase == .paused, before != .paused else { return }
+        guard !frozen, ceremony.phase == .paused, before != .paused else { return }
+        guard !StoneCeremonyScore.act2(ceremony.timeline, hapticsOn: hapticsOn).isEmpty else { return }
         haptics.prepare()
     }
 }

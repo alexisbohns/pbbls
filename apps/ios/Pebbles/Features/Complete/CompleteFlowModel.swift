@@ -20,6 +20,9 @@ final class CompleteFlowModel {
     private(set) var completed: CompletionResult?
     private(set) var isCompleting = false
     private(set) var completeError: String?
+    /// ✕ was pressed and the flow is leaving: the step stops taking taps for the dismissal, so a
+    /// late Continue cannot start the ceremony's second act on the way out.
+    private(set) var isClosing = false
 
     private let haptic: @MainActor (TapHaptic) -> Void
 
@@ -135,6 +138,13 @@ final class CompleteFlowModel {
     func restore(_ saved: CompleteDraft, known: CompleteDraft.KnownIds) {
         draft = saved.sanitized(known: known)
         step = firstGap()
+    }
+
+    // MARK: Closing
+
+    /// Silent, like ✕ itself: the flow is going and there is nothing to confirm.
+    func beginClosing() {
+        isClosing = true
     }
 
     // MARK: Completing

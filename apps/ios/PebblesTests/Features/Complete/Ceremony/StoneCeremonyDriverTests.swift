@@ -147,4 +147,20 @@ struct StoneCeremonyDriverTests {
         #expect(d.ceremony.phase == .paused)
         #expect(spy.prepares == started + 1)
     }
+
+    @Test func noPrepareAtThePauseWhenNothingPlays() {
+        let off = SpyHaptics()
+        let d1 = driver(spy: off, hapticsOn: false)
+        d1.start(at: t0)
+        d1.tick(at: t0.addingTimeInterval(10))
+        #expect(d1.ceremony.phase == .paused)
+        #expect(off.prepares == 0)
+
+        let quiet = SpyHaptics()
+        let d2 = driver(.lowlightLarge, spy: quiet)
+        d2.start(at: t0)
+        d2.tick(at: t0.addingTimeInterval(10))
+        #expect(d2.ceremony.phase == .paused)
+        #expect(quiet.prepares == 0)
+    }
 }
