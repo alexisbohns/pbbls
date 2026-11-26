@@ -25,6 +25,15 @@ enum PebbleOutlineGeometry {
         .large:  CGSize(width: 260, height: 310),
     ]
 
+    /// The outline viewBox's width and height, for callers that fit
+    /// something into the silhouette's own units.
+    static func outlineSize(for size: ValenceSizeGroup) -> CGSize {
+        guard let outline = outlineSize[size] else {
+            fatalError("PebbleOutlineGeometry: missing geometry for \(size) — add to outlineSize dictionary")
+        }
+        return outline
+    }
+
     /// Linear scale factor to apply to `PebbleRenderView` so it fits
     /// inside the larger backdrop viewBox. Computed from the per-size
     /// viewBox width ratio; per-axis match is guaranteed by the matched
