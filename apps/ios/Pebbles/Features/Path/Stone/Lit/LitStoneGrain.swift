@@ -2,13 +2,15 @@ import CoreGraphics
 import Foundation
 
 /// The stone's grain, rasterised once per display scale: web's `feTurbulence`
-/// grain filter (`StoneSprite.tsx`) through Android's `grainTile`. Fractal noise
-/// sampled per CSS px (so the specks keep their size at every scale), a black
-/// speck where the noise's red runs high and a white one where its green does,
-/// merged light over dark. Only the R and G channels are read.
+/// grain filter (`StoneSprite.tsx`) through Android's `grainTile` / `grainPixel`
+/// (`StonePainter.kt`), so the two native surfaces generate the same specks.
+/// Fractal noise sampled per CSS px (the specks keep their size at every
+/// scale), a black speck where the noise's red runs high and a white one where
+/// its green does, merged light over dark. Only the R and G channels are read.
 ///
 /// The tile is full strength and meant to repeat; the painter applies the
-/// material's strength and the seed's shift when it overlays it.
+/// material's strength and the seed's shift when it overlays it. Its bytes are
+/// straight (non-premultiplied) RGBA, as Android's bitmap holds them.
 enum LitStoneGrain {
 
     /// The tile's side in device px.
@@ -17,8 +19,6 @@ enum LitStoneGrain {
     private static let baseFrequency = 0.9
     private static let octaves = 2
     private static let seed = 7
-    private static let sampleShift = 0.5
-    private static let premultiplyBias = 0.625
 
     private static let noise = SVGTurbulence(seed: seed)
 
@@ -41,20 +41,18 @@ enum LitStoneGrain {
         var bytes = [UInt8](repeating: 0, count: side * side * 4)
         for y in 0..<side {
             for x in 0..<side {
-                // Chrome samples at the pixel's centre, and its filter space sits half a CSS px in.
-                let sampleX = (Double(x) + 0.5) / Double(scale) + sampleShift
-                let sampleY = (Double(y) + 0.5) / Double(scale) + sampleShift
-                // Each layer sits in an 8-bit buffer before the merge.
-                let dark = byte(clamp(effective(0, sampleX, sampleY) * 6 - 3.5))
-                let light = byte(clamp(effective(1, sampleX, sampleY) * 4 - 2.75))
-                // Light over dark. Premultiplied, the white's colour is its own
-                // coverage, so the grey needs no division.
+                let sampleX = Double(CGFloat(x) / scale)
+                let sampleY = Double(CGFloat(y) / scale)
+                let dark = clamp(channel(0, sampleX, sampleY) * 6 - 3.5)
+                let light = clamp(channel(1, sampleX, sampleY) * 4 - 2.75)
+                // Light over dark.
                 let coverage = light + dark * (1 - light)
+                guard coverage > 0 else { continue }
+                let grey = UInt8((light / coverage * 255).rounded())
                 let offset = (y * side + x) * 4
-                let white = UInt8((light * 255).rounded())
-                bytes[offset] = white
-                bytes[offset + 1] = white
-                bytes[offset + 2] = white
+                bytes[offset] = grey
+                bytes[offset + 1] = grey
+                bytes[offset + 2] = grey
                 bytes[offset + 3] = UInt8((coverage * 255).rounded())
             }
         }
@@ -64,7 +62,7 @@ enum LitStoneGrain {
                 width: side, height: side,
                 bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: side * 4,
                 space: CGColorSpaceCreateDeviceRGB(),
-                bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+                bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue),
                 provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent
               )
         else {
@@ -77,22 +75,6 @@ enum LitStoneGrain {
     private static func channel(_ channel: Int, _ x: Double, _ y: Double) -> Double {
         clamp((noise.turbulence(channel: channel, x: x, y: y, baseFrequency: baseFrequency, octaves: octaves) + 1) / 2)
     }
-
-    /// What the colour matrix reads back from the noise. Chrome keeps the noise
-    /// as an 8-bit premultiplied image, colour scaled by the noise's own alpha
-    /// (channel 3), so the matrix unpremultiplies a rounded value: harmless
-    /// where that alpha is high, a visible wobble where it is low. The premultiply
-    /// rounds a touch up (`premultiplyBias`), calibrated against the browser's
-    /// pixels (512 of them agree within 2).
-    private static func effective(_ colourChannel: Int, _ x: Double, _ y: Double) -> Double {
-        let alpha = (channel(3, x, y) * 255 + 0.5).rounded(.down)
-        guard alpha > 0 else { return 0 }
-        let premultiplied = (channel(colourChannel, x, y) * channel(3, x, y) * 255 + premultiplyBias).rounded(.down)
-        return clamp(premultiplied / alpha)
-    }
-
-    /// A value as it sits in an 8-bit buffer.
-    private static func byte(_ value: Double) -> Double { (value * 255).rounded() / 255 }
 
     private static func clamp(_ value: Double) -> Double { min(max(value, 0), 1) }
 }

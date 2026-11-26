@@ -3,45 +3,61 @@ import Foundation
 import Testing
 @testable import Pebbles
 
-/// The expected pixels are the web's own grain filter (`StoneSprite.tsx`:
-/// `feTurbulence` fractalNoise 0.9 / 2 octaves / seed 7, the dark and light
-/// colour matrices, `feMerge`), rendered at 64 × 64 in a browser and read back
-/// with `getImageData`. They are unpremultiplied there; the comparison runs
-/// on premultiplied values, because a tile stores them that way and the
-/// browser's own canvas rounds at low alpha.
+/// Web's numbers come from its own grain filter (`StoneSprite.tsx`: `feTurbulence`
+/// fractalNoise 0.9 / 2 octaves / seed 7, the dark and light colour matrices,
+/// `feMerge`), drawn as a 64 x 64 SVG onto a 64 x 64 canvas in Chrome (browser
+/// pane, dpr 2) and read back with `getImageData`, i.e. unpremultiplied RGBA.
+/// Over all 4096 pixels:
+/// - 1186 have alpha > 0 (28.96%);
+/// - 918 of those are dark specks (R = G = B = 0), mean alpha 91.887 / 255;
+/// - 268 are light specks (any other colour), mean alpha 60.183 / 255.
+///
+/// The tile is Android's `grainTile` model, not Chrome's rasteriser, so it is
+/// held to those numbers statistically (10% relative), not pixel for pixel.
 @Suite("Lit stone grain")
 struct LitStoneGrainTests {
 
-    private struct Pixel { let x: Int, y: Int, r: Int, g: Int, b: Int, a: Int }
+    private struct Stats {
+        let fraction: Double
+        let darkMeanAlpha: Double
+        let lightMeanAlpha: Double
+    }
 
-    private static let golden: [Pixel] = [
-        Pixel(x: 3, y: 5, r: 0, g: 0, b: 0, a: 20),
-        Pixel(x: 17, y: 2, r: 0, g: 0, b: 0, a: 0),
-        Pixel(x: 30, y: 40, r: 0, g: 0, b: 0, a: 0),
-        Pixel(x: 45, y: 12, r: 249, g: 249, b: 249, a: 41),
-        Pixel(x: 60, y: 60, r: 0, g: 0, b: 0, a: 0),
-        Pixel(x: 8, y: 50, r: 0, g: 0, b: 0, a: 9),
-        Pixel(x: 33, y: 27, r: 0, g: 0, b: 0, a: 0),
-        Pixel(x: 52, y: 37, r: 0, g: 0, b: 0, a: 47)
-    ]
+    /// The tile's straight RGBA bytes, as stored.
+    private func bytes(_ image: CGImage) throws -> [UInt8] {
+        let data = try #require(image.dataProvider?.data)
+        return Array(data as Data)
+    }
 
-    /// The tile's RGBA bytes, premultiplied, row by row.
-    private func premultipliedBytes(_ image: CGImage) -> [UInt8] {
-        var bytes = [UInt8](repeating: 0, count: image.width * image.height * 4)
-        bytes.withUnsafeMutableBytes { buffer in
-            let context = CGContext(
-                data: buffer.baseAddress,
-                width: image.width,
-                height: image.height,
-                bitsPerComponent: 8,
-                bytesPerRow: image.width * 4,
-                space: CGColorSpaceCreateDeviceRGB(),
-                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-            )
-            context?.setBlendMode(.copy)
-            context?.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+    /// The same statistics web's 64 x 64 frame reports, over the tile's top-left 64 x 64 px.
+    private func stats(_ image: CGImage) throws -> Stats {
+        let pixels = try bytes(image)
+        var inked = 0, dark = 0, light = 0
+        var darkAlpha = 0.0, lightAlpha = 0.0
+        for y in 0..<64 {
+            for x in 0..<64 {
+                let offset = (y * image.width + x) * 4
+                let alpha = Double(pixels[offset + 3])
+                guard alpha > 0 else { continue }
+                inked += 1
+                if pixels[offset] == 0 && pixels[offset + 1] == 0 && pixels[offset + 2] == 0 {
+                    dark += 1
+                    darkAlpha += alpha
+                } else {
+                    light += 1
+                    lightAlpha += alpha
+                }
+            }
         }
-        return bytes
+        return Stats(
+            fraction: Double(inked) / 4096,
+            darkMeanAlpha: dark > 0 ? darkAlpha / Double(dark) : 0,
+            lightMeanAlpha: light > 0 ? lightAlpha / Double(light) : 0
+        )
+    }
+
+    private func within(_ value: Double, _ expected: Double, relative: Double = 0.10) -> Bool {
+        abs(value - expected) <= expected * relative
     }
 
     @Test("the tile is 256 px square")
@@ -51,40 +67,27 @@ struct LitStoneGrainTests {
         #expect(tile.height == 256)
     }
 
-    @Test("eight pixels match web's grain within 2 per channel")
-    func matchesWeb() {
+    @Test("the scale-1 frame has web's amount and strength of dark and light specks")
+    func matchesWebStatistically() throws {
         let tile = LitStoneGrain.tile(scale: 1)
         #expect(tile.width == 256 && tile.height == 256)
-        let bytes = premultipliedBytes(tile)
-        #expect(bytes.count == 256 * 256 * 4)
-        #expect(Self.golden.contains { $0.a > 0 }, "the golden must not be all clear")
-
-        var seenInk = false
-        for pixel in Self.golden {
-            let offset = (pixel.y * tile.width + pixel.x) * 4
-            let want = [pixel.r, pixel.g, pixel.b].map { Int((Double($0 * pixel.a) / 255).rounded()) }
-            let got = (0..<3).map { Int(bytes[offset + $0]) }
-            let gotAlpha = Int(bytes[offset + 3])
-            if gotAlpha > 0 { seenInk = true }
-            for channel in 0..<3 {
-                #expect(abs(got[channel] - want[channel]) <= 2, "(\(pixel.x), \(pixel.y)) channel \(channel): \(got[channel]) vs \(want[channel])")
-            }
-            #expect(abs(gotAlpha - pixel.a) <= 2, "(\(pixel.x), \(pixel.y)) alpha: \(gotAlpha) vs \(pixel.a)")
-        }
-        #expect(seenInk, "the tile must carry some ink at the sampled pixels")
+        let got = try stats(tile)
+        #expect(got.fraction > 0, "the frame must not be clear")
+        #expect(within(got.fraction, 1186.0 / 4096), "nonzero fraction \(got.fraction) vs 0.2896")
+        #expect(within(got.darkMeanAlpha, 91.887), "dark mean alpha \(got.darkMeanAlpha) vs 91.887")
+        #expect(within(got.lightMeanAlpha, 60.183), "light mean alpha \(got.lightMeanAlpha) vs 60.183")
     }
 
-    /// Alpha read from the same filter drawn at 128 px, i.e. at a scale of 2.
-    @Test("a scale of 2 matches web drawn at twice the size")
-    func matchesWebAtScaleTwo() {
-        let tile = LitStoneGrain.tile(scale: 2)
-        let bytes = premultipliedBytes(tile)
-        let golden: [(x: Int, y: Int, a: Int)] = [(10, 0, 70), (59, 0, 104), (1, 1, 32)]
-        #expect(golden.allSatisfy { $0.a > 0 })
-        for pixel in golden {
-            let got = Int(bytes[(pixel.y * tile.width + pixel.x) * 4 + 3])
-            #expect(abs(got - pixel.a) <= 2, "(\(pixel.x), \(pixel.y)) alpha: \(got) vs \(pixel.a)")
-        }
+    @Test("a scale of 2 is its own tile with a similar amount of ink")
+    func scaleTwo() throws {
+        let one = LitStoneGrain.tile(scale: 1)
+        let two = LitStoneGrain.tile(scale: 2)
+        #expect(one !== two)
+        #expect(two === LitStoneGrain.tile(scale: 2))
+        let base = try stats(one)
+        let doubled = try stats(two)
+        #expect(doubled.fraction > 0)
+        #expect(within(doubled.fraction, base.fraction), "scale 2 fraction \(doubled.fraction) vs \(base.fraction)")
     }
 
     @Test("two calls at one scale return the same image")
