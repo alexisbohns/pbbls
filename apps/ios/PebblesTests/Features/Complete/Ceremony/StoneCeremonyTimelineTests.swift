@@ -49,6 +49,7 @@ struct StoneCeremonyTimelineTests {
         #expect(close(q.karmaIn, n.karmaIn * 1.25)); #expect(close(q.continueIn, n.continueIn * 1.25))
         #expect(close(q.pause, n.pause * 1.25)); #expect(close(q.landing, n.landing * 1.25))
         #expect(close(q.actionsIn, n.actionsIn * 1.25)); #expect(close(q.settled, n.settled * 1.25))
+        #expect(close(q.still, q.settled))                              // no sweep, spark or landing waves
         #expect(q.heroWaveCount == 1); #expect(q.landingWaveCount == 0); #expect(!q.sparksOnClosure)
         #expect(close(q.dipDepth, 1 - (1 - 0.91) / 2))
     }

@@ -111,21 +111,35 @@ struct StoneCeremonyTimeline: Equatable {
     var settled: Double { mode == .full ? actionsIn + tempo * 0.30 : flight }
 
     /// When the last landing wave, sweep or spark has ended, so the clock can stop on a still frame.
+    /// A quiet stone has none of the three, so it stops at `settled`.
     var still: Double {
         guard mode == .full else { return flight }
         var end = settled
-        for k in 0..<landingWaveCount {
-            // The landing waves play at half speed against the press table.
-            let wave = StoneMotion.Wave.element(k)
-            end = max(end, landing + (wave.delay + wave.duration) * 0.5)
-        }
-        let sweep = StoneMotion.Sweep.element
-        end = max(end, landing + sweep.delay + sweep.duration)
-        if polarity == .highlight && !quiet {
-            let spark = StoneMotion.Spark.element
-            end = max(end, landing + spark.delay + spark.duration)
-        }
+        for k in 0..<landingWaveCount { end = max(end, landingWave(k).end) }
+        if let sweep = landingSweep { end = max(end, sweep.end) }
+        if let spark = landingSpark { end = max(end, spark.end) }
         return end
+    }
+
+    // MARK: The landing press, in seconds from Continue
+
+    /// Landing wave `k`: the press table's wave at half speed, from the landing.
+    func landingWave(_ k: Int) -> StoneMotion.Element {
+        let wave = StoneMotion.Wave.element(k)
+        return StoneMotion.Element(delay: landing + wave.delay * 0.5, duration: wave.duration * 0.5, curve: wave.curve)
+    }
+
+    var landingSweep: StoneMotion.Element? {
+        guard mode == .full, !quiet else { return nil }
+        let sweep = StoneMotion.Sweep.element
+        return StoneMotion.Element(delay: landing + sweep.delay, duration: sweep.duration, curve: sweep.curve)
+    }
+
+    /// The gem's spark, which a quiet stone does not get.
+    var landingSpark: StoneMotion.Element? {
+        guard mode == .full, !quiet, polarity == .highlight else { return nil }
+        let spark = StoneMotion.Spark.element
+        return StoneMotion.Element(delay: landing + spark.delay, duration: spark.duration, curve: spark.curve)
     }
 
     // MARK: Tables
