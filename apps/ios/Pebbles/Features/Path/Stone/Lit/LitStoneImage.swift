@@ -26,7 +26,8 @@ struct LitStoneImage: View {
                     picture(box: proxy.size)
                 }
             }
-            .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
+            .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)
+                .receive(on: DispatchQueue.main)) { _ in
                 lowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
             }
             .accessibilityHidden(true)
@@ -39,7 +40,7 @@ struct LitStoneImage: View {
                                     glyph: spec.glyph, seed: spec.seed,
                                     night: colorScheme == .dark, flat: lowPower)
             let image = LitStoneCache.shared.image(live, box: box, scale: displayScale)
-            let padding = LitStoneCache.padding(live, box: box)
+            let padding = LitStoneCache.padding(live, box: box, scale: displayScale)
             Image(decorative: image, scale: displayScale)
                 .offset(x: -padding.leading, y: -padding.top)
         }

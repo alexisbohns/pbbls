@@ -70,6 +70,29 @@ struct LitStoneCacheTests {
         #expect(first !== second)
     }
 
+    @Test("the cache is capped by bytes as well as by count, and an image costs its pixel bytes")
+    func cacheIsCappedByBytes() {
+        let limits = LitStoneCache().limits
+        #expect(limits.count == 400)
+        #expect(limits.bytes == 24 * 1024 * 1024)
+        let spec = Self.spec()
+        let image = LitStoneCache().image(spec, box: Self.box(), scale: 3)
+        #expect(LitStoneCache.cost(of: image) == image.bytesPerRow * image.height)
+        #expect(LitStoneCache.cost(of: image) > 0)
+    }
+
+    @Test("the padding is the margin of the snapped box the cache paints")
+    func paddingFollowsTheSnappedBox() {
+        let spec = Self.spec()
+        let scale: CGFloat = 3
+        let raw = CGSize(width: 44.1, height: 61.3)
+        let snapped = CGSize(width: (raw.width * scale).rounded() / scale, height: (raw.height * scale).rounded() / scale)
+        let padding = LitStoneCache.padding(spec, box: raw, scale: scale)
+        let want = LitStoneCache.padding(spec, box: snapped)
+        #expect(padding.top == want.top && padding.leading == want.leading)
+        #expect(padding.bottom == want.bottom && padding.trailing == want.trailing)
+    }
+
     @Test("the same pixel box at scale 2 and 3 is two entries")
     func scaleIsPartOfTheKey() {
         let spec = Self.spec()

@@ -17,9 +17,17 @@ final class LitStoneCache {
 
     private let storage = NSCache<Key, Entry>()
 
-    init(countLimit: Int = 400) {
+    /// The pixel bytes a cached image holds (`bytesPerRow` x `height`), the cost
+    /// the cache counts it at, so a few big stones cannot crowd out the rest.
+    static func cost(of image: CGImage) -> Int { image.bytesPerRow * image.height }
+
+    init(countLimit: Int = 400, byteLimit: Int = 24 * 1024 * 1024) {
         storage.countLimit = countLimit
+        storage.totalCostLimit = byteLimit
     }
+
+    /// The limits the cache runs with, so a test can read them back.
+    var limits: (count: Int, bytes: Int) { (storage.countLimit, storage.totalCostLimit) }
 
     /// The stone's image, painted into the box plus `padding(_:box:)` on every side.
     func image(_ spec: LitStoneSpec, box: CGSize, scale: CGFloat) -> CGImage {
@@ -27,8 +35,14 @@ final class LitStoneCache {
         if let hit = storage.object(forKey: key) { return hit.image }
         let snapped = Self.snapped(box, scale: scale)
         let image = Self.paint(spec, box: snapped, scale: scale)
-        storage.setObject(Entry(image), forKey: key)
+        storage.setObject(Entry(image), forKey: key, cost: Self.cost(of: image))
         return image
+    }
+
+    /// The padding of the image `image(_:box:scale:)` returns for `box`: the margin
+    /// of the snapped box the cache paints, never of the raw one.
+    static func padding(_ spec: LitStoneSpec, box: CGSize, scale: CGFloat) -> EdgeInsets {
+        padding(spec, box: snapped(box, scale: scale))
     }
 
     /// The shadow margin in whole points, so the box starts on a whole pixel.
