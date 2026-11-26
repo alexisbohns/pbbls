@@ -1,7 +1,7 @@
 # iOS draws the web and Android stone — design
 
 **Date:** 2026-11-26 · **Issue:** #1690 · **Surface:** ios · **Size:** large (new renderer under every iOS pebble surface)
-**Status:** approach approved by the maintainer 2026-11-26; this document awaits review.
+**Status:** approach and D1–D8 approved by the maintainer 2026-11-26.
 
 ## Intent
 
@@ -45,14 +45,14 @@ The maintainer wants iOS aligned with the other two. The end-of-record reveal (t
 
 ## Decisions taken
 
-- **D1 — The tilt light goes.** Two places still follow the phone: the richer step (`followsTilt: true` in `CompleteRicherStep`) and the valence picker (`ValenceStoneView` feeds `motion.lean` to the active stone and starts the motion source on appear). Neither web nor Android can match it, and it is the one place the battery contract was stretched. `Features/Path/Stone/Motion/` (BodyTilt, Lean, LeanMapper, StoneMotionSource) is deleted with it. The richer step's removal was approved 2026-11-26 with the plan; **the picker's is pending the maintainer** (see D8).
+- **D1 — The tilt light goes.** Two places still follow the phone: the richer step (`followsTilt: true` in `CompleteRicherStep`) and the valence picker (`ValenceStoneView` feeds `motion.lean` to the active stone and starts the motion source on appear). Neither web nor Android can match it, and it is the one place the battery contract was stretched. `Features/Path/Stone/Motion/` (BodyTilt, Lean, LeanMapper, StoneMotionSource) is deleted with it. Both removals were approved by the maintainer on 2026-11-26 (the picker's in D8).
 - **D2 — One switch-over.** All call sites move in one part, as #975 did, so the app never shows two stones.
 - **D3 — The stone lab goes.** Its job was tuning the Metal uniforms; the tones now come from web. The Spine stone gallery (`SpineStoneGallery`) shows the new stone and stays as the Debug comparison page.
 - **D4 — `PebbleStoneView`'s public API stays** (valence, glyph, palette, `blank(seed:)`), except that `followsTilt` is removed and **`seed:` becomes required**. A real pebble passes `StableHash.seed(pebble.id)` everywhere, so `PebbleRow` (souls, collections) and the richer step (`CompletionResult.pebbleId`) draw the same stone as the Spine. A sample stone with no pebble (the picker, the home illustrations) passes a fixed per-valence seed constant, so it never changes between launches. *(Builder's call, settled here.)*
 - **D5 — Scale rule: Android's.** Web's px constants (`SHADOW_*_PX`, `LIP_PX`, `CARVE_STROKE_PX`, hairline, AO and edge widths, grain) are defined at `STONE_WIDTH.phone`. iOS applies them the way `StonePainter.kt` does: px × display scale for the hairline, shadow, edge and grain (fixed in points whatever the stone's size), and the carve and glyph strokes also × `carveGain` (Android's gain for stones drawn larger than phone width). The verso, the picker and the richer step therefore draw the same line weights as Android at the same sizes. *(Builder's call, settled here.)*
 - **D6 — The shadow overflows the layout box** at every call site, as `StoneView.shadowLayer` does today and as Android's bitmap grown by a shadow margin does. The cached image is larger than the layout box and drawn unclipped; a site that clips today keeps clipping. *(Builder's call, settled here.)*
 - **D7 — Lava keeps its wobbled body.** Web's `StoneSprite` wobbles only the lowlight silhouette (`wobbleBackdrop`), and the river pebble and the gem keep the soft outline; Android does the same, and iOS's `WobbleRenderer.backdropArt` already does. The body layer is that silhouette, not always the flat outline. The clip is the same wobbled silhouette.
-- **D8 — The valence picker (pending the maintainer).** Proposal: the picker drops the tilt too, and the selection's one-off light sweep (`isSelected` + `stoneSweeps`) becomes the Spine press already on iOS (`StoneMotion` dip + glint), finite and shared. Its stones take the sample glyph from `stone-glyph.json`, as today, and the fixed per-valence seed from D4.
+- **D8 — The valence picker** (approved 2026-11-26): the picker drops the tilt too, and the selection's one-off light sweep (`isSelected` + `stoneSweeps`) becomes the Spine press already on iOS (`StoneMotion` dip + glint), finite and shared. Its stones take the sample glyph from `stone-glyph.json`, as today, and the fixed per-valence seed from D4.
 
 ## Layers (the contract, in web order)
 
