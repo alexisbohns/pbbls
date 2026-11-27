@@ -1088,13 +1088,13 @@
       "note": "Admin analytics; select revoked from anon and authenticated, read only through the admin get_* RPCs."
     },
     "public.v_bounce": {
-      "security_invoker": false,
+      "security_invoker": true,
       "anon": "none",
       "authenticated": "own",
       "key": {
         "user_id": "$A"
       },
-      "note": "Definer view over auth.users filtered by auth.uid(): one row, the caller's."
+      "note": "Invoker view over auth.uid() (no auth.users) and base-table RLS: one row, the caller's."
     },
     "public.v_domains_with_glyph": {
       "security_invoker": true,
@@ -1118,13 +1118,13 @@
       "note": "Invoker view over glyphs RLS; the owner's unsubmitted glyph must not appear."
     },
     "public.v_karma_summary": {
-      "security_invoker": false,
+      "security_invoker": true,
       "anon": "none",
       "authenticated": "own",
       "key": {
         "user_id": "$A"
       },
-      "note": "Definer view over auth.users filtered by auth.uid(): one row, the caller's."
+      "note": "Invoker view over auth.uid() (no auth.users) and base-table RLS: one row, the caller's."
     },
     "public.v_logs_with_counts": {
       "security_invoker": true,
@@ -1142,13 +1142,13 @@
       "note": "Invoker view over moments RLS; the seed's pebble is secret."
     },
     "public.v_ripple": {
-      "security_invoker": false,
+      "security_invoker": true,
       "anon": "none",
       "authenticated": "own",
       "key": {
         "user_id": "$A"
       },
-      "note": "Definer view over auth.users filtered by auth.uid(): one row, the caller's."
+      "note": "Invoker view over auth.uid() (no auth.users) and base-table RLS: one row, the caller's."
     },
     "public.v_wallet_summary": {
       "security_invoker": false,

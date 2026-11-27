@@ -69,27 +69,6 @@ export type Database = {
             referencedRelation: "pebbles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "achievement_completions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "achievement_completions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "achievement_completions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       achievement_unlocks: {
@@ -126,27 +105,6 @@ export type Database = {
             referencedRelation: "pebbles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "achievement_unlocks_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "achievement_unlocks_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "achievement_unlocks_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       achievement_views: {
@@ -165,29 +123,7 @@ export type Database = {
           seen_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "achievement_views_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "achievement_views_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "achievement_views_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       achievements: {
         Row: {
@@ -316,29 +252,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "bounces_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "bounces_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "bounces_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       card_types: {
         Row: {
@@ -434,27 +348,6 @@ export type Database = {
             referencedRelation: "v_glyph_market"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "collections_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "collections_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "collections_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       connection_blocks: {
@@ -473,50 +366,7 @@ export type Database = {
           blocker_id?: string
           created_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "connection_blocks_blocked_id_fkey"
-            columns: ["blocked_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "connection_blocks_blocked_id_fkey"
-            columns: ["blocked_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "connection_blocks_blocked_id_fkey"
-            columns: ["blocked_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "connection_blocks_blocker_id_fkey"
-            columns: ["blocker_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "connection_blocks_blocker_id_fkey"
-            columns: ["blocker_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "connection_blocks_blocker_id_fkey"
-            columns: ["blocker_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       connection_invites: {
         Row: {
@@ -543,29 +393,7 @@ export type Database = {
           revoked_at?: string | null
           token?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "connection_invites_inviter_id_fkey"
-            columns: ["inviter_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "connection_invites_inviter_id_fkey"
-            columns: ["inviter_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "connection_invites_inviter_id_fkey"
-            columns: ["inviter_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       connections: {
         Row: {
@@ -586,50 +414,7 @@ export type Database = {
           user_a?: string
           user_b?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "connections_user_a_fkey"
-            columns: ["user_a"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "connections_user_a_fkey"
-            columns: ["user_a"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "connections_user_a_fkey"
-            columns: ["user_a"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "connections_user_b_fkey"
-            columns: ["user_b"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "connections_user_b_fkey"
-            columns: ["user_b"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "connections_user_b_fkey"
-            columns: ["user_b"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       content_reports: {
         Row: {
@@ -677,71 +462,7 @@ export type Database = {
           target_snapshot?: Json | null
           target_user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "content_reports_reporter_id_fkey"
-            columns: ["reporter_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "content_reports_reporter_id_fkey"
-            columns: ["reporter_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "content_reports_reporter_id_fkey"
-            columns: ["reporter_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "content_reports_resolved_by_fkey"
-            columns: ["resolved_by"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "content_reports_resolved_by_fkey"
-            columns: ["resolved_by"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "content_reports_resolved_by_fkey"
-            columns: ["resolved_by"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "content_reports_target_user_id_fkey"
-            columns: ["target_user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "content_reports_target_user_id_fkey"
-            columns: ["target_user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "content_reports_target_user_id_fkey"
-            columns: ["target_user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       domains: {
         Row: {
@@ -907,27 +628,6 @@ export type Database = {
             referencedRelation: "karma_events"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "glyph_entitlements_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "glyph_entitlements_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "glyph_entitlements_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       glyph_favourites: {
@@ -960,27 +660,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_glyph_market"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "glyph_favourites_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "glyph_favourites_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "glyph_favourites_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -1036,48 +715,6 @@ export type Database = {
             referencedRelation: "v_glyph_market"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "glyph_submissions_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "glyph_submissions_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "glyph_submissions_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "glyph_submissions_submitter_id_fkey"
-            columns: ["submitter_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "glyph_submissions_submitter_id_fkey"
-            columns: ["submitter_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "glyph_submissions_submitter_id_fkey"
-            columns: ["submitter_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       glyphs: {
@@ -1114,29 +751,7 @@ export type Database = {
           user_id?: string | null
           view_box?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "glyphs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "glyphs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "glyphs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       guides: {
         Row: {
@@ -1214,29 +829,7 @@ export type Database = {
           type?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "karma_events_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "karma_events_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "karma_events_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       log_reactions: {
         Row: {
@@ -1268,27 +861,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_logs_with_counts"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "log_reactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "log_reactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "log_reactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -1386,50 +958,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "moments_hidden_by_fkey"
-            columns: ["hidden_by"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "moments_hidden_by_fkey"
-            columns: ["hidden_by"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "moments_hidden_by_fkey"
-            columns: ["hidden_by"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "moments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "moments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "moments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       pebble_cards: {
         Row: {
@@ -1614,27 +1143,6 @@ export type Database = {
             referencedRelation: "v_moments_full"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "pebbles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "pebbles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "pebbles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       profiles: {
@@ -1712,48 +1220,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_glyph_market"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_hidden_by_fkey"
-            columns: ["hidden_by"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "profiles_hidden_by_fkey"
-            columns: ["hidden_by"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "profiles_hidden_by_fkey"
-            columns: ["hidden_by"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -1881,27 +1347,6 @@ export type Database = {
             referencedRelation: "v_moments_full"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "snaps_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "snaps_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "snaps_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       souls: {
@@ -1944,27 +1389,6 @@ export type Database = {
             referencedRelation: "v_glyph_market"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "souls_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "souls_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "souls_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       user_consents: {
@@ -2001,29 +1425,7 @@ export type Database = {
           user_id?: string
           withdrawn_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_consents_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "user_consents_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "user_consents_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       wallet_balances: {
         Row: {
@@ -2041,29 +1443,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "wallet_balances_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "wallet_balances_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "wallet_balances_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       wrap_reveals: {
         Row: {
@@ -2081,29 +1461,7 @@ export type Database = {
           revealed_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "wrap_reveals_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "wrap_reveals_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "wrap_reveals_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -2291,45 +1649,13 @@ export type Database = {
           user_id: string | null
           view_box: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "glyphs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "glyphs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "glyphs_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       v_karma_summary: {
         Row: {
           pebbles_count: number | null
           total_karma: number | null
           user_id: string | null
-        }
-        Insert: {
-          pebbles_count?: never
-          total_karma?: never
-          user_id?: string | null
-        }
-        Update: {
-          pebbles_count?: never
-          total_karma?: never
-          user_id?: string | null
         }
         Relationships: []
       }
@@ -2393,29 +1719,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "moments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "moments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "moments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       v_ripple: {
         Row: {
@@ -2445,29 +1749,7 @@ export type Database = {
           total_spent?: never
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "wallet_balances_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "wallet_balances_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "wallet_balances_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Functions: {

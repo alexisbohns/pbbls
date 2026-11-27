@@ -73,4 +73,8 @@ expect "bad base ref fails closed" 2 "$(cd "$d" && bash "$script" nope m >/dev/n
 d=$(new_repo none)
 echo x > "$d/README"; commit_all "$d"; expect "no new migrations" 0 "$(run "$d")"
 
+d=$(new_repo nofunction)
+echo 'create or replace view public.v as select 1 as one;' > "$d/m/1_a.sql"
+commit_all "$d"; expect "new migration with no function" 0 "$(run "$d")"
+
 if [ "$failures" -eq 0 ]; then echo "all passed"; else echo "$failures failed"; exit 1; fi
