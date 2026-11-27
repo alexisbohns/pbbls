@@ -1151,13 +1151,13 @@
       "note": "Invoker view over auth.uid() (no auth.users) and base-table RLS: one row, the caller's."
     },
     "public.v_wallet_summary": {
-      "security_invoker": false,
+      "security_invoker": true,
       "anon": "none",
       "authenticated": "own",
       "key": {
         "user_id": "$A"
       },
-      "note": "Definer view filtered by auth.uid(); select revoked from anon."
+      "note": "Invoker view over wallet_balances and karma_events RLS, filtered by auth.uid(); select revoked from anon."
     }
   },
   "functions": {
