@@ -1103,10 +1103,10 @@
       "note": "Reference data with glyph strokes."
     },
     "public.v_emotions_with_palette": {
-      "security_invoker": false,
+      "security_invoker": true,
       "anon": "all",
       "authenticated": "all",
-      "note": "Reference data only (emotions + categories), so the definer read leaks nothing."
+      "note": "Invoker view over reference data only (emotions + categories, both using (true))."
     },
     "public.v_glyph_market": {
       "security_invoker": true,
