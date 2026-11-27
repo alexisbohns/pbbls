@@ -28,7 +28,7 @@ fail=0
 fn_re='create (or replace )?function (public|private)\.[a-z_0-9]+'
 
 # (a) the same function created in two new files, or twice in one
-dups=$(while read -r f; do grep -hoiE "$fn_re" "$f"; done < "$tmp" \
+dups=$(while read -r f; do grep -hoiE "$fn_re" "$f" || true; done < "$tmp" \
   | sed -E 's/.*function //' | tr '[:upper:]' '[:lower:]' | sort | uniq -d)
 for fn in $dups; do
   echo "::error::$fn is re-emitted more than once by this PR's new migrations: union the bodies in one file"
